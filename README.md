@@ -1,4 +1,4 @@
-# FTB (Mod Name)
+# FTB Echoes
 
 Use https://github.com/FTBTeam/FTB-Mods-Issues for any mod issues
 
