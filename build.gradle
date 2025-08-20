@@ -80,6 +80,7 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
 	maven {
 		url = "https://maven.ftb.dev/releases"
 		content {
@@ -93,10 +94,27 @@ repositories {
 			includeGroup("dev.architectury")
 		}
 	}
+
+	maven {
+		url "https://www.cursemaven.com"
+		content {
+			includeGroup "curse.maven"
+		}
+	}
+
+	maven {
+		name = "Curios"
+		url = uri("https://maven.theillusivec4.top/")
+	}
 }
 
 dependencies {
 	implementation "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+	implementation "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
+
+	runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+	compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
+	implementation "curse.maven:magic_coins-597281:${magic_coins_version}"
 }
 
 tasks.register("sourcesJar", Jar) {
@@ -121,13 +139,13 @@ tasks.named("jar") {
 
 tasks.withType(ProcessResources).configureEach {
 	var replaceProperties = [
-		version: version,
-		mod_id: mod_id,
-		mod_name: mod_name,
-		pack_format: pack_format,
-		loader_version_range: loader_version_range,
-		// 99.9% of the time we're only going to target a very vague version of neoforge so this is fine.
-		mod_loader_range: mod_loader_range.replace("\${mc_base}", mcMinorAndPatch), // Replace the version in the mod loader range
+			version: version,
+			mod_id: mod_id,
+			mod_name: mod_name,
+			pack_format: pack_format,
+			loader_version_range: loader_version_range,
+			// 99.9% of the time we're only going to target a very vague version of neoforge so this is fine.
+			mod_loader_range: mod_loader_range.replace("\${mc_base}", mcMinorAndPatch), // Replace the version in the mod loader range
 	]
 
 	inputs.properties replaceProperties

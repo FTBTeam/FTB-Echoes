@@ -16,4 +16,6 @@ public interface BaseStageEntry {
             .dispatch(BaseStageEntry::getType, StageEntryType::streamCodec);
 
     StageEntryType<? extends BaseStageEntry> getType();
+
+    String getTypeId();
 }

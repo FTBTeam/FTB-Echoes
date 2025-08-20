@@ -19,3 +19,17 @@ mandatory = true
 versionRange = "${mod_loader_range}"
 ordering = "NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "magic_coins"
+mandatory = true
+versionRange = "[1.0.9,)"
+ordering = "NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "curios"
+mandatory = true
+versionRange = "[9.4.2,)"
+ordering = "NONE"
+side="BOTH"

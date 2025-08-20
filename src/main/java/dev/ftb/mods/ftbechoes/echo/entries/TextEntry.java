@@ -26,4 +26,9 @@ public record TextEntry(Component text) implements BaseStageEntry {
     public StageEntryType<? extends BaseStageEntry> getType() {
         return ModStageEntryTypes.TEXT_ENTRY.get();
     }
+
+    @Override
+    public String getTypeId() {
+        return ID;
+    }
 }
