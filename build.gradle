@@ -209,6 +209,7 @@ publishing {
 	publications {
 		register('mavenJava', MavenPublication) {
 			version = ftbPublishing.mavenVersion
+			artifactId = archives_base_name
 			from components.java
 			artifact sourcesJar
 			// Uncomment this if you want to create an API jar
