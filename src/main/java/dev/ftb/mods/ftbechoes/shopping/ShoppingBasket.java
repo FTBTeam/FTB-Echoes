@@ -72,9 +72,9 @@ public class ShoppingBasket {
 
     private void recalc() {
         totalCost = 0;
+        EchoManager mgr = this == CLIENT_INSTANCE ? EchoManager.getClientInstance() : EchoManager.getServerInstance();
         orders.forEach((key, nOrders) ->
-                totalCost += EchoManager.getClientInstance().getShopData(key)
-                        .map(data -> data.cost() * nOrders).orElse(0)
+                totalCost += mgr.getShopData(key).map(data -> data.cost() * nOrders).orElse(0)
         );
     }
 }
