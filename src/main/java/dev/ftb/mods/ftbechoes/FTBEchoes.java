@@ -127,7 +127,7 @@ public class FTBEchoes {
     }
 
     private void registerReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new EchoManager.ReloadListener());
+        event.addListener(new EchoManager.ReloadListener(event.getRegistryAccess()));
     }
 
     public static ResourceLocation id(String path) {

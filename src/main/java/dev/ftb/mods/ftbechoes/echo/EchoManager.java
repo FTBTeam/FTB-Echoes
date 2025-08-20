@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.net.SyncEchoesMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -106,9 +107,12 @@ public class EchoManager {
 
     public static class ReloadListener extends SimpleJsonResourceReloadListener {
         private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
+        private final RegistryAccess registryAccess;
 
-        public ReloadListener() {
+        public ReloadListener(RegistryAccess registryAccess) {
             super(GSON, "echo_definitions");
+
+            this.registryAccess = registryAccess;
         }
 
         @Override
@@ -117,7 +121,7 @@ public class EchoManager {
 
             getServerInstance().clear();
 
-            map.forEach((id, json) -> Echo.fromJson(json).ifPresent(echo -> getServerInstance().echoes.put(id, echo)));
+            map.forEach((id, json) -> Echo.fromJson(json, registryAccess).ifPresent(echo -> getServerInstance().echoes.put(id, echo)));
 
             FTBEchoes.LOGGER.info("loaded {} echo definitions", getServerInstance().echoes.size());
 

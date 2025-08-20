@@ -33,10 +33,8 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages)
             Echo::new
     );
 
-    public static Optional<Echo> fromJson(JsonElement json) {
-        RegistryAccess r = ServerLifecycleHooks.getCurrentServer().registryAccess();
-
-        return CODEC.decode(r.createSerializationContext(JsonOps.INSTANCE), json)
+    public static Optional<Echo> fromJson(JsonElement json, RegistryAccess registryAccess) {
+        return CODEC.decode(registryAccess.createSerializationContext(JsonOps.INSTANCE), json)
                 .resultOrPartial(error -> FTBEchoes.LOGGER.error("JSON parse failure: {}", error))
                 .map(Pair::getFirst);
     }
