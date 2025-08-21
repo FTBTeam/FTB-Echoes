@@ -14,7 +14,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.List;
 import java.util.Optional;

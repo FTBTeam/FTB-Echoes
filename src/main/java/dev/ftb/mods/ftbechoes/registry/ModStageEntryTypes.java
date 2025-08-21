@@ -2,7 +2,8 @@ package dev.ftb.mods.ftbechoes.registry;
 
 import com.mojang.serialization.MapCodec;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.echo.*;
+import dev.ftb.mods.ftbechoes.echo.BaseStageEntry;
+import dev.ftb.mods.ftbechoes.echo.StageEntryType;
 import dev.ftb.mods.ftbechoes.echo.entries.AudioEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.ImageEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.TextEntry;

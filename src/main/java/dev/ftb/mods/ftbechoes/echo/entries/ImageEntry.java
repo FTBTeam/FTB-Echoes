@@ -11,8 +11,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
-import net.neoforged.neoforge.common.TranslatableEnum;
-import net.neoforged.neoforge.common.util.NeoForgeExtraCodecs;
 import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 public record ImageEntry(ResourceLocation location, int width, int height, Alignment alignment) implements BaseStageEntry {

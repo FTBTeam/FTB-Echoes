@@ -1,10 +1,11 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.client.FTBEchoesClient;
+import dev.ftb.mods.ftbechoes.MiscUtil;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
+import dev.ftb.mods.ftbechoes.net.SelectEchoMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -15,27 +16,39 @@ import dev.ftb.mods.ftblibrary.ui.misc.AbstractThreePanelScreen;
 import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
 
-    private final Echo echo;
+    private final BlockPos projectorPos;
+    private Echo echo;
     private boolean pendingScrollToEnd;
 
-    public EchoScreen(Echo echo) {
+    public EchoScreen(BlockPos projectorPos, Echo echo) {
         super();
 
+        this.projectorPos = projectorPos;
         this.echo = echo;
 
         showCloseButton(false);
+    }
+
+    public void setEcho(Echo echo) {
+        this.echo = echo;
+        refreshWidgets();
     }
 
     @Override
@@ -95,6 +108,10 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
+    public BlockPos getProjectorPos() {
+        return projectorPos;
+    }
+
     static class PurchaseButton extends SimpleTextButton {
         public PurchaseButton(Panel parent) {
             super(parent, Component.translatable("ftbechoes.gui.place_order"), Icons.MONEY_BAG);
@@ -122,12 +139,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> {
                     EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
                         Component desc = Component.literal(count + " x ").append(data.description().orElse(data.stack().getHoverName()));
-                        Component cost = FTBEchoesClient.formatCost(count * data.cost());
+                        Component cost = MiscUtil.formatCost(count * data.cost());
                         list.add(Component.literal("• ").append(desc).append(": ").append(cost));
                     });
                 });
                 list.add(Component.empty());
-                list.add(Component.translatable("ftbechoes.tooltip.total_cost", FTBEchoesClient.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost())));
+                list.add(Component.translatable("ftbechoes.tooltip.total_cost", MiscUtil.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost())));
                 if (ShoppingBasket.CLIENT_INSTANCE.getTotalCost() > FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player)) {
                     list.add(Component.translatable("ftbechoes.tooltip.too_expensive").withStyle(ChatFormatting.RED));
                 }
@@ -154,12 +171,14 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     private class TopPanel extends Panel {
         private final TextField label;
+        private final Button settingsButton;
         private final Map<EchoScreen.Page, EchoScreen.PageButton> buttons = new EnumMap<>(EchoScreen.Page.class);
 
         public TopPanel() {
             super(EchoScreen.this);
 
-            label = new TextField(this)/*.addFlags(Theme.CENTERED)*/;
+            label = new TextField(this);
+            settingsButton = SimpleTextButton.create(this, Component.empty(), Icons.SETTINGS, this::showEchoSelector);
             buttons.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
             buttons.put(EchoScreen.Page.TASKS, new EchoScreen.PageButton(EchoScreen.Page.TASKS, this, Icons.CHAT));
             buttons.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
@@ -167,7 +186,14 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void addWidgets() {
-            add(label.setText(echo.title().copy().withStyle(ChatFormatting.YELLOW)));
+            if (Minecraft.getInstance().player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+                add(settingsButton);
+            }
+            if (echo == null) {
+                add(label.setText(Component.literal("No echo configured").withStyle(ChatFormatting.ITALIC, ChatFormatting.GOLD)));
+            } else {
+                add(label.setText(echo.title().copy().withStyle(ChatFormatting.YELLOW)));
+            }
             for (EchoScreen.Page p : EchoScreen.Page.values()) {
                 add(buttons.get(p));
             }
@@ -175,6 +201,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void alignWidgets() {
+            settingsButton.setPosAndSize(width - 18, 2, 16, 16);
+
             label.setPos(4, 5);
             label.setWidth(width);
 
@@ -192,6 +220,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.TASKS).posX, y + height - 1, col);
             graphics.hLine(x + buttons.get(Page.TASKS).posX + buttons.get(Page.TASKS).width, x + buttons.get(Page.SHOP).posX, y + height - 1, col);
             graphics.hLine(x + buttons.get(Page.SHOP).posX + buttons.get(Page.SHOP).width, x + width - 1, y + height - 1, col);
+        }
+
+        private void showEchoSelector(MouseButton mb) {
+            ContextMenu menu = new ContextMenu(this, Util.make(new ArrayList<>(), list ->
+                EchoManager.getClientInstance().getEchoes()
+                        .forEach(echo -> list.add(new ContextMenuItem(echo.title(), Icons.BLUE_BUTTON, btn -> selectEcho(echo))))
+            ));
+            pushModalPanel(menu);
+            menu.setPos(Math.min(getGui().getWidth() - menu.getWidth(), settingsButton.getPosX()), settingsButton.getPosY() + settingsButton.height + 1);
+        }
+
+        private void selectEcho(Echo echo) {
+            PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
         }
     }
 
@@ -271,7 +312,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             super.draw(graphics, theme, x, y, w, h);
 
-            var c = FTBEchoesClient.formatCost(FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player));
+            var c = MiscUtil.formatCost(FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player));
 
             theme.drawString(graphics, Component.translatable("ftbechoes.gui.wallet", c), x + 5, y + 8, Color4I.GREEN.rgba());
         }
@@ -299,8 +340,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             return page == currentPage;
         }
 
-        protected Echo getEcho() {
-            return echoScreen.echo;
+        protected Optional<Echo> getEcho() {
+            return Optional.ofNullable(echoScreen.echo);
         }
 
         protected final void vSpace(int space) {

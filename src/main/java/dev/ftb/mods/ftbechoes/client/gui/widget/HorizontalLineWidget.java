@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.Theme;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import net.minecraft.client.gui.GuiGraphics;
 import org.apache.commons.lang3.Validate;
 

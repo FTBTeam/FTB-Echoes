@@ -5,12 +5,9 @@ import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.Map;
 import java.util.function.BiConsumer;

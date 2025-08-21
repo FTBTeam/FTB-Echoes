@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.datagen;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.registry.ModBlocks;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
@@ -11,11 +12,14 @@ public class ModLangProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add(ModBlocks.ECHO_PROJECTOR.get(), "Echo Projector");
+
         add("ftbechoes.gui.page.lore", "Lore");
         add("ftbechoes.gui.page.tasks", "Tasks");
         add("ftbechoes.gui.page.shop", "Shop");
         add("ftbechoes.gui.place_order", "Place Order");
         add("ftbechoes.gui.wallet", "Wallet: %s");
+        add("ftbechoes.gui.complete_stage", "Complete Stage");
 
         add("ftbechoes.commands.invalid_echo", "Invalid echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown echo id: %s");

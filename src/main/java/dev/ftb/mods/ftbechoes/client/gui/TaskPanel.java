@@ -24,34 +24,35 @@ class TaskPanel extends EchoScreen.PagePanel {
 
     @Override
     public void addWidgets() {
-        List<EchoStage> stages = getEcho().stages();
-        int current = ClientProgress.get().getCurrentStage(getEcho().id());
-        boolean allCompleted = current >= stages.size();
-        int limit = Math.min(stages.size(), current + 1);
-        Player player = Minecraft.getInstance().player;
+        getEcho().ifPresent(echo -> {
+            List<EchoStage> stages = echo.stages();
+            int current = ClientProgress.get().getCurrentStage(echo.id());
+            int limit = Math.min(stages.size(), current + 1);
+            Player player = Minecraft.getInstance().player;
 
-        for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
-            EchoStage stage = stages.get(stageIdx);
+            for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
+                EchoStage stage = stages.get(stageIdx);
 
-            Icon icon = Color4I.empty();
-            Component c = Component.empty();
-            if (current > stageIdx) {
-                icon = Icons.CHECK; // stage completed
-                c = stage.ready();
-            } else if (current == stageIdx) {
-                if (GameStageHelper.hasStage(player, stage.requiredGameStage())) {
-                    icon = Icons.LOCK_OPEN;  // ready to complete
+                Icon icon = Color4I.empty();
+                Component c = Component.empty();
+                if (current > stageIdx) {
+                    icon = Icons.CHECK; // stage completed
                     c = stage.ready();
-                } else {
-                    icon = Icons.LOCK; // not ready to complete
-                    c = stage.notReady();
+                } else if (current == stageIdx) {
+                    if (GameStageHelper.hasStage(player, stage.requiredGameStage())) {
+                        icon = Icons.LOCK_OPEN;  // ready to complete
+                        c = stage.ready();
+                    } else {
+                        icon = Icons.LOCK; // not ready to complete
+                        c = stage.notReady();
+                    }
+                }
+                add(new TaskEntryPanel(this, icon, stage.title().orElse(Component.empty()), c));
+                if (icon == Icons.LOCK_OPEN) {
+                    add(new CompleteStageButton(this, Component.translatable("ftbechoes.gui.complete_stage"), echo.id()));
                 }
             }
-            add(new TaskEntryPanel(this, icon, stage.title().orElse(Component.empty()), c));
-            if (icon == Icons.LOCK_OPEN) {
-                add(new CompleteStageButton(this, Component.literal("Complete Stage"), getEcho().id()));
-            }
-        }
+        });
     }
 
     @Override

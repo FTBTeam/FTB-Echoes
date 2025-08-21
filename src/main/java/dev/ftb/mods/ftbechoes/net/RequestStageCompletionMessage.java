@@ -1,13 +1,11 @@
 package dev.ftb.mods.ftbechoes.net;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -30,20 +28,8 @@ public record RequestStageCompletionMessage(ResourceLocation echoId) implements 
         if (context.player() instanceof ServerPlayer sp) {
             FTBTeamsAPI.api().getManager().getTeamForPlayer(sp).ifPresent(team -> {
                 TeamProgress progress = TeamProgressManager.get().getProgress(team);
-                EchoManager.getServerInstance().getEcho(message.echoId).ifPresent(echo -> {
-                    int curStage = progress.getCurrentStage(echo.id());
-                    if (curStage >= 0 && curStage < echo.stages().size()) {
-                        var stage = echo.stages().get(curStage);
-                        if (GameStageHelper.hasStage(sp, stage.requiredGameStage())) {
-                            if (TeamProgressManager.get().completeStage(team, echo.id())) {
-                                if (progress.getCurrentStage(echo.id()) == echo.stages().size()) {
-                                    // TODO completed all stages, some special reward here?
-                                    sp.displayClientMessage(Component.literal("All stages completed!"), false);
-                                }
-                            }
-                        }
-                    }
-                });
+                EchoManager.getServerInstance().getEcho(message.echoId)
+                        .ifPresent(echo -> progress.advance(sp, team, echo));
             });
         }
     }

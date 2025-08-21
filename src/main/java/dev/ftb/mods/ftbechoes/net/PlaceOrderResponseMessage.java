@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.net;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.MiscUtil;
 import dev.ftb.mods.ftbechoes.client.FTBEchoesClient;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -39,7 +40,7 @@ public record PlaceOrderResponseMessage(boolean success, Optional<Component> mes
         if (message.success) {
             FTBEchoesClient.notifySuccess(
                     Component.translatable("ftbechoes.message.purchase_success"),
-                    Component.translatable("ftbechoes.message.purchase_success.2", FTBEchoesClient.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost()))
+                    Component.translatable("ftbechoes.message.purchase_success.2", MiscUtil.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost()))
             );
             ShoppingBasket.CLIENT_INSTANCE.clear();
         } else {

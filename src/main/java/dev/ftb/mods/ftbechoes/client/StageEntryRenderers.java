@@ -7,7 +7,9 @@ import dev.ftb.mods.ftbechoes.echo.entries.AudioEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.ImageEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.TextEntry;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.TextField;
+import dev.ftb.mods.ftblibrary.ui.Widget;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -44,7 +46,6 @@ public class StageEntryRenderers {
         public void addWidgets(Consumer<Widget> widgetAdder, BaseStageEntry entry, Panel panel) {
             TextEntry t = cast(entry);
             TextField textWidget = new TextField(panel).setText(t.text());
-//            textWidget.setWidth(panel.getWidth() - 4);
             textWidget.setX(2);
             widgetAdder.accept(textWidget);
         }

@@ -4,13 +4,15 @@ import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.gui.widget.AudioButton;
+import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.HorizontalLineWidget;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
-import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
 import dev.ftb.mods.ftbechoes.echo.BaseStageEntry;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.TextField;
+import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -24,41 +26,43 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
 
     @Override
     public void addWidgets() {
-        List<EchoStage> stages = getEcho().stages();
-        int current = ClientProgress.get().getCurrentStage(getEcho().id());
-        boolean allCompleted = current >= stages.size();
-        int limit = Math.min(stages.size(), current + 1);
-
-        vSpace(5);
-
-        for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
-            EchoStage stage = stages.get(stageIdx);
-
-            stage.title().ifPresent(title -> add(new TextField(this).setText(title).setColor(Color4I.LIGHT_GREEN)));
-
-            addTextLines(stage.lore());
+        getEcho().ifPresent(echo -> {
+            List<EchoStage> stages = echo.stages();
+            int current = ClientProgress.get().getCurrentStage(echo.id());
+            boolean allCompleted = current >= stages.size();
+            int limit = Math.min(stages.size(), current + 1);
 
             vSpace(5);
 
-            if (stageIdx == limit - 1 && stageIdx < stages.size() && !allCompleted) {
-                if (GameStageHelper.hasStage(Minecraft.getInstance().player, stage.requiredGameStage())) {
-                    add(new TextField(this).setText(stage.ready()));
-                    add(new CompleteStageButton(this, Component.translatable("ftbechoes.message.complete_stage"), getEcho().id()));
-                } else {
-                    add(new TextField(this).setText(stage.notReady()));
+            for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
+                EchoStage stage = stages.get(stageIdx);
+
+                stage.title().ifPresent(title -> add(new TextField(this).setText(title).setColor(Color4I.LIGHT_GREEN)));
+
+                addTextLines(stage.lore());
+
+                vSpace(5);
+
+                if (stageIdx == limit - 1 && stageIdx < stages.size() && !allCompleted) {
+                    if (GameStageHelper.hasStage(Minecraft.getInstance().player, stage.requiredGameStage())) {
+                        add(new TextField(this).setText(stage.ready()));
+                        add(new CompleteStageButton(this, Component.translatable("ftbechoes.message.complete_stage"), echo.id()));
+                    } else {
+                        add(new TextField(this).setText(stage.notReady()));
+                    }
+                }
+                if (stageIdx < limit - 1) {
+                    add(new HorizontalLineWidget(this, 0.75f));
                 }
             }
-            if (stageIdx < limit - 1) {
+
+            if (allCompleted) {
                 add(new HorizontalLineWidget(this, 0.75f));
+                add(new TextField(this).setText(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE)));
             }
-        }
 
-        if (allCompleted) {
-            add(new HorizontalLineWidget(this, 0.75f));
-            add(new TextField(this).setText(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE)));
-        }
-
-        vSpace(10);
+            vSpace(10);
+        });
     }
 
     private void addTextLines(List<BaseStageEntry> entries) {

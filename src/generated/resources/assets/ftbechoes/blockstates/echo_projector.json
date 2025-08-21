@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "ftbechoes:block/echo_projector"
+    }
+  }
+}

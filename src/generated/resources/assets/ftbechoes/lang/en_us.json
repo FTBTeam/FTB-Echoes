@@ -1,6 +1,8 @@
 {
+  "block.ftbechoes.echo_projector": "Echo Projector",
   "ftbechoes.commands.invalid_echo": "Invalid echo id: %s",
   "ftbechoes.commands.unknown_echo": "Unknown echo id: %s",
+  "ftbechoes.gui.complete_stage": "Complete Stage",
   "ftbechoes.gui.page.lore": "Lore",
   "ftbechoes.gui.page.shop": "Shop",
   "ftbechoes.gui.page.tasks": "Tasks",

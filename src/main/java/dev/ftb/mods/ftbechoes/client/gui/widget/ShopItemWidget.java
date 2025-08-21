@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import dev.ftb.mods.ftbechoes.client.FTBEchoesClient;
-import dev.ftb.mods.ftbechoes.echo.*;
+import dev.ftb.mods.ftbechoes.MiscUtil;
+import dev.ftb.mods.ftbechoes.echo.Echo;
+import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
@@ -9,7 +10,6 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -33,7 +33,7 @@ public class ShopItemWidget extends Panel {
         this.data = data;
 
         key = ShoppingKey.of(echo, data);
-        costStr = FTBEchoesClient.formatCost(data.cost());
+        costStr = MiscUtil.formatCost(data.cost());
 
         Component txt = stage.title().orElse(Component.literal(String.valueOf(stageIdx)));
         tooltip = Component.translatable("ftbechoes.tooltip.unlocked_by", txt.copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY);
