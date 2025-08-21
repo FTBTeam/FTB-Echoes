@@ -69,6 +69,7 @@ public class FTBEchoes {
     private static void registerAll(IEventBus eventBus) {
         ModBlocks.BLOCKS.register(eventBus);
         ModBlockEntityTypes.BLOCK_ENTITY_TYPES.register(eventBus);
+        ModEntityTypes.ENTITY_TYPES.register(eventBus);
         ModItems.ITEMS.register(eventBus);
         ModStageEntryTypes.STAGE_ENTRY_TYPES.register(eventBus);
         ModArgumentTypes.COMMAND_ARGUMENT_TYPES.register(eventBus);

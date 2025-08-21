@@ -15,7 +15,8 @@ public class ModBlocks {
         return Block.Properties.of()
                 .mapColor(MapColor.METAL)
                 .strength(3f, 10f)
-                .sound(SoundType.METAL);
+                .sound(SoundType.METAL)
+                .lightLevel(state -> 15);
     }
 
     public static final DeferredBlock<EchoProjectorBlock> ECHO_PROJECTOR

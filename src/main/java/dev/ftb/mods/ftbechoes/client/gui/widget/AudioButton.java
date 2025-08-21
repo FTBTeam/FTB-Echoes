@@ -40,6 +40,14 @@ public class AudioButton extends SimpleTextButton {
        stopAudio();
     }
 
+    @Override
+    public void tick() {
+        if (playing != null && !Minecraft.getInstance().getSoundManager().isActive(playing)) {
+            playing = null;
+            setIcon(INACTIVE);
+        }
+    }
+
     public void startAudio() {
         playing = SimpleSoundInstance.forUI(sound, 1f);
         Minecraft.getInstance().getSoundManager().play(playing);

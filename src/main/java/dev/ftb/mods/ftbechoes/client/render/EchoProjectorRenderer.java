@@ -7,12 +7,14 @@ import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.phys.AABB;
 
 public class EchoProjectorRenderer implements BlockEntityRenderer<EchoProjectorBlockEntity> {
     private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/villager/villager.png");
@@ -24,6 +26,10 @@ public class EchoProjectorRenderer implements BlockEntityRenderer<EchoProjectorB
 
     @Override
     public void render(EchoProjectorBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        if (blockEntity.getEchoId() == null) {
+            return;
+        }
+
         poseStack.pushPose();
 
         // necessary transforms to make models render in the right place
@@ -34,13 +40,14 @@ public class EchoProjectorRenderer implements BlockEntityRenderer<EchoProjectorB
         poseStack.mulPose(Axis.YP.rotationDegrees(180 + Minecraft.getInstance().gameRenderer.getMainCamera().getYRot()));
 
         // actual model rendering work
-        renderModel(blockEntity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucentCull(TEXTURE));
+        model.renderToBuffer(poseStack, builder, LightTexture.FULL_BRIGHT, packedOverlay, 0x9090FFFF);
 
         poseStack.popPose();
     }
 
-    private void renderModel(EchoProjectorBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        VertexConsumer builder = bufferSource.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        model.renderToBuffer(poseStack, builder, packedLight, packedOverlay, 0x9090FFFF);
+    @Override
+    public AABB getRenderBoundingBox(EchoProjectorBlockEntity blockEntity) {
+        return new AABB(blockEntity.getBlockPos()).setMaxY(blockEntity.getBlockPos().getY() + 3);
     }
 }

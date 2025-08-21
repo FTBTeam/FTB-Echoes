@@ -3,9 +3,11 @@ package dev.ftb.mods.ftbechoes.client;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
 import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
+import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
 import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbechoes.registry.ModEntityTypes;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
@@ -49,6 +51,7 @@ public class FTBEchoesClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntityTypes.ECHO_PROJECTOR.get(), EchoProjectorRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.ECHO.get(), EchoEntityRenderer::new);
     }
 
     public static void openEchoScreen(EchoProjectorBlockEntity projector) {
