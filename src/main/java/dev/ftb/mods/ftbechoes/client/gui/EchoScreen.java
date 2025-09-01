@@ -192,7 +192,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             if (echo == null) {
                 add(label.setText(Component.literal("No echo configured").withStyle(ChatFormatting.ITALIC, ChatFormatting.GOLD)));
             } else {
-                add(label.setText(echo.title().copy().withStyle(ChatFormatting.YELLOW)));
+                add(label.setText(echo.title()));
             }
             for (EchoScreen.Page p : EchoScreen.Page.values()) {
                 add(buttons.get(p));
