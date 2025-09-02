@@ -18,17 +18,19 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 import java.util.Optional;
 
-public record Echo(ResourceLocation id, Component title, List<EchoStage> stages) {
+public record Echo(ResourceLocation id, Component title, List<EchoStage> stages, Optional<Component> allComplete) {
     public static final Codec<Echo> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(Echo::id),
             ComponentSerialization.CODEC.fieldOf("title").forGetter(Echo::title),
-            EchoStage.CODEC.listOf().fieldOf("stages").forGetter(Echo::stages)
+            EchoStage.CODEC.listOf().fieldOf("stages").forGetter(Echo::stages),
+            ComponentSerialization.CODEC.optionalFieldOf("all_complete").forGetter(Echo::allComplete)
     ).apply(builder, Echo::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Echo> STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC, Echo::id,
             ComponentSerialization.STREAM_CODEC, Echo::title,
             EchoStage.STREAM_CODEC.apply(ByteBufCodecs.list()), Echo::stages,
+            ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), Echo::allComplete,
             Echo::new
     );
 

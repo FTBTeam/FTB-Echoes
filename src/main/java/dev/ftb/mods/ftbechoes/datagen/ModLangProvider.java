@@ -20,16 +20,18 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.place_order", "Place Order");
         add("ftbechoes.gui.wallet", "Wallet: %s");
         add("ftbechoes.gui.complete_stage", "Complete Stage");
+        add("ftbechoes.gui.shopping_basket", "Shopping Basket");
 
-        add("ftbechoes.commands.invalid_echo", "Invalid echo id: %s");
-        add("ftbechoes.commands.unknown_echo", "Unknown echo id: %s");
+        add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
+        add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
         add("ftbechoes.message.complete_stage", "Complete Stage");
         add("ftbechoes.message.all_complete", "All Stages Complete!");
         add("ftbechoes.message.purchase_success", "Purchase Completed!");
         add("ftbechoes.message.purchase_success.2", "Payment Taken: %s");
         add("ftbechoes.message.purchase_failed", "Purchase Failed!");
+        add("ftbechoes.message.no_echo", "No Echo Configured");
 
-        add("ftbechoes.tooltip.unlocked_by", "Unlocked by Stage: %s");
+        add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
         add("ftbechoes.tooltip.total_cost", "Total Cost: %s");
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
     }

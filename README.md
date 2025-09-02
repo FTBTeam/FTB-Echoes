@@ -17,6 +17,7 @@ An Echo json has the following top-level fields, all required:
 * `id` - must be unique to the Echo; match the path & filename
 * `title` - displayed in the Echo GUI, a serialized component
 * `stages` - a list of Echo stages for this echo, see below
+* `all_complete` - a message displayed at the end of the Echo GUI lore panel. Optional, defaults to "All Stages Complete!"
 
 ### Echo Stages
 

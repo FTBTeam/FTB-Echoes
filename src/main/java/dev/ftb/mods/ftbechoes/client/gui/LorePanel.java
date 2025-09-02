@@ -37,7 +37,9 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
 
-                stage.title().ifPresent(title -> add(new TextField(this).setText(title).setColor(Color4I.LIGHT_GREEN)));
+                stage.title().ifPresent(title ->
+                        add(new TextField(this).setText(Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(title)))
+                );
 
                 addTextLines(stage.lore());
 
@@ -58,7 +60,8 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
 
             if (allCompleted) {
                 add(new HorizontalLineWidget(this, 0.75f));
-                add(new TextField(this).setText(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE)));
+                Component msg = echo.allComplete().orElse(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE));
+                add(new TextField(this).setText(msg));
             }
 
             vSpace(10);

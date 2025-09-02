@@ -1,6 +1,6 @@
 {
   "id": "ftbechoes:test_echo1",
-  "title": "This is Test Echo 1",
+  "title": { "text": "This is Test Echo 1", "color": "blue" },
   "stages": [
     {
       "title": "Stage 1",
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "title": "Stage 2",
+      "title": { "text": "Stage 2", "color": "aqua" },
       "lore": [
         { "type": "ftbechoes:text", "text": "this is stage2!" },
         { "type": "ftbechoes:audio", "location": "music_disc.strad", "text": "strad" },

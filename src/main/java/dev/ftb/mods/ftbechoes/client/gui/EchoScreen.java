@@ -135,7 +135,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             super.addMouseOverText(list);
 
             if (!ShoppingBasket.CLIENT_INSTANCE.isEmpty()) {
-                list.add(Component.literal("Shopping Basket").withStyle(ChatFormatting.YELLOW));
+                list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> {
                     EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
                         Component desc = Component.literal(count + " x ").append(data.description().orElse(data.stack().getHoverName()));
@@ -190,9 +190,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 add(settingsButton);
             }
             if (echo == null) {
-                add(label.setText(Component.literal("No echo configured").withStyle(ChatFormatting.ITALIC, ChatFormatting.GOLD)));
+                add(label.setText(Component.translatable("ftbechoes.message.no_echo").withStyle(ChatFormatting.ITALIC, ChatFormatting.GOLD)));
             } else {
-                add(label.setText(echo.title()));
+                add(label.setText(Component.empty().withStyle(ChatFormatting.YELLOW).append(echo.title())));
             }
             for (EchoScreen.Page p : EchoScreen.Page.values()) {
                 add(buttons.get(p));

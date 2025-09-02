@@ -1,19 +1,21 @@
 {
   "block.ftbechoes.echo_projector": "Echo Projector",
-  "ftbechoes.commands.invalid_echo": "Invalid echo id: %s",
-  "ftbechoes.commands.unknown_echo": "Unknown echo id: %s",
+  "ftbechoes.commands.invalid_echo": "Invalid Echo id: %s",
+  "ftbechoes.commands.unknown_echo": "Unknown Echo id: %s",
   "ftbechoes.gui.complete_stage": "Complete Stage",
   "ftbechoes.gui.page.lore": "Lore",
   "ftbechoes.gui.page.shop": "Shop",
   "ftbechoes.gui.page.tasks": "Tasks",
   "ftbechoes.gui.place_order": "Place Order",
+  "ftbechoes.gui.shopping_basket": "Shopping Basket",
   "ftbechoes.gui.wallet": "Wallet: %s",
   "ftbechoes.message.all_complete": "All Stages Complete!",
   "ftbechoes.message.complete_stage": "Complete Stage",
+  "ftbechoes.message.no_echo": "No Echo Configured",
   "ftbechoes.message.purchase_failed": "Purchase Failed!",
   "ftbechoes.message.purchase_success": "Purchase Completed!",
   "ftbechoes.message.purchase_success.2": "Payment Taken: %s",
   "ftbechoes.tooltip.too_expensive": "Too Expensive! Can't place order",
   "ftbechoes.tooltip.total_cost": "Total Cost: %s",
-  "ftbechoes.tooltip.unlocked_by": "Unlocked by Stage: %s"
+  "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s"
 }
