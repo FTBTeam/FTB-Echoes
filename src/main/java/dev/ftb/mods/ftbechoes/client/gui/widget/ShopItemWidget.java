@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,6 +21,7 @@ public class ShopItemWidget extends Panel {
     public static final int INC_BTN_SIZE = 14;
 
     private final ShopData data;
+    private final boolean unlocked;
     private final Button incrButton, decrButton;
     private final Button iconButton;
     private final ShoppingKey key;
@@ -27,22 +29,25 @@ public class ShopItemWidget extends Panel {
     private final Component tooltip;
     private final boolean isCommand;
 
-    public ShopItemWidget(Panel parent, Echo echo, ShopData data, int stageIdx, EchoStage stage) {
+    public ShopItemWidget(Panel parent, Echo echo, ShopData data, int stageIdx, EchoStage stage, boolean unlocked) {
         super(parent);
 
         this.data = data;
+        this.unlocked = unlocked;
 
         key = ShoppingKey.of(echo, data);
         costStr = MiscUtil.formatCost(data.cost());
 
         Component txt = stage.title().orElse(Component.literal(String.valueOf(stageIdx)));
-        tooltip = Component.translatable("ftbechoes.tooltip.unlocked_by", txt.copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY);
+        tooltip = unlocked ?
+                Component.translatable("ftbechoes.tooltip.unlocked_by", txt.copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY) :
+                Component.translatable("ftbechoes.tooltip.locked");
 
         setSize(WIDGET_SIZE, WIDGET_SIZE);
 
-        decrButton = SimpleTextButton.create(this, Component.literal("-"), Icon.empty(), mb -> adjustAmount(-1));
-        incrButton = SimpleTextButton.create(this, Component.literal("+"), Icon.empty(), mb -> adjustAmount(1));
-        iconButton = new IconButton();
+        decrButton = new AdjustButton(this, false);
+        incrButton = new AdjustButton(this, true);
+        iconButton = new IconButton(getActualIcon());
 
         isCommand = !data.command().isEmpty();
     }
@@ -62,7 +67,9 @@ public class ShopItemWidget extends Panel {
     }
 
     private void adjustAmount(int adjustment) {
-        ShoppingBasket.CLIENT_INSTANCE.adjust(key, adjustment * (ScreenWrapper.hasShiftDown() ? 10 : 1), isCommand ? 1 : Integer.MAX_VALUE);
+        if (unlocked) {
+            ShoppingBasket.CLIENT_INSTANCE.adjust(key, adjustment * (ScreenWrapper.hasShiftDown() ? 10 : 1), isCommand ? 1 : Integer.MAX_VALUE);
+        }
     }
 
     @Override
@@ -79,11 +86,46 @@ public class ShopItemWidget extends Panel {
         theme.drawString(graphics, amountStr, x + sx, y + height - INC_BTN_SIZE, theme.getContentColor(WidgetType.NORMAL), 0);
 
         theme.drawString(graphics, costStr, x + width - theme.getStringWidth(costStr) - 4, y + 4, theme.getContentColor(WidgetType.NORMAL), 0);
+
+        if (!unlocked) {
+            graphics.pose().translate(0, 0, 300);
+            Color4I.DARK_GRAY.withAlpha(160).draw(graphics, x, y, w, h);
+            graphics.pose().translate(0, 0, -300);
+        }
+    }
+
+    private Icon getActualIcon() {
+        Icon i = data.icon().orElse(ItemIcon.getItemIcon(data.stack()));
+        return unlocked ? i : i.withColor(Color4I.rgb(0x80C0C0C0));
+    }
+
+    private class AdjustButton extends SimpleTextButton {
+        private final boolean forward;
+
+        public AdjustButton(Panel panel, boolean forward) {
+            super(panel, Component.literal(forward ? "+": "-"), Icon.empty());
+            this.forward = forward;
+        }
+
+        @Override
+        public void onClicked(MouseButton mouseButton) {
+            adjustAmount(forward ? 1 : -1);
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return unlocked;
+        }
+
+        @Override
+        public WidgetType getWidgetType() {
+            return unlocked ? super.getWidgetType() : WidgetType.DISABLED;
+        }
     }
 
     private class IconButton extends SimpleButton {
-        public IconButton() {
-            super(ShopItemWidget.this, Component.empty(), data.icon().orElse(ItemIcon.getItemIcon(data.stack())), (b, mb) -> {});
+        public IconButton(Icon icon) {
+            super(ShopItemWidget.this, Component.empty(), icon, (b, mb) -> {});
         }
 
         @Override

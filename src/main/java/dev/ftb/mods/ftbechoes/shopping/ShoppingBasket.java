@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.shopping;
 
 import com.google.common.collect.Maps;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,11 +10,12 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- * Clientside class tracking what player currently has on order from the shop.
+ * Tracking what player currently has on order from the shop. Also sent to the server by PlaceOrderMessage.
  */
 public class ShoppingBasket {
     public static final StreamCodec<FriendlyByteBuf, ShoppingBasket> STREAM_CODEC = StreamCodec.composite(
@@ -73,5 +75,22 @@ public class ShoppingBasket {
         orders.forEach((key, nOrders) ->
                 totalCost += mgr.getShopData(key).map(data -> data.cost() * nOrders).orElse(0)
         );
+    }
+
+    public ShoppingBasket validate(ServerPlayer sp) {
+        Map<ShoppingKey,Integer> map = new HashMap<>();
+
+        if (sp.getServer() != null) {
+            TeamProgressManager.get(sp.getServer()).getProgress(sp).ifPresent(progress -> {
+                EchoManager mgr = EchoManager.getServerInstance();
+                orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
+                    if (progress.getCurrentStage(key.echoId()) >= entry.stageIdx()) {
+                        map.put(key, amount);
+                    }
+                }));
+            });
+        }
+
+        return new ShoppingBasket(map);
     }
 }

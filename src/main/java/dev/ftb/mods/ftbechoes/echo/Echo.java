@@ -39,15 +39,4 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
                 .resultOrPartial(error -> FTBEchoes.LOGGER.error("JSON parse failure: {}", error))
                 .map(Pair::getFirst);
     }
-
-    public Optional<ShopData> getShopData(String name) {
-        for (EchoStage s : stages) {
-            for (ShopData d : s.shopUnlocked()) {
-                if (d.name().equals(name)) {
-                    return Optional.of(d);
-                }
-            }
-        }
-        return Optional.empty();
-    }
 }

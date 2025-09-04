@@ -25,9 +25,11 @@ public record PlaceOrderMessage(ShoppingBasket basket) implements CustomPacketPa
 
     public static void handleData(PlaceOrderMessage message, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer sp) {
-            if (FTBEchoes.currencyPlugin.takeCurrency(sp, message.basket.getTotalCost())) {
+            ShoppingBasket validatedBasket = message.basket.validate(sp);
+
+            if (FTBEchoes.currencyPlugin.takeCurrency(sp, validatedBasket.getTotalCost())) {
                 // payment taken, give player the goods
-                message.basket.giveTo(sp);
+                validatedBasket.giveTo(sp);
                 PacketDistributor.sendToPlayer(sp, PlaceOrderResponseMessage.ok());
             } else {
                 // already checked clientside, so if we get here, the client is probably lying to us...

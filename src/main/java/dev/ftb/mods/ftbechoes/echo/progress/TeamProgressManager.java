@@ -3,9 +3,6 @@ package dev.ftb.mods.ftbechoes.echo.progress;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.GameStageHelper;
-import dev.ftb.mods.ftbechoes.echo.Echo;
-import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
@@ -17,18 +14,13 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.Validate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class TeamProgressManager extends SavedData {
@@ -81,34 +73,38 @@ public class TeamProgressManager extends SavedData {
                         .orElse(new CompoundTag())));
     }
 
+    public Optional<TeamProgress> getProgress(ServerPlayer sp) {
+        return FTBTeamsAPI.api().getManager().getTeamForPlayer(sp).map(this::getProgress);
+    }
+
     public TeamProgress getProgress(Team team) {
         return get().progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
     }
 
-    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player) {
-        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
-        TeamProgress progress = getProgress(team);
-        return checkStatus(echo, progress, player, progress.getCurrentStage(echoId));
-    }
-
-    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player, int stageToCheck) {
-        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
-        TeamProgress progress = getProgress(team);
-        return checkStatus(echo, progress, player, stageToCheck);
-    }
-
-    private StageStatus checkStatus(Echo echo, TeamProgress progress, Player player, int toCheck) {
-        int currentStage = progress.getCurrentStage(echo.id());
-        Validate.isTrue(toCheck >= 0 && toCheck <= echo.stages().size());
-        if (toCheck == echo.stages().size() || toCheck > currentStage) {
-            return StageStatus.COMPLETED;
-        } else {
-            var stage = echo.stages().get(toCheck);
-            return GameStageHelper.hasStage(player, stage.requiredGameStage()) ?
-                    StageStatus.READY_TO_COMPLETE :
-                    StageStatus.IN_PROGRESS;
-        }
-    }
+//    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player) {
+//        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
+//        TeamProgress progress = getProgress(team);
+//        return checkStatus(echo, progress, player, progress.getCurrentStage(echoId));
+//    }
+//
+//    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player, int stageToCheck) {
+//        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
+//        TeamProgress progress = getProgress(team);
+//        return checkStatus(echo, progress, player, stageToCheck);
+//    }
+//
+//    private StageStatus checkStatus(Echo echo, TeamProgress progress, Player player, int toCheck) {
+//        int currentStage = progress.getCurrentStage(echo.id());
+//        Validate.isTrue(toCheck >= 0 && toCheck <= echo.stages().size());
+//        if (toCheck == echo.stages().size() || toCheck > currentStage) {
+//            return StageStatus.COMPLETED;
+//        } else {
+//            var stage = echo.stages().get(toCheck);
+//            return GameStageHelper.hasStage(player, stage.requiredGameStage()) ?
+//                    StageStatus.READY_TO_COMPLETE :
+//                    StageStatus.IN_PROGRESS;
+//        }
+//    }
 
     public boolean completeStage(ServerPlayer player, ResourceLocation echoId) {
         return applyChange(player, progress -> progress.completeStage(echoId));

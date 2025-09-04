@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.net.SyncEchoesMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
+import dev.ftb.mods.ftbechoes.shopping.ShopDataCache;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +26,7 @@ public class EchoManager {
     private static EchoManager serverInstance;
 
     private final Map<ResourceLocation, Echo> echoes = new ConcurrentHashMap<>();
-    private final Map<ShoppingKey, ShopData> shoppingCache = new HashMap<>();
+    private final ShopDataCache shoppingCache = new ShopDataCache();
 
     public static void initClient() {
         if (clientInstance == null) {
@@ -92,12 +93,12 @@ public class EchoManager {
         Validate.isTrue(echoes.containsKey(echoId), "Unknown echo ID: " + echoId);
     }
 
+    public Optional<ShopDataCache.ShoppingEntry> getShoppingEntry(ShoppingKey key) {
+        return Optional.ofNullable(shoppingCache.find(key));
+    }
+
     public Optional<ShopData> getShopData(ShoppingKey key) {
-        return Optional.ofNullable(
-                shoppingCache.computeIfAbsent(key, k ->
-                        getEcho(key.echoId()).flatMap(echo -> echo.getShopData(key.name())).orElse(null)
-                )
-        );
+        return getShoppingEntry(key).map(ShopDataCache.ShoppingEntry::data);
     }
 
     public void clear() {

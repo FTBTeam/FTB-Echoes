@@ -31,6 +31,8 @@ import java.util.*;
  * @param perEcho progress on an echo, by echo ID
  */
 public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
+    public static final TeamProgress NONE = new TeamProgress(Map.of());
+
     private static final Codec<Map<ResourceLocation,PerEchoProgress>> ECHO_STAGE
             = Codec.unboundedMap(ResourceLocation.CODEC, PerEchoProgress.CODEC).xmap(HashMap::new, Map::copyOf);
 

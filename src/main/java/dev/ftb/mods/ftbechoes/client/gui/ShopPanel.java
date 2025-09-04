@@ -18,13 +18,12 @@ class ShopPanel extends EchoScreen.PagePanel {
     public void addWidgets() {
         getEcho().ifPresent(echo -> {
             List<EchoStage> stages = echo.stages();
-            int current = ClientProgress.get().getCurrentStage(echo.id());
-            int limit = Math.min(stages.size(), current);
+            int currentStage = ClientProgress.get().getCurrentStage(echo.id());
 
-            for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
+            for (int stageIdx = 0; stageIdx < stages.size(); stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
                 for (ShopData data : stage.shopUnlocked()) {
-                    add(new ShopItemWidget(this, echo, data, stageIdx, stage));
+                    add(new ShopItemWidget(this, echo, data, stageIdx, stage, stageIdx < currentStage));
                 }
             }
         });

@@ -31,6 +31,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.purchase_failed", "Purchase Failed!");
         add("ftbechoes.message.no_echo", "No Echo Configured");
 
+        add("ftbechoes.tooltip.locked", "Not available yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
         add("ftbechoes.tooltip.total_cost", "Total Cost: %s");
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
