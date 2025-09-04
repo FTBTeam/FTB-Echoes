@@ -53,7 +53,7 @@ For `ftbechoes:audio`:
 
 ### Shop Entries
 
-Shop entries define items that may be bought, and/or commands that may be run (with permission level 2) on behalf of the player, along with an associated cost in the currency system currently in use.
+Shop entries define items that may be bought, and/or commands that may be run (with a configurable permission level) on behalf of the player, along with an associated cost in the currency system currently in use.
 
 Fields:
 
@@ -65,7 +65,7 @@ Fields:
 * `icon` - the resource location for an icon image; may be omitted if `item` is specified
 * `command` - a command to run on behalf of the player, with the permission level specified in `permission_level`. 
   * This is exclusive with the `item` field.
-* `permission_level` - option integer permission level in range 1-4. Defaults to 1.
+* `permission_level` - optional integer permission level for running commands, in range 1-4. Defaults to 1.
 
 ## Support
 
