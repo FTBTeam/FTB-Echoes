@@ -1,6 +1,6 @@
 {
   "id": "ftbechoes:test_echo2",
-  "title": "This is Test Echo 2",
+  "title": { "text": "Test Echo 2", "color": "green" },
   "stages": [
     {
       "title": "Stage I",

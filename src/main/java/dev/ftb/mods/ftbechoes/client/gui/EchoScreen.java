@@ -138,7 +138,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> {
                     EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
-                        Component desc = Component.literal(count + " x ").append(data.description().orElse(data.stack().getHoverName()));
+                        Component desc0 = data.stack().isEmpty() ? data.description().orElseThrow() : data.stack().getHoverName();
+                        Component desc = Component.literal(count + " x ").append(desc0);
                         Component cost = MiscUtil.formatCost(count * data.cost());
                         list.add(Component.literal("• ").append(desc).append(": ").append(cost));
                     });

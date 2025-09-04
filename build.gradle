@@ -112,11 +112,24 @@ repositories {
 		name = "Curios"
 		url = uri("https://maven.theillusivec4.top/")
 	}
+
+	maven {
+		url "https://maven.blamejared.com"
+		content {
+			includeGroup("mezz.jei")
+		}
+	}
 }
 
 dependencies {
 	implementation "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
 	implementation "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
+
+	// JEI
+	compileOnly("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+	compileOnly("mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}")
+	// at runtime, use the full JEI jar for NeoForge
+	runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
 	runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 	compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
