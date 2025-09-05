@@ -1,0 +1,8 @@
+{
+  "coins": {
+    "sounds": [
+      "ftbechoes:coins"
+    ],
+    "subtitle": "ftbechoes.subtitle.coins_clink"
+  }
+}

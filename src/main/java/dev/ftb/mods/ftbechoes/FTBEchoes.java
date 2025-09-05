@@ -73,6 +73,7 @@ public class FTBEchoes {
         ModItems.ITEMS.register(eventBus);
         ModStageEntryTypes.STAGE_ENTRY_TYPES.register(eventBus);
         ModArgumentTypes.COMMAND_ARGUMENT_TYPES.register(eventBus);
+        ModSounds.SOUNDS.register(eventBus);
     }
 
     private void onServerAboutToStart(ServerAboutToStartEvent event) {

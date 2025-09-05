@@ -39,5 +39,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.jei.shop.title", "Echo Shop");
         add("ftbechoes.jei.echo_title", "Sold by Echo: %s");
         add("ftbechoes.jei.stage_title", "Unlocked by: %s");
+
+        add("ftbechoes.subtitle.coins_clink", "Coins clink");
     }
 }
