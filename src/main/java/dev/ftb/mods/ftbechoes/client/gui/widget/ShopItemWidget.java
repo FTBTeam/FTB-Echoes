@@ -100,7 +100,7 @@ public class ShopItemWidget extends Panel {
         if (data.stacks().size() == 1) {
             return data.icon().orElse(ItemIcon.getItemIcon(data.stacks().getFirst()));
         } else if (data.stacks().size() > 1) {
-            return IconAnimation.fromList(data.stacks().stream().map(ItemIcon::getItemIcon).toList(), false);
+            return data.icon().orElse(IconAnimation.fromList(data.stacks().stream().map(ItemIcon::getItemIcon).toList(), false));
         } else {
             return data.icon().orElse(Icon.empty());
         }
