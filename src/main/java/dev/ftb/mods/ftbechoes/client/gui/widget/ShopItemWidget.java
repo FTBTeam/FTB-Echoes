@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -15,6 +16,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class ShopItemWidget extends Panel {
     public static final int WIDGET_SIZE = 64;
@@ -95,8 +97,13 @@ public class ShopItemWidget extends Panel {
     }
 
     private Icon getActualIcon() {
-        Icon i = data.icon().orElse(ItemIcon.getItemIcon(data.stack()));
-        return unlocked ? i : i.withColor(Color4I.rgb(0x80C0C0C0));
+        if (data.stacks().size() == 1) {
+            return data.icon().orElse(ItemIcon.getItemIcon(data.stacks().getFirst()));
+        } else if (data.stacks().size() > 1) {
+            return IconAnimation.fromList(data.stacks().stream().map(ItemIcon::getItemIcon).toList(), false);
+        } else {
+            return data.icon().orElse(Icon.empty());
+        }
     }
 
     private class AdjustButton extends SimpleTextButton {
@@ -134,12 +141,18 @@ public class ShopItemWidget extends Panel {
 
         @Override
         public void addMouseOverText(TooltipList list) {
-            if (!data.stack().isEmpty()) {
-                list.add(data.stack().getHoverName());
-            }
+            data.stacks().stream()
+                    .map(IconButton::stackDesc)
+                    .forEach(list::add);
             data.description().ifPresent(list::add);
             list.add(Component.empty());
             list.add(tooltip);
+        }
+
+        private static Component stackDesc(ItemStack stack) {
+            return stack.getCount() == 1 ?
+                    stack.getHoverName() :
+                    Component.literal(stack.getCount() + " x ").append(stack.getHoverName());
         }
     }
 }

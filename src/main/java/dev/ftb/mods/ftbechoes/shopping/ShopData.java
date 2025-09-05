@@ -15,10 +15,11 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, ItemStack stack, int cost, Optional<Component> description, Optional<Icon> icon, String command, int permissionLevel) {
+public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, String command, int permissionLevel) {
     // TODO move into FTB Library
     public static final Codec<Icon> ICON_STRING_CODEC = Codec.STRING.comapFlatMap(
             s -> {
@@ -28,9 +29,13 @@ public record ShopData(String name, ItemStack stack, int cost, Optional<Componen
             Icon::toString
     );
 
+    private static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
+            ItemStack.CODEC.listOf(), ItemStack.CODEC, List::of
+    );
+
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
-            ItemStack.CODEC.optionalFieldOf("item", ItemStack.EMPTY).forGetter(ShopData::stack),
+            ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
             ExtraCodecs.POSITIVE_INT.fieldOf("cost").forGetter(ShopData::cost),
             ComponentSerialization.CODEC.optionalFieldOf("description").forGetter(ShopData::description),
             ICON_STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
@@ -42,7 +47,7 @@ public record ShopData(String name, ItemStack stack, int cost, Optional<Componen
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = NetworkHelper.composite(
             ByteBufCodecs.STRING_UTF8, ShopData::name,
-            ItemStack.OPTIONAL_STREAM_CODEC, ShopData::stack,
+            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
             ByteBufCodecs.VAR_INT, ShopData::cost,
             ComponentSerialization.OPTIONAL_STREAM_CODEC, ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
@@ -52,19 +57,19 @@ public record ShopData(String name, ItemStack stack, int cost, Optional<Componen
     );
 
     private DataResult<ShopData> validate() {
-        if (stack.isEmpty() && (icon.isEmpty() || command.isEmpty() || description.isEmpty())) {
+        if (stacks.isEmpty() && (icon.isEmpty() || command.isEmpty() || description.isEmpty())) {
             return DataResult.error(() -> "when item is empty, icon, description and command must all be specified");
-        } else if (!stack.isEmpty() && !command.isEmpty()) {
+        } else if (!stacks.isEmpty() && !command.isEmpty()) {
             return DataResult.error(() -> "when item is not empty, icon, command must not be specified");
         }
         return DataResult.success(this);
     }
 
     public void giveTo(ServerPlayer player, int nOrders) {
-        if (!stack().isEmpty()) {
-            int total = stack().getCount() * nOrders;
+        for (ItemStack stack : stacks()) {
+            int total = stack.getCount() * nOrders;
             while (total > 0) {
-                ItemStack toGive = stack().copyWithCount(Math.min(total, stack().getMaxStackSize()));
+                ItemStack toGive = stack.copyWithCount(Math.min(total, stack.getMaxStackSize()));
                 ItemHandlerHelper.giveItemToPlayer(player, toGive);
                 total -= toGive.getCount();
             }

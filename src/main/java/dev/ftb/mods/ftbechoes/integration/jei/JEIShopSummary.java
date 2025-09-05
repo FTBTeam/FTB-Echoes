@@ -15,33 +15,35 @@ import java.util.List;
 public enum JEIShopSummary {
     INSTANCE;
 
-    private final Int2ObjectMap<List<ShopDataSummary>> map = new Int2ObjectOpenHashMap<>();
-    private final List<ShopDataSummary> allItems = new ArrayList<>();
-
-    public boolean hasShopData(ItemStack stack) {
-        return map.containsKey(ItemStack.hashItemAndComponents(stack));
-    }
+    private final Int2ObjectMap<List<ShopDataSummary>> byItemHash = new Int2ObjectOpenHashMap<>();
+    private final List<ShopDataSummary> allShopData = new ArrayList<>();
 
     public List<ShopDataSummary> getAllShopData() {
-        return Collections.unmodifiableList(allItems);
+        return Collections.unmodifiableList(allShopData);
+    }
+
+    public boolean hasShopData(ItemStack stack) {
+        return byItemHash.containsKey(ItemStack.hashItemAndComponents(stack));
     }
 
     public List<ShopDataSummary> getShopDataFor(ItemStack stack) {
-        return map.getOrDefault(ItemStack.hashItemAndComponents(stack), List.of());
+        return byItemHash.getOrDefault(ItemStack.hashItemAndComponents(stack), List.of());
     }
 
     public void buildSummary() {
-        map.clear();
-        allItems.clear();
+        byItemHash.clear();
+        allShopData.clear();
 
         for (Echo echo : EchoManager.getClientInstance().getEchoes()) {
             for (EchoStage stage : echo.stages()) {
                 for (ShopData data : stage.shopUnlocked()) {
-                    if (!data.stack().isEmpty()) {
+                    if (!data.stacks().isEmpty()) {
                         ShopDataSummary summary = new ShopDataSummary(data, echo.title(), stage.title());
-                        allItems.add(summary);
-                        int key = ItemStack.hashItemAndComponents(data.stack());
-                        map.computeIfAbsent(key, k -> new ArrayList<>()).add(summary);
+                        for (ItemStack stack : data.stacks()) {
+                            int key = ItemStack.hashItemAndComponents(stack);
+                            byItemHash.computeIfAbsent(key, k -> new ArrayList<>()).add(summary);
+                        }
+                        allShopData.add(summary);
                     }
                 }
             }

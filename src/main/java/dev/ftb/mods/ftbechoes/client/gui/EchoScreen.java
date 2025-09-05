@@ -23,12 +23,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
@@ -138,10 +137,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> {
                     EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
-                        Component desc0 = data.stack().isEmpty() ? data.description().orElseThrow() : data.stack().getHoverName();
-                        Component desc = Component.literal(count + " x ").append(desc0);
-                        Component cost = MiscUtil.formatCost(count * data.cost());
-                        list.add(Component.literal("• ").append(desc).append(": ").append(cost));
+                        List<MutableComponent> lines = new ArrayList<>();
+                        List<ItemStack> stacks = data.stacks();
+                        for (int i = 0; i < stacks.size(); i++) {
+                            ItemStack stack = stacks.get(i);
+                            lines.add(Component.literal(i == 0 ? "• " : "  ").append(count * stack.getCount() + " x ").append(stack.getHoverName()));
+                        }
+                        if (!data.command().isEmpty()) {
+                            data.description().ifPresent(d -> lines.add(Component.literal("• ").append(d)));
+                        }
+                        if (!lines.isEmpty()) {
+                            lines.getLast().append(": ").append(MiscUtil.formatCost(count * data.cost()));
+                        }
+                        lines.forEach(list::add);
                     });
                 });
                 list.add(Component.empty());

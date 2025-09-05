@@ -24,7 +24,15 @@
       "ready": "Ok good",
       "required_stage": "echo2_stage2",
       "shop_unlock": [
-        { "name": "amethyst_2", "item": { "id": "minecraft:amethyst_shard", "count": 1 }, "cost": 2 }
+        {
+          "name": "amethyst_2",
+          "item": [
+            { "id": "minecraft:amethyst_shard", "count": 1 },
+            { "id": "minecraft:redstone", "count": 1 },
+            { "id": "minecraft:gold_nugget", "count": 2 }
+          ],
+          "cost": 2
+        }
       ]
     }
   ]

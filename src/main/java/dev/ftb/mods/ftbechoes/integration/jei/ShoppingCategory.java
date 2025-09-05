@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbechoes.integration.jei;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.registry.ModBlocks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -22,13 +23,14 @@ import static dev.ftb.mods.ftbechoes.integration.jei.FTBEchoesJEIPlugin.guiHelpe
 public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
     private static final ResourceLocation BG_TEXTURE = FTBEchoes.id("textures/gui/jei_shopping.png");
     public static final ResourceLocation MONEY_BAG = ResourceLocation.fromNamespaceAndPath("ftblibrary", "textures/icons/money_bag.png");
+    private static final int OUTPUT_SLOTS = 4;
 
     private final IDrawable background;
     private final IDrawable moneyIcon;
 
     public ShoppingCategory() {
-        background = guiHelper().drawableBuilder(BG_TEXTURE, 0, 0, 64, 32)
-                .setTextureSize(64, 32)
+        background = guiHelper().drawableBuilder(BG_TEXTURE, 0, 0, 128, 32)
+                .setTextureSize(128, 32)
                 .build();
         moneyIcon = guiHelper().drawableBuilder(MONEY_BAG, 0, 0, 16, 16)
                 .setTextureSize(16, 16)
@@ -52,7 +54,12 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, ShopDataSummary recipe, IFocusGroup focuses) {
-        builder.addOutputSlot(42, 8).addItemStack(recipe.data().stack());
+        for (int i = 0; i < OUTPUT_SLOTS; i++) {
+            IRecipeSlotBuilder b = builder.addOutputSlot(42 + i * 18, 8);
+            if (i < recipe.data().stacks().size()) {
+                b.addItemStack(recipe.data().stacks().get(i));
+            }
+        }
     }
 
     @Override
@@ -76,7 +83,9 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, ShopDataSummary recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        tooltip.add(recipe.data().stack().getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE));
+        recipe.data().stacks().forEach(stack ->
+                tooltip.add(stack.getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+        );
         recipe.data().description().ifPresent(tooltip::add);
         tooltip.add(Component.translatable("ftbechoes.jei.echo_title", recipe.echoTitle()).withStyle(ChatFormatting.GRAY));
         recipe.stageTitle().ifPresent(c -> tooltip.add(Component.translatable("ftbechoes.jei.stage_title", c).withStyle(ChatFormatting.GRAY)));
@@ -84,7 +93,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
 
     @Override
     public int getWidth() {
-        return 64;
+        return 128;
     }
 
     @Override
