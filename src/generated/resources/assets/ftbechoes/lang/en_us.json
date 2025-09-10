@@ -1,6 +1,8 @@
 {
   "block.ftbechoes.echo_projector": "Echo Projector",
+  "ftbechoes.commands.added_stage": "Added game stage: %s",
   "ftbechoes.commands.invalid_echo": "Invalid Echo id: %s",
+  "ftbechoes.commands.removed_stage": "Removed game stage: %s",
   "ftbechoes.commands.unknown_echo": "Unknown Echo id: %s",
   "ftbechoes.gui.complete_stage": "Complete Stage",
   "ftbechoes.gui.page.lore": "Lore",

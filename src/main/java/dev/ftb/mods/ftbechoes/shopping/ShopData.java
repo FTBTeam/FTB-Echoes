@@ -20,15 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, String command, int permissionLevel) {
-    // TODO move into FTB Library
-    public static final Codec<Icon> ICON_STRING_CODEC = Codec.STRING.comapFlatMap(
-            s -> {
-                Icon res = Icon.getIcon(s);
-                return res.isEmpty() ? DataResult.error(() -> "Invalid icon spec: " + s) : DataResult.success(res);
-            },
-            Icon::toString
-    );
-
     private static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
             ItemStack.CODEC.listOf(), ItemStack.CODEC, List::of
     );
@@ -36,9 +27,9 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
             ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
-            ExtraCodecs.POSITIVE_INT.fieldOf("cost").forGetter(ShopData::cost),
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("cost", 1).forGetter(ShopData::cost),
             ComponentSerialization.CODEC.optionalFieldOf("description").forGetter(ShopData::description),
-            ICON_STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
+            Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
             Codec.STRING.optionalFieldOf("command", "").forGetter(ShopData::command),
             ExtraCodecs.intRange(1, 4).optionalFieldOf("permission_level", 1).forGetter(ShopData::permissionLevel)
     ).apply(builder, ShopData::new));

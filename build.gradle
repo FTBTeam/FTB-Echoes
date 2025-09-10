@@ -131,9 +131,10 @@ dependencies {
 	// at runtime, use the full JEI jar for NeoForge
 	runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
-	runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-	compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}:api"
-	implementation "curse.maven:magic_coins-597281:${magic_coins_version}"
+	// for currency testing
+	localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}")
+	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
+	localRuntime("dev.ftb.mods:ftb-xmod-compat-neoforge:${ftb_xmod_compat_version}")
 }
 
 tasks.register("sourcesJar", Jar) {

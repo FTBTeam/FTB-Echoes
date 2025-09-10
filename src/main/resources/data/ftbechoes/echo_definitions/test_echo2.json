@@ -32,6 +32,10 @@
             { "id": "minecraft:gold_nugget", "count": 2 }
           ],
           "cost": 2
+        },
+        {
+          "name": "stone_2",
+          "item": { "id":  "minecraft:stone" }
         }
       ]
     }

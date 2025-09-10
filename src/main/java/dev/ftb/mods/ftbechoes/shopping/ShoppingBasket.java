@@ -69,19 +69,18 @@ public class ShoppingBasket {
         orders.forEach((key, nOrders) -> mgr.getShopData(key).ifPresent(data -> data.giveTo(player, nOrders)));
     }
 
-    private void recalc() {
-        totalCost = 0;
-        EchoManager mgr = this == CLIENT_INSTANCE ? EchoManager.getClientInstance() : EchoManager.getServerInstance();
-        orders.forEach((key, nOrders) ->
-                totalCost += mgr.getShopData(key).map(data -> data.cost() * nOrders).orElse(0)
-        );
-    }
-
-    public ShoppingBasket validate(ServerPlayer sp) {
+    /**
+     * Perform server-side validation of a basket's contents, ensuring only items the player actually has access
+     * to (based on their current echo progress) are included.
+     *
+     * @param player the player to check
+     * @return a new basket, including only items the player has unlocked
+     */
+    public ShoppingBasket validate(ServerPlayer player) {
         Map<ShoppingKey,Integer> map = new HashMap<>();
 
-        if (sp.getServer() != null) {
-            TeamProgressManager.get(sp.getServer()).getProgress(sp).ifPresent(progress -> {
+        if (player.getServer() != null) {
+            TeamProgressManager.get(player.getServer()).getProgress(player).ifPresent(progress -> {
                 EchoManager mgr = EchoManager.getServerInstance();
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
                     if (progress.getCurrentStage(key.echoId()) >= entry.stageIdx()) {
@@ -92,5 +91,13 @@ public class ShoppingBasket {
         }
 
         return new ShoppingBasket(map);
+    }
+
+    private void recalc() {
+        totalCost = 0;
+        EchoManager mgr = this == CLIENT_INSTANCE ? EchoManager.getClientInstance() : EchoManager.getServerInstance();
+        orders.forEach((key, nOrders) ->
+                totalCost += mgr.getShopData(key).map(data -> data.cost() * nOrders).orElse(0)
+        );
     }
 }

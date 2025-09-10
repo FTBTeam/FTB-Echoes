@@ -6,7 +6,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.net.SyncGameStageMessage;
+import dev.ftb.mods.ftblibrary.integration.stages.EntityTagStageProvider;
+import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -49,18 +52,25 @@ public class StageCommand {
     }
 
     private static int addStage(CommandContext<CommandSourceStack> ctx, ServerPlayer player, String stage, boolean adding) throws CommandSyntaxException {
+        StageProvider provider = FTBEchoes.stageProvider();
         if (adding) {
-            player.removeTag(stage);
-            if (!player.addTag(stage)) {
+            provider.add(player, stage);
+            if (!provider.has(player, stage)) {
                 throw ERROR_ADD_FAILED.create();
             }
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.added_stage", stage), false);
         } else {
-            if (!player.removeTag(stage)) {
+            provider.remove(player, stage);
+            if (provider.has(player, stage)) {
                 throw ERROR_REMOVE_FAILED.create();
             }
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.removed_stage", stage), false);
         }
 
-        PacketDistributor.sendToPlayer(player, adding ? SyncGameStageMessage.add(stage) : SyncGameStageMessage.remove(stage));
+        if (provider instanceof EntityTagStageProvider) {
+            // TODO this would better done in the EntityTagStageProvider#sync method in ftb library
+            PacketDistributor.sendToPlayer(player, adding ? SyncGameStageMessage.add(stage) : SyncGameStageMessage.remove(stage));
+        }
 
         return Command.SINGLE_SUCCESS;
     }

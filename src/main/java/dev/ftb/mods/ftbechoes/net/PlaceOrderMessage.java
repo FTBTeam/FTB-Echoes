@@ -27,7 +27,7 @@ public record PlaceOrderMessage(ShoppingBasket basket) implements CustomPacketPa
         if (context.player() instanceof ServerPlayer sp) {
             ShoppingBasket validatedBasket = message.basket.validate(sp);
 
-            if (FTBEchoes.currencyPlugin.takeCurrency(sp, validatedBasket.getTotalCost())) {
+            if (FTBEchoes.currencyProvider().takeCurrency(sp, validatedBasket.getTotalCost())) {
                 // payment taken, give player the goods
                 validatedBasket.giveTo(sp);
                 PacketDistributor.sendToPlayer(sp, PlaceOrderResponseMessage.ok());

@@ -29,6 +29,7 @@ public record SelectEchoMessage(BlockPos projectorPos, ResourceLocation echoId) 
     public static void handleData(SelectEchoMessage message, IPayloadContext context) {
         if (context.player() instanceof ServerPlayer sp
                 && sp.hasPermissions(Commands.LEVEL_GAMEMASTERS)
+                && sp.isCreative()
                 && sp.level().getBlockEntity(message.projectorPos) instanceof EchoProjectorBlockEntity projector)
         {
             EchoManager.getServerInstance().getEcho(message.echoId)

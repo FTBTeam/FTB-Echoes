@@ -5,13 +5,15 @@ import dev.ftb.mods.ftbechoes.config.FTBEchoesServerConfig;
 import dev.ftb.mods.ftbechoes.datagen.DataGenerators;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
-import dev.ftb.mods.ftbechoes.integration.magic_coins.MagicCoinsCurrency;
 import dev.ftb.mods.ftbechoes.net.SyncGameStageMessage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.registry.*;
-import dev.ftb.mods.ftbechoes.shopping.CurrencyPlugin;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
+import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
+import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
+import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
+import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +22,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -38,7 +41,10 @@ public class FTBEchoes {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(FTBEchoes.class);
 
-    public static final CurrencyPlugin currencyPlugin = MagicCoinsCurrency.INSTANCE;
+    public static final Lazy<CurrencyProvider> CURRENCY_PROVIDER
+        = Lazy.of(() -> CurrencyHelper.getInstance().getProvider());
+    public static final Lazy<StageProvider> STAGE_PROVIDER
+            = Lazy.of(() -> StageHelper.getInstance().getProvider());
 
     public FTBEchoes(IEventBus eventBus, ModContainer container) {
         IEventBus forgeBus = NeoForge.EVENT_BUS;
@@ -58,6 +64,14 @@ public class FTBEchoes {
         forgeBus.addListener(FTBEchoesCommands::registerCommands);
 
         TeamEvent.PLAYER_LOGGED_IN.register(this::onPlayerTeamLogin);
+    }
+
+    public static CurrencyProvider currencyProvider() {
+        return CURRENCY_PROVIDER.get();
+    }
+
+    public static StageProvider stageProvider() {
+        return STAGE_PROVIDER.get();
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

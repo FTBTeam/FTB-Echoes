@@ -24,6 +24,9 @@ public class ModLangProvider extends LanguageProvider {
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
+        add("ftbechoes.commands.added_stage", "Added game stage: %s");
+        add("ftbechoes.commands.removed_stage", "Removed game stage: %s");
+
         add("ftbechoes.message.complete_stage", "Complete Stage");
         add("ftbechoes.message.all_complete", "All Stages Complete!");
         add("ftbechoes.message.purchase_success", "Purchase Completed!");

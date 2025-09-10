@@ -154,7 +154,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 });
                 list.add(Component.empty());
                 list.add(Component.translatable("ftbechoes.tooltip.total_cost", MiscUtil.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost())));
-                if (ShoppingBasket.CLIENT_INSTANCE.getTotalCost() > FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player)) {
+                if (ShoppingBasket.CLIENT_INSTANCE.getTotalCost() > FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player)) {
                     list.add(Component.translatable("ftbechoes.tooltip.too_expensive").withStyle(ChatFormatting.RED));
                 }
             }
@@ -169,7 +169,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public boolean isEnabled() {
             return !ShoppingBasket.CLIENT_INSTANCE.isEmpty()
                     && currentPage == Page.SHOP
-                    && ShoppingBasket.CLIENT_INSTANCE.getTotalCost() <= FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player);
+                    && ShoppingBasket.CLIENT_INSTANCE.getTotalCost() <= FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player);
         }
 
         @Override
@@ -195,7 +195,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void addWidgets() {
-            if (Minecraft.getInstance().player.hasPermissions(Commands.LEVEL_GAMEMASTERS)) {
+            var player = Objects.requireNonNull(Minecraft.getInstance().player);
+            if (player.hasPermissions(Commands.LEVEL_GAMEMASTERS) && player.isCreative()) {
                 add(settingsButton);
             }
             if (echo == null) {
@@ -232,16 +233,18 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         private void showEchoSelector(MouseButton mb) {
-            ContextMenu menu = new ContextMenu(this, Util.make(new ArrayList<>(), list ->
-                EchoManager.getClientInstance().getEchoes()
-                        .forEach(echo -> list.add(new ContextMenuItem(echo.title(), Icons.BLUE_BUTTON, btn -> selectEcho(echo))))
+            openContextMenu(Util.make(new ArrayList<>(), list ->
+                    EchoManager.getClientInstance().getEchoes().forEach(echo -> {
+                        Icon icon = echo.id().equals(EchoScreen.this.echo.id()) ? Icons.CHECK : Icon.empty();
+                        list.add(new ContextMenuItem(echo.title(), icon, btn -> selectEcho(echo)));
+                    })
             ));
-            pushModalPanel(menu);
-            menu.setPos(Math.min(getGui().getWidth() - menu.getWidth(), settingsButton.getPosX()), settingsButton.getPosY() + settingsButton.height + 1);
         }
 
         private void selectEcho(Echo echo) {
-            PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
+            if (!echo.id().equals(EchoScreen.this.echo.id())) {
+                PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
+            }
         }
     }
 
@@ -321,7 +324,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             super.draw(graphics, theme, x, y, w, h);
 
-            var c = MiscUtil.formatCost(FTBEchoes.currencyPlugin.getTotalCurrency(Minecraft.getInstance().player));
+            var c = MiscUtil.formatCost(FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player));
 
             theme.drawString(graphics, Component.translatable("ftbechoes.gui.wallet", c), x + 5, y + 8, Color4I.GREEN.rgba());
         }

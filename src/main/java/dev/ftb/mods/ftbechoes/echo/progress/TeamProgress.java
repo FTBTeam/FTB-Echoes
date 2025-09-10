@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.echo.progress;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
@@ -99,7 +100,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
 
         if (currentStage >= 0 && currentStage < echo.stages().size()) {
             var stage = echo.stages().get(currentStage);
-            if (GameStageHelper.hasStage(sp, stage.requiredGameStage()) && TeamProgressManager.get().completeStage(team, echo.id())) {
+            if (FTBEchoes.stageProvider().has(sp, stage.requiredGameStage()) && TeamProgressManager.get().completeStage(team, echo.id())) {
                 team.getOnlineMembers().forEach(member -> {
                     Vec3 vec = member.position();
                     if (currentStage == echo.stages().size()) {

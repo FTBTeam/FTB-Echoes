@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
+import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
@@ -46,7 +47,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                 vSpace(5);
 
                 if (stageIdx == limit - 1 && stageIdx < stages.size() && !allCompleted) {
-                    if (GameStageHelper.hasStage(Minecraft.getInstance().player, stage.requiredGameStage())) {
+                    if (FTBEchoes.stageProvider().has(Minecraft.getInstance().player, stage.requiredGameStage())) {
                         add(new TextField(this).setText(stage.ready()));
                         add(new CompleteStageButton(this, Component.translatable("ftbechoes.message.complete_stage"), echo.id()));
                     } else {
