@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, String command, int permissionLevel) {
-    private static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
+    public static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
             ItemStack.CODEC.listOf(), ItemStack.CODEC, List::of
     );
 
@@ -66,7 +66,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
             }
         }
         if (!command().isEmpty()) {
-            player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack().withPermission(2), command());
+            player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack().withPermission(permissionLevel), command());
         }
     }
 

@@ -1,13 +1,9 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
-import dev.ftb.mods.ftbechoes.client.gui.widget.AudioButton;
-import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
-import dev.ftb.mods.ftbechoes.client.gui.widget.HorizontalLineWidget;
-import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
+import dev.ftb.mods.ftbechoes.client.gui.widget.*;
 import dev.ftb.mods.ftbechoes.echo.BaseStageEntry;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -17,6 +13,7 @@ import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
 
@@ -31,11 +28,12 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             List<EchoStage> stages = echo.stages();
             int current = ClientProgress.get().getCurrentStage(echo.id());
             boolean allCompleted = current >= stages.size();
-            int limit = Math.min(stages.size(), current + 1);
+            int limit = Math.min(stages.size() - 1, current);
+            Player player = Minecraft.getInstance().player;
 
             vSpace(5);
 
-            for (int stageIdx = 0; stageIdx < limit; stageIdx++) {
+            for (int stageIdx = 0; stageIdx <= limit; stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
 
                 stage.title().ifPresent(title ->
@@ -46,15 +44,18 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
 
                 vSpace(5);
 
-                if (stageIdx == limit - 1 && stageIdx < stages.size() && !allCompleted) {
-                    if (FTBEchoes.stageProvider().has(Minecraft.getInstance().player, stage.requiredGameStage())) {
+                if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
+                    if (FTBEchoes.stageProvider().has(player, stage.requiredGameStage())) {
                         add(new TextField(this).setText(stage.ready()));
                         add(new CompleteStageButton(this, Component.translatable("ftbechoes.message.complete_stage"), echo.id()));
                     } else {
                         add(new TextField(this).setText(stage.notReady()));
                     }
                 }
-                if (stageIdx < limit - 1) {
+                if (stageIdx < current && stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
+                    add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
+                }
+                if (stageIdx < limit) {
                     add(new HorizontalLineWidget(this, 0.75f));
                 }
             }

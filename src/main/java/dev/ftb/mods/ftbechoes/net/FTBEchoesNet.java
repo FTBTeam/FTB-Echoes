@@ -20,10 +20,12 @@ public class FTBEchoesNet {
         registrar.playToClient(SyncProgressMessage.TYPE, SyncProgressMessage.STREAM_CODEC, SyncProgressMessage::handleData);
         registrar.playToClient(SyncGameStageMessage.TYPE, SyncGameStageMessage.STREAM_CODEC, SyncGameStageMessage::handleData);
         registrar.playToClient(PlaceOrderResponseMessage.TYPE, PlaceOrderResponseMessage.STREAM_CODEC, PlaceOrderResponseMessage::handleData);
+        registrar.playToClient(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handleData);
 
         // serverbound
         registrar.playToServer(RequestStageCompletionMessage.TYPE, RequestStageCompletionMessage.STREAM_CODEC, RequestStageCompletionMessage::handleData);
         registrar.playToServer(PlaceOrderMessage.TYPE, PlaceOrderMessage.STREAM_CODEC, PlaceOrderMessage::handleData);
         registrar.playToServer(SelectEchoMessage.TYPE, SelectEchoMessage.STREAM_CODEC, SelectEchoMessage::handleData);
+        registrar.playToServer(ClaimRewardMessage.TYPE, ClaimRewardMessage.STREAM_CODEC, ClaimRewardMessage::handleData);
     }
 }

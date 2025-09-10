@@ -28,7 +28,14 @@
           },
           "cost": 6
         }
-      ]
+      ],
+      "completion_reward": {
+        "item": { "id": "minecraft:diamond_block" },
+        "exp": 10,
+        "currency": 2,
+        "command": "/say well done!",
+        "command_desc": { "text": "A command will be run" }
+      }
     },
     {
       "title": { "text": "Stage 2", "color": "aqua" },

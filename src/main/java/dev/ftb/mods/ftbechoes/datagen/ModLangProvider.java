@@ -21,6 +21,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.wallet", "Wallet: %s");
         add("ftbechoes.gui.complete_stage", "Complete Stage");
         add("ftbechoes.gui.shopping_basket", "Shopping Basket");
+        add("ftbechoes.gui.claim_reward", "Claim Reward");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
@@ -33,11 +34,14 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.purchase_success.2", "Payment Taken: %s");
         add("ftbechoes.message.purchase_failed", "Purchase Failed!");
         add("ftbechoes.message.no_echo", "No Echo Configured");
+        add("ftbechoes.message.reward_claimed", "Reward Claimed!");
+        add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
 
         add("ftbechoes.tooltip.locked", "Not available yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
         add("ftbechoes.tooltip.total_cost", "Total Cost: %s");
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
+        add("ftbechoes.tooltip.reward_header", "You will receive:");
 
         add("ftbechoes.jei.shop.title", "Echo Shop");
         add("ftbechoes.jei.echo_title", "Sold by Echo: %s");

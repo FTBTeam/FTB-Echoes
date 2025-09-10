@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbechoes.echo.progress;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbteams.api.Team;
@@ -73,7 +72,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return getPerEchoProgress(echoId).isRewardClaimed(player, stage);
     }
 
-    public int getCurrentStage(ResourceLocation echoId) throws IllegalArgumentException {
+    public int getCurrentStage(ResourceLocation echoId) {
         return getPerEchoProgress(echoId).getCurrentStage();
     }
 
@@ -81,11 +80,19 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return stageIdx >= getCurrentStage(id);
     }
 
-    boolean claimReward(ResourceLocation echoId, Player player, int stage) {
-        return getPerEchoProgress(echoId).setRewardClaimed(player, stage);
+    boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
+        // only called via TeamProgressManager
+        return EchoManager.getServerInstance().getEcho(echoId).map(echo -> {
+            if (stage >= 0 && stage < echo.stages().size()) {
+                echo.stages().get(stage).completionReward().ifPresent(c -> c.giveToPlayer(player));
+                return getPerEchoProgress(echoId).setRewardClaimed(player, stage);
+            }
+            return false;
+        }).orElse(false);
     }
 
     boolean completeStage(ResourceLocation echoId) {
+        // only called via TeamProgressManager
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
         if (per.getCurrentStage() < echo.stages().size()) {
@@ -123,7 +130,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
     }
 
     @NotNull
-    private PerEchoProgress getPerEchoProgress(ResourceLocation echoId) throws IllegalArgumentException {
+    private PerEchoProgress getPerEchoProgress(ResourceLocation echoId) {
         return perEcho.computeIfAbsent(echoId, k -> PerEchoProgress.empty());
     }
 }

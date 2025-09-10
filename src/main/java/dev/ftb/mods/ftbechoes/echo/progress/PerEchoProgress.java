@@ -20,7 +20,18 @@ import java.util.*;
  */
 public record PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> claimedRewards) {
     private static final Codec<Map<UUID, Set<Integer>>> REWARDS_CLAIMED
-            = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.INT.listOf().xmap(HashSet::new, ArrayList::new));
+            = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.INT.listOf().xmap(HashSet::new, ArrayList::new))
+            .xmap(PerEchoProgress::toMutable, PerEchoProgress::toImmutable);
+
+    private static Map<UUID, HashSet<Integer>> toImmutable(Map<UUID, Set<Integer>> m) {
+        HashMap<UUID,HashSet<Integer>> res = new HashMap<>();
+        m.forEach((k, v) -> res.put(k, new HashSet<>(v)));
+        return res;
+    }
+
+    private static Map<UUID, Set<Integer>> toMutable(Map<UUID, HashSet<Integer>> m) {
+        return new HashMap<>(m);
+    }
 
     public static final Codec<PerEchoProgress> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.INT.xmap(MutableInt::new, MutableInt::getValue).fieldOf("current_stage").forGetter(p -> p.currentStage),

@@ -5,11 +5,13 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface Textures {
     String ICON_LOCATION = FTBEchoes.MOD_ID + ":";
-    String GUI_LOCATION = ICON_LOCATION + "textures/gui/";
+    String GUI_LOCATION = ICON_LOCATION + "icons/";
 
-    ResourceLocation BASKET = guiTexture("basket.png");
+    ResourceLocation BASKET = iconTexture("basket.png");
+    ResourceLocation SPEAKER = iconTexture("speaker");
+    ResourceLocation SPEAKER_ACTIVE = iconTexture("speaker_active");
 
-    static ResourceLocation guiTexture(String img) {
+    static ResourceLocation iconTexture(String img) {
         return ResourceLocation.parse(GUI_LOCATION + img);
     }
 }

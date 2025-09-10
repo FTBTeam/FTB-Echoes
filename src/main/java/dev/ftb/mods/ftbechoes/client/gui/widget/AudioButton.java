@@ -1,9 +1,8 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
 import dev.ftb.mods.ftbechoes.client.gui.AudioButtonHolder;
-import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftbechoes.client.gui.Textures;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
@@ -14,14 +13,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 
 public class AudioButton extends SimpleTextButton {
-    private static final Icon INACTIVE = Icons.RIGHT;
-    private static final Icon ACTIVE = Icons.RIGHT.withBorder(Color4I.rgb(0xFFFF00), false);
+    private static final Icon INACTIVE = Icon.getIcon(Textures.SPEAKER);
+    private static final Icon ACTIVE =  Icon.getIcon(Textures.SPEAKER_ACTIVE);
 
     private final SoundEvent sound;
     private SoundInstance playing = null;
 
     public AudioButton(Panel panel, Component text, SoundEvent sound) {
-        super(panel, text, Icons.RIGHT);
+        super(panel, text, INACTIVE);
 
         this.sound = sound;
     }

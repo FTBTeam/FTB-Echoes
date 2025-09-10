@@ -105,10 +105,10 @@ public class TeamProgressManager extends SavedData {
 //                    StageStatus.IN_PROGRESS;
 //        }
 //    }
-
-    public boolean completeStage(ServerPlayer player, ResourceLocation echoId) {
-        return applyChange(player, progress -> progress.completeStage(echoId));
-    }
+//
+//    public boolean completeStage(ServerPlayer player, ResourceLocation echoId) {
+//        return applyChange(player, progress -> progress.completeStage(echoId));
+//    }
 
     public boolean completeStage(Team team, ResourceLocation echoId) {
         return applyChange(team, progress -> progress.completeStage(echoId));

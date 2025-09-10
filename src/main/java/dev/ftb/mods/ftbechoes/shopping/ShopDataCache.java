@@ -14,10 +14,15 @@ import java.util.Map;
  */
 public class ShopDataCache {
     private final Map<ShoppingKey, ShoppingEntry> map = new HashMap<>();
+    private final EchoManager echoManager;
+
+    public ShopDataCache(EchoManager echoManager) {
+        this.echoManager = echoManager;
+    }
 
     @Nullable
     public ShoppingEntry find(ShoppingKey key) {
-        return map.computeIfAbsent(key, k -> EchoManager.getServerInstance().getEcho(key.echoId())
+        return map.computeIfAbsent(key, k -> echoManager.getEcho(key.echoId())
                 .map(echo -> findEntry(echo, key.name()))
                 .orElse(null));
     }

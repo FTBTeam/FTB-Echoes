@@ -27,7 +27,7 @@ public class EchoManager {
     private static EchoManager serverInstance;
 
     private final Map<ResourceLocation, Echo> echoes = new ConcurrentHashMap<>();
-    private final ShopDataCache shoppingCache = new ShopDataCache();
+    private final ShopDataCache shoppingCache = new ShopDataCache(this);
 
     public static void initClient() {
         if (clientInstance == null) {
