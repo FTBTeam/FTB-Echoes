@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbechoes.integration.jei;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.echo.CommandInfo;
 import dev.ftb.mods.ftbechoes.registry.ModBlocks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -87,8 +86,8 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
         recipe.data().stacks().forEach(stack ->
                 tooltip.add(stack.getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
         );
-        recipe.data().description().ifPresent(tooltip::add);
-        recipe.data().command().flatMap(CommandInfo::description).ifPresent(tooltip::add);
+        recipe.data().description().forEach(tooltip::add);
+        recipe.data().command().ifPresent(cmd -> cmd.description().forEach(tooltip::add));
         tooltip.add(Component.translatable("ftbechoes.jei.echo_title", recipe.echoTitle()).withStyle(ChatFormatting.GRAY));
         recipe.stageTitle().ifPresent(c -> tooltip.add(Component.translatable("ftbechoes.jei.stage_title", c).withStyle(ChatFormatting.GRAY)));
     }

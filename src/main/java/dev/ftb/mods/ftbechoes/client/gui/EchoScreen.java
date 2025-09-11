@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.echo.CommandInfo;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
@@ -143,7 +142,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                         ItemStack stack = stacks.get(i);
                         lines.add(Component.literal(i == 0 ? "• " : "  ").append(count * stack.getCount() + " x ").append(stack.getHoverName()));
                     }
-                    data.command().flatMap(CommandInfo::description).ifPresent(desc -> lines.add(Component.literal("• ").append(desc)));
+                    data.command().ifPresent(cmd -> cmd.description().forEach(d -> lines.add(Component.literal("• ").append(d))));
                     if (!lines.isEmpty()) {
                         lines.getLast().append(": ").append(MiscUtil.formatCost(count * data.cost()));
                     }

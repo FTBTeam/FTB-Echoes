@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.echo.CommandInfo;
+import dev.ftb.mods.ftbechoes.util.EchoCodecs;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -19,16 +20,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, Optional<CommandInfo> command) {
-    public static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
-            ItemStack.CODEC.listOf(), ItemStack.CODEC, List::of
-    );
-
+public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command) {
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
-            ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
+            EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("cost", 1).forGetter(ShopData::cost),
-            ComponentSerialization.CODEC.optionalFieldOf("description").forGetter(ShopData::description),
+            EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(ShopData::description),
             Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
             CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command)
     ).apply(builder, ShopData::new));
@@ -39,7 +36,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
             ByteBufCodecs.STRING_UTF8, ShopData::name,
             ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
             ByteBufCodecs.VAR_INT, ShopData::cost,
-            ComponentSerialization.OPTIONAL_STREAM_CODEC, ShopData::description,
+            ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
             ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), ShopData::command,
             ShopData::new

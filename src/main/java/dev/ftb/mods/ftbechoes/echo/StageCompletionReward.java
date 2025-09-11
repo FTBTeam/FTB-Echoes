@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbechoes.echo;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.shopping.ShopData;
+import dev.ftb.mods.ftbechoes.util.EchoCodecs;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -22,15 +22,12 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public record StageCompletionReward(List<ItemStack> stacks, int exp, int currency, Optional<CommandInfo> command, List<Component> description) {
-    private static final Codec<List<Component>> COMPONENT_OR_LIST = Codec.withAlternative(
-        ComponentSerialization.CODEC.listOf(), ComponentSerialization.CODEC, List::of
-    );
     public static final Codec<StageCompletionReward> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ShopData.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(StageCompletionReward::stacks),
+            EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(StageCompletionReward::stacks),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("experience", 0).forGetter(StageCompletionReward::exp),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("currency", 0).forGetter(StageCompletionReward::currency),
             CommandInfo.CODEC.optionalFieldOf("command").forGetter(StageCompletionReward::command),
-            COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(StageCompletionReward::description)
+            EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(StageCompletionReward::description)
     ).apply(builder, StageCompletionReward::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StageCompletionReward> STREAM_CODEC = StreamCodec.composite(

@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import dev.ftb.mods.ftbechoes.echo.CommandInfo;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
@@ -145,8 +144,8 @@ public class ShopItemWidget extends Panel {
             data.stacks().stream()
                     .map(IconButton::stackDesc)
                     .forEach(list::add);
-            data.command().flatMap(CommandInfo::description).ifPresent(list::add);
-            data.description().ifPresent(list::add);
+            data.command().ifPresent(cmd -> cmd.description().forEach(list::add));
+            data.description().forEach(list::add);
             list.add(Component.empty());
             list.add(tooltip);
         }
