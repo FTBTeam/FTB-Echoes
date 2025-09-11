@@ -85,6 +85,8 @@ public class EchoManager {
         clear();
         echoes.forEach(echo -> this.echoes.put(echo.id(), echo));
         JEIShopSummary.INSTANCE.buildSummary();
+
+        FTBEchoes.LOGGER.debug("{} echoes sync'd from server", echoes.size());
     }
 
     public void syncToClient(ServerPlayer sp) {

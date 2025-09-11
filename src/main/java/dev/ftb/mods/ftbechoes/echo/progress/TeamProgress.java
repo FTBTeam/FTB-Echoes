@@ -76,8 +76,8 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return getPerEchoProgress(echoId).getCurrentStage();
     }
 
-    public boolean isStageAvailable(ResourceLocation id, int stageIdx) {
-        return stageIdx >= getCurrentStage(id);
+    public boolean isStageCompleted(ResourceLocation id, int stageIdx) {
+        return stageIdx < getCurrentStage(id);
     }
 
     boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
@@ -85,10 +85,14 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return EchoManager.getServerInstance().getEcho(echoId).map(echo -> {
             if (stage >= 0 && stage < echo.stages().size()) {
                 echo.stages().get(stage).completionReward().ifPresent(c -> c.giveToPlayer(player));
-                return getPerEchoProgress(echoId).setRewardClaimed(player, stage);
+                return getPerEchoProgress(echoId).setRewardClaimed(player, stage, true);
             }
             return false;
         }).orElse(false);
+    }
+
+    boolean resetReward(ResourceLocation echoId, ServerPlayer player, int stageIdx) {
+        return getPerEchoProgress(echoId).setRewardClaimed(player, stageIdx, false);
     }
 
     boolean completeStage(ResourceLocation echoId) {
@@ -122,10 +126,10 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         }
     }
 
-    public Boolean setStage(ResourceLocation echoId, int stage) {
+    public Boolean setStage(ResourceLocation echoId, int stageIdx) {
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
-        per.setStage(Mth.clamp(stage, 0, echo.stages().size() - 1));
+        per.setStage(Mth.clamp(stageIdx, 0, echo.stages().size() - 1));
         return true;
     }
 

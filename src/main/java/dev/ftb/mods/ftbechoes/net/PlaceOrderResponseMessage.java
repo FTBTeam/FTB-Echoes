@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbechoes.net;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.MiscUtil;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.client.FTBEchoesClient;
 import dev.ftb.mods.ftbechoes.registry.ModSounds;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;

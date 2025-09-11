@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import dev.ftb.mods.ftbechoes.MiscUtil;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;

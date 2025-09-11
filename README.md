@@ -10,25 +10,26 @@ Each Echo is loaded a datapack json file, located in `data/<modid>/echo_definiti
 
 Note that whenever "a serialized component" is mentioned below, this is the raw json for a Minecraft text component, as documented [here](https://minecraft.wiki/w/Text_component_format).
 
-See example echo definition [here](https://github.com/FTBTeam/FTB-Echoes/blob/main/src/main/resources/data/ftbechoes/echo_definitions/test_echo1.json).
+See example echo definitions [here](https://github.com/FTBTeam/FTB-Echoes/blob/main/src/main/resources/data/ftbechoes/echo_definitions/). These test definitions are loaded by the mod only when in a development environment.
 
 An Echo json has the following top-level fields, all required:
 
 * `id` - must be unique to the Echo; match the path & filename
 * `title` - displayed in the Echo GUI, a serialized component
 * `stages` - a list of Echo stages for this echo, see below
-* `all_complete` - a message displayed at the end of the Echo GUI lore panel. Optional, defaults to "All Stages Complete!"
+* `all_complete` - a message displayed at the end of the Echo GUI lore panel when the team has completed all stages. Optional, defaults to "All Stages Complete!"
 
 ### Echo Stages
 
 Echo stages define the progression for an Echo. Fields:
 
 * `title` - optional, displayed in the Lore page as the first text line of a stage if present
-* `lore` - a list of lore entry components, see below
+* `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below
 * `not_ready` - serialized component, text displayed after the lore if the player isn't ready to proceed
 * `ready` - serialized component, text displayed after the lore if the player _is_ ready to proceed
 * `required_stage` - a string; the game stage the player must have to complete the stage
-* `shop_unlock` - required, but may be empty; a list of shop entries (see below) to unlock once the stage is completed
+* `shop_unlock` - required, but may be empty; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
+* `completion_reward` - optional one-time reward(s) granted to players when they complete the stage; see [Completion Rewards](#completion-rewards) below 
 
 ### Lore Entry Components
 
@@ -49,23 +50,48 @@ For `ftbechoes:image`:
 
 For `ftbechoes:audio`:
 
-* `location` - the resource location for an audio clip; a sound event name
+* `location` - the resource location for an audio clip, which is a Minecraft sound event name
 
 ### Shop Entries
 
-Shop entries define items that may be bought, and/or commands that may be run (with a configurable permission level) on behalf of the player, along with an associated cost in the currency system currently in use.
+Shop entries define items that may be bought, and/or commands that may be run (with a configurable permission level) on behalf of the player, along with an associated cost in the currency system currently in use. The player must have completed the associated echo stage to be able to buy these items. 
 
 Fields:
 
 * `name` - a string to identify this entry, must be unique within this particular Echo
-* `item` - a serialized itemstack, possibly including component data. If omitted, then `description` and `command` must be specified.
+* `item` - a serialized itemstack, or list of itemstacks, possibly including component data. If omitted, then `description` and `command` must be specified.
   * This is exclusive with the `command` field.
 * `cost` - an integer cost, must be > 0
 * `description` - a serialized component; may be omitted if `item` is specified but overrides the item description if present.
 * `icon` - the resource location for an icon image; may be omitted if `item` is specified
-* `command` - a command to run on behalf of the player, with the permission level specified in `permission_level`. 
+* `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
   * This is exclusive with the `item` field.
 * `permission_level` - optional integer permission level for running commands, in range 1-4. Defaults to 1.
+
+### Completion Rewards
+
+Completion rewards define a set of rewards granted to a player when they complete a stage. This includes one or more of an item, some experience, some currency, or a command to be run on behalf of the player (e.g. grant them a game stage)
+
+All fields below are optional, but at least of one `item`, `experience`, `currency` or `command` must be specified.
+
+Fields:
+
+* `item` - a serialized itemstack, or list of itemstacks, to give to the player
+* `experience` - an integer quantity of experience for the player
+* `currency` - an integer quantity of currency for the player
+* `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
+* `description` - an optional serialized component, or list of serialized components, used for tooltip purposes on the "Claim Reward" button
+  * This is recommended if there is a command component to this reward
+
+### Command Entries
+
+Command entries define a string command, with an optional permission level and silent field (to suppress normal command output)
+
+Fields:
+
+* `run` - the command string, mandatory
+* `permission` - the integer permission level in range 0..4, optional (default: 0)
+* `silent` - a boolean to suppress normal command output, optional (default: true)
 
 ## Support
 

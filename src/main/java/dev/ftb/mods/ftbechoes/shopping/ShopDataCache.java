@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Cache to map shopping keys to the shop entry and the echo stage they come from
+ * Cache to map shopping keys to the shop entry and the echo stage they come from.
+ * This object only exists as a field of an echo manager object
  */
 public class ShopDataCache {
     private final Map<ShoppingKey, ShoppingEntry> map = new HashMap<>();

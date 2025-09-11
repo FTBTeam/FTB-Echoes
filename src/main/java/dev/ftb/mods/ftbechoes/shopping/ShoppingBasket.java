@@ -83,7 +83,7 @@ public class ShoppingBasket {
             TeamProgressManager.get(player.getServer()).getProgress(player).ifPresent(progress -> {
                 EchoManager mgr = EchoManager.getServerInstance();
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
-                    if (progress.getCurrentStage(key.echoId()) >= entry.stageIdx()) {
+                    if (progress.isStageCompleted(key.echoId(), entry.stageIdx())) {
                         map.put(key, amount);
                     }
                 }));

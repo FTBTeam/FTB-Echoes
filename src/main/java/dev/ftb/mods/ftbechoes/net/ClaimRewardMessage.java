@@ -29,18 +29,17 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
     }
 
     public static void handleData(ClaimRewardMessage message, IPayloadContext context) {
-        Player player = context.player();
         boolean claimedOK = false;
-        if (player instanceof ServerPlayer sp && sp.getServer() != null) {
+        if (context.player() instanceof ServerPlayer player && player.getServer() != null) {
             if (EchoManager.getServerInstance().isKnownEcho(message.echoId)) {
-                TeamProgressManager mgr = TeamProgressManager.get(sp.getServer());
-                var progress = mgr.getProgress(sp).orElse(TeamProgress.NONE);
-                if (progress.getCurrentStage(message.echoId) > message.stageIdx && !progress.isRewardClaimed(message.echoId, sp, message.stageIdx)) {
-                    claimedOK = mgr.claimReward(sp, message.echoId, message.stageIdx);
+                TeamProgressManager mgr = TeamProgressManager.get(player.getServer());
+                var progress = mgr.getProgress(player).orElse(TeamProgress.NONE);
+                if (progress.isStageCompleted(message.echoId, message.stageIdx) && !progress.isRewardClaimed(message.echoId, player, message.stageIdx)) {
+                    claimedOK = mgr.claimReward(player, message.echoId, message.stageIdx);
                 }
-                PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(progress, sp));
+                PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
             }
-            PacketDistributor.sendToPlayer(sp, new ClaimRewardResponseMessage(claimedOK));
+            PacketDistributor.sendToPlayer(player, new ClaimRewardResponseMessage(claimedOK));
         }
     }
 }

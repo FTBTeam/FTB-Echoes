@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -17,7 +18,7 @@ public class ClaimRewardButton extends SimpleTextButton {
     private final StageCompletionReward reward;
 
     public ClaimRewardButton(Panel parent, Echo echo, int stageIdx, StageCompletionReward reward) {
-        super(parent, Component.translatable("ftbechoes.gui.claim_reward"), Icons.MONEY_BAG);
+        super(parent, Component.translatable("ftbechoes.gui.claim_reward").withStyle(ChatFormatting.LIGHT_PURPLE), Icons.MONEY_BAG);
         this.echo = echo;
         this.stageIdx = stageIdx;
         this.reward = reward;
@@ -32,7 +33,7 @@ public class ClaimRewardButton extends SimpleTextButton {
     public void addMouseOverText(TooltipList list) {
         super.addMouseOverText(list);
 
-        list.add(Component.translatable("ftbechoes.tooltip.reward_header"));
+        list.add(Component.translatable("ftbechoes.tooltip.reward_header").withStyle(ChatFormatting.YELLOW));
         reward.addTooltip(list::add);
     }
 }

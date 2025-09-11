@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.GameStageHelper;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.TaskEntryPanel;
@@ -50,7 +49,7 @@ class TaskPanel extends EchoScreen.PagePanel {
                 }
                 add(new TaskEntryPanel(this, icon, stage.title().orElse(Component.empty()), c));
                 if (icon == Icons.LOCK_OPEN) {
-                    add(new CompleteStageButton(this, Component.translatable("ftbechoes.gui.complete_stage"), echo.id()));
+                    add(new CompleteStageButton(this, echo.id()));
                 }
             }
         });

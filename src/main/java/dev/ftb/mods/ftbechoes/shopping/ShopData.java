@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbechoes.shopping;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbechoes.echo.CommandInfo;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, String command, int permissionLevel) {
+public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<Component> description, Optional<Icon> icon, Optional<CommandInfo> command) {
     public static final Codec<List<ItemStack>> ITEM_OR_ITEMS_CODEC = Codec.withAlternative(
             ItemStack.CODEC.listOf(), ItemStack.CODEC, List::of
     );
@@ -30,27 +30,25 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("cost", 1).forGetter(ShopData::cost),
             ComponentSerialization.CODEC.optionalFieldOf("description").forGetter(ShopData::description),
             Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
-            Codec.STRING.optionalFieldOf("command", "").forGetter(ShopData::command),
-            ExtraCodecs.intRange(1, 4).optionalFieldOf("permission_level", 1).forGetter(ShopData::permissionLevel)
+            CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command)
     ).apply(builder, ShopData::new));
 
     public static final Codec<ShopData> CODEC = RAW_CODEC.validate(ShopData::validate);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = NetworkHelper.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, ShopData::name,
             ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
             ByteBufCodecs.VAR_INT, ShopData::cost,
             ComponentSerialization.OPTIONAL_STREAM_CODEC, ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
-            ByteBufCodecs.STRING_UTF8, ShopData::command,
-            ByteBufCodecs.VAR_INT, ShopData::permissionLevel,
+            ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), ShopData::command,
             ShopData::new
     );
 
     private DataResult<ShopData> validate() {
         if (stacks.isEmpty() && (icon.isEmpty() || command.isEmpty() || description.isEmpty())) {
             return DataResult.error(() -> "when item is empty, icon, description and command must all be specified");
-        } else if (!stacks.isEmpty() && !command.isEmpty()) {
+        } else if (!stacks.isEmpty() && command.isPresent()) {
             return DataResult.error(() -> "when item is not empty, icon, command must not be specified");
         }
         return DataResult.success(this);
@@ -65,9 +63,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
                 total -= toGive.getCount();
             }
         }
-        if (!command().isEmpty()) {
-            player.getServer().getCommands().performPrefixedCommand(player.createCommandSourceStack().withPermission(permissionLevel), command());
-        }
+        command.ifPresent(cmdInfo -> cmdInfo.runForPlayer(player));
     }
 
     @Override

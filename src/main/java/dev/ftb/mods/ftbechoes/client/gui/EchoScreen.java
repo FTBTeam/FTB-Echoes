@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.MiscUtil;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
@@ -235,16 +235,20 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         private void showEchoSelector(MouseButton mb) {
             openContextMenu(Util.make(new ArrayList<>(), list ->
                     EchoManager.getClientInstance().getEchoes().forEach(echo -> {
-                        Icon icon = echo.id().equals(EchoScreen.this.echo.id()) ? Icons.CHECK : Icon.empty();
+                        Icon icon = isCurrentEcho(echo) ? Icons.CHECK : Icon.empty();
                         list.add(new ContextMenuItem(echo.title(), icon, btn -> selectEcho(echo)));
                     })
             ));
         }
 
         private void selectEcho(Echo echo) {
-            if (!echo.id().equals(EchoScreen.this.echo.id())) {
+            if (!isCurrentEcho(echo)) {
                 PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
             }
+        }
+
+        private boolean isCurrentEcho(Echo e) {
+            return EchoScreen.this.echo != null && e.id().equals(EchoScreen.this.echo.id());
         }
     }
 

@@ -31,10 +31,10 @@
       ],
       "completion_reward": {
         "item": { "id": "minecraft:diamond_block" },
-        "exp": 10,
+        "experience": 10,
         "currency": 2,
-        "command": "/say well done!",
-        "command_desc": { "text": "A command will be run" }
+        "command": { "run": "/give @s minecraft:diamond", "permission": 2 },
+        "description": { "text": "A command will be run" }
       }
     },
     {
@@ -49,7 +49,11 @@
       "required_stage": "echo1_stage2",
       "shop_unlock": [
         { "name": "nether_star_2", "item": { "id": "minecraft:nether_star", "count": 1 }, "cost": 10 }
-      ]
+      ],
+      "completion_reward": {
+        "experience": 20,
+        "currency": 6
+      }
     },
     {
       "title": "Stage 3",
@@ -63,8 +67,12 @@
       "required_stage": "echo1_stage3",
       "shop_unlock": [
         { "name": "dragon_egg_3", "item": { "id": "minecraft:dragon_egg", "count": 1 }, "cost": 20 },
-        { "name": "do_cmd1", "cost": 20, "icon": "ftblibrary:icons/settings", "description": "Do something!", "command": "/say I did something!" }
-      ]
+        { "name": "do_cmd1", "cost": 20, "icon": "ftblibrary:icons/settings", "description": "Do something!", "command": { "run": "/say I did something!" } }
+      ],
+      "completion_reward": {
+        "experience": 40,
+        "currency": 10
+      }
     }
   ]
 }

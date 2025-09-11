@@ -47,7 +47,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                 if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
                     if (FTBEchoes.stageProvider().has(player, stage.requiredGameStage())) {
                         add(new TextField(this).setText(stage.ready()));
-                        add(new CompleteStageButton(this, Component.translatable("ftbechoes.message.complete_stage"), echo.id()));
+                        add(new CompleteStageButton(this, echo.id()));
                     } else {
                         add(new TextField(this).setText(stage.notReady()));
                     }

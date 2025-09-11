@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.datagen;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.registry.ModBlocks;
+import dev.ftb.mods.ftbechoes.registry.ModEntityTypes;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
@@ -13,6 +14,8 @@ public class ModLangProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add(ModBlocks.ECHO_PROJECTOR.get(), "Echo Projector");
+
+        add(ModEntityTypes.ECHO.get(), "Echo Projection");
 
         add("ftbechoes.gui.page.lore", "Lore");
         add("ftbechoes.gui.page.tasks", "Tasks");
@@ -27,6 +30,10 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
         add("ftbechoes.commands.added_stage", "Added game stage: %s");
         add("ftbechoes.commands.removed_stage", "Removed game stage: %s");
+        add("ftbechoes.commands.progress_changed", "Set progress for '%s' on echo '%s' to stage %s");
+        add("ftbechoes.commands.progress_changed.failed", "Progress change failed");
+        add("ftbechoes.commands.reward_reset", "Reset reward for '%s' on echo '%s', stage %s");
+        add("ftbechoes.commands.reward_reset.failed", "Could not reset reward - player has not claimed it?");
 
         add("ftbechoes.message.complete_stage", "Complete Stage");
         add("ftbechoes.message.all_complete", "All Stages Complete!");
@@ -37,11 +44,11 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.reward_claimed", "Reward Claimed!");
         add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
 
-        add("ftbechoes.tooltip.locked", "Not available yet!");
+        add("ftbechoes.tooltip.locked", "Not unlocked yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
         add("ftbechoes.tooltip.total_cost", "Total Cost: %s");
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
-        add("ftbechoes.tooltip.reward_header", "You will receive:");
+        add("ftbechoes.tooltip.reward_header", "Reward");
 
         add("ftbechoes.jei.shop.title", "Echo Shop");
         add("ftbechoes.jei.echo_title", "Sold by Echo: %s");

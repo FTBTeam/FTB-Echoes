@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
  * Uniquely identifies one shopping entry in an Echo
  *
  * @param echoId the echo's unique ID
- * @param name the shop data ID, which must be unique within its Echo
+ * @param name the shop data ID, which must also be unique within its Echo
  */
 public record ShoppingKey(ResourceLocation echoId, String name) {
     public static final StreamCodec<FriendlyByteBuf, ShoppingKey> STREAM_CODEC = StreamCodec.composite(

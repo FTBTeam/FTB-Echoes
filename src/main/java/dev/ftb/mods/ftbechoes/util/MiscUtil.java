@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbechoes;
+package dev.ftb.mods.ftbechoes.util;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

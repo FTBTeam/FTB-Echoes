@@ -114,16 +114,20 @@ public class TeamProgressManager extends SavedData {
         return applyChange(team, progress -> progress.completeStage(echoId));
     }
 
-    public boolean claimReward(ServerPlayer player, ResourceLocation echoId, int stage) {
-        return applyChange(player, progress -> progress.claimReward(echoId, player, stage));
+    public boolean claimReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
+        return applyChange(player, progress -> progress.claimReward(echoId, player, stageIdx));
     }
 
-    public boolean setStage(ServerPlayer player, ResourceLocation echoId, int stage) {
-        return applyChange(player, progress -> progress.setStage(echoId, stage));
+    public boolean setStage(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
+        return applyChange(player, progress -> progress.setStage(echoId, stageIdx));
     }
 
-    public boolean setStage(Team team, ResourceLocation echoId, int stage) {
-        return applyChange(team, progress -> progress.setStage(echoId, stage));
+    public boolean setStage(Team team, ResourceLocation echoId, int stageIdx) {
+        return applyChange(team, progress -> progress.setStage(echoId, stageIdx));
+    }
+
+    public boolean resetReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
+        return applyChange(player, progress -> progress.resetReward(echoId, player, stageIdx));
     }
 
     private boolean applyChange(ServerPlayer player, Function<TeamProgress, Boolean> task) {
