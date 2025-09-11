@@ -23,6 +23,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.place_order", "Place Order");
         add("ftbechoes.gui.wallet", "Wallet: %s");
         add("ftbechoes.gui.complete_stage", "Complete Stage");
+        add("ftbechoes.gui.stage_completed", "Stage Completed!");
         add("ftbechoes.gui.shopping_basket", "Shopping Basket");
         add("ftbechoes.gui.claim_reward", "Claim Reward");
 

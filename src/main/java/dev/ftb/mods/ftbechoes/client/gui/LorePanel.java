@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.TextField;
+import dev.ftb.mods.ftblibrary.ui.Theme;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -63,7 +64,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             if (allCompleted) {
                 add(new HorizontalLineWidget(this, 0.75f));
                 Component msg = echo.allComplete().orElse(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE));
-                add(new TextField(this).setText(msg));
+                add(new TextField(this).setText(msg).setScale(1.25f).addFlags(Theme.CENTERED));
             }
 
             vSpace(10);

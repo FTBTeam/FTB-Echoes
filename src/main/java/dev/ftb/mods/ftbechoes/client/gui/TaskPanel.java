@@ -37,7 +37,7 @@ class TaskPanel extends EchoScreen.PagePanel {
                 Component c = Component.empty();
                 if (current > stageIdx) {
                     icon = Icons.CHECK; // stage completed
-                    c = stage.ready();
+                    c = stage.completed().orElse(Component.translatable("ftbechoes.gui.stage_completed"));
                 } else if (current == stageIdx) {
                     if (FTBEchoes.stageProvider().has(player, stage.requiredGameStage())) {
                         icon = Icons.LOCK_OPEN;  // ready to complete

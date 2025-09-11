@@ -25,9 +25,10 @@ Echo stages define the progression for an Echo. Fields:
 
 * `title` - optional, displayed in the Lore page as the first text line of a stage if present
 * `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below
-* `not_ready` - serialized component, text displayed after the lore if the player isn't ready to proceed
-* `ready` - serialized component, text displayed after the lore if the player _is_ ready to proceed
-* `required_stage` - a string; the game stage the player must have to complete the stage
+* `not_ready` - serialized component, text displayed after the lore or in the task panel if the player isn't ready to complete the stage
+* `ready` - serialized component, text displayed after the lore or in the task panel if the player _is_ ready to complete the stage
+* `completed` - serialized component, text displayed in the task panel if the player has completed the stage. Optional; defaults to "Stage Completed!"
+* `required_stage` - a string; the game stage the player must have to complete this echo stage
 * `shop_unlock` - required, but may be empty; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
 * `completion_reward` - optional one-time reward(s) granted to players when they complete the stage; see [Completion Rewards](#completion-rewards) below 
 
@@ -66,7 +67,6 @@ Fields:
 * `icon` - the resource location for an icon image; may be omitted if `item` is specified
 * `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
   * This is exclusive with the `item` field.
-* `permission_level` - optional integer permission level for running commands, in range 1-4. Defaults to 1.
 
 ### Completion Rewards
 

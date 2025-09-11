@@ -13,13 +13,14 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.List;
 import java.util.Optional;
 
-public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  Component notReady, Component ready, String requiredGameStage,
+public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  Component notReady, Component ready, Optional<Component> completed, String requiredGameStage,
                         List<ShopData> shopUnlocked, Optional<StageCompletionReward> completionReward) {
     public static final Codec<EchoStage> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ComponentSerialization.CODEC.optionalFieldOf("title").forGetter(EchoStage::title),
             BaseStageEntry.CODEC.listOf().fieldOf("lore").forGetter(EchoStage::lore),
             ComponentSerialization.CODEC.fieldOf("not_ready").forGetter(EchoStage::notReady),
             ComponentSerialization.CODEC.fieldOf("ready").forGetter(EchoStage::ready),
+            ComponentSerialization.CODEC.optionalFieldOf("completed").forGetter(EchoStage::completed),
             Codec.STRING.fieldOf("required_stage").forGetter(EchoStage::requiredGameStage),
             ShopData.CODEC.listOf().fieldOf("shop_unlock").forGetter(EchoStage::shopUnlocked),
             StageCompletionReward.CODEC.optionalFieldOf("completion_reward").forGetter(EchoStage::completionReward)
@@ -30,6 +31,7 @@ public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  C
             BaseStageEntry.STREAM_CODEC.apply(ByteBufCodecs.list()), EchoStage::lore,
             ComponentSerialization.STREAM_CODEC, EchoStage::notReady,
             ComponentSerialization.STREAM_CODEC, EchoStage::ready,
+            ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), EchoStage::completed,
             ByteBufCodecs.STRING_UTF8, EchoStage::requiredGameStage,
             ShopData.STREAM_CODEC.apply(ByteBufCodecs.list()), EchoStage::shopUnlocked,
             ByteBufCodecs.optional(StageCompletionReward.STREAM_CODEC), EchoStage::completionReward,
