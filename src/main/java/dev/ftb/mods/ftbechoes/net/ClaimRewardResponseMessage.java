@@ -22,7 +22,7 @@ public record ClaimRewardResponseMessage(boolean claimedOK) implements CustomPac
         return TYPE;
     }
 
-    public static void handleData(ClaimRewardResponseMessage message, IPayloadContext context) {
+    public static void handleData(ClaimRewardResponseMessage message, IPayloadContext ignored) {
         if (message.claimedOK) {
             FTBEchoesClient.notifySuccess(Component.translatable("ftbechoes.message.reward_claimed"), Component.empty());
             FTBEchoesClient.onProgressUpdated();  // refreshes gui if open

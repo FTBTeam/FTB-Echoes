@@ -67,7 +67,13 @@
       "required_stage": "echo1_stage3",
       "shop_unlock": [
         { "name": "dragon_egg_3", "item": { "id": "minecraft:dragon_egg", "count": 1 }, "cost": 20 },
-        { "name": "do_cmd1", "cost": 20, "icon": "ftblibrary:icons/settings", "description": "Do something!", "command": { "run": "/say I did something!" } }
+        {
+          "name": "do_cmd1",
+          "cost": 20,
+          "icon": "ftblibrary:icons/settings",
+          "description": { "text": "Hello", "color": "aqua" },
+          "command": { "run": "/say I did something!", "description": "Do something!"}
+        }
       ],
       "completion_reward": {
         "experience": 40,

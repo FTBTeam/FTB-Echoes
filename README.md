@@ -63,7 +63,7 @@ Fields:
 * `item` - a serialized itemstack, or list of itemstacks, possibly including component data. If omitted, then `description` and `command` must be specified.
   * This is exclusive with the `command` field.
 * `cost` - an integer cost, must be > 0
-* `description` - a serialized component; may be omitted if `item` is specified but overrides the item description if present.
+* `description` - an optional serialized component; extra (player-friendly) descriptive text about this shop entry can be added here
 * `icon` - the resource location for an icon image; may be omitted if `item` is specified
 * `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
   * This is exclusive with the `item` field.
@@ -92,6 +92,8 @@ Fields:
 * `run` - the command string, mandatory
 * `permission` - the integer permission level in range 0..4, optional (default: 0)
 * `silent` - a boolean to suppress normal command output, optional (default: true)
+* `description` - an optional (player-friendly) description for what the command does; if present, it's added to GUI tooltips where relevant
+  * Note this is specifically to describe the command; see also the `description` field in the [ShopEntry](#shop-entries) section, which is a more general description of the entry
 
 ## Support
 

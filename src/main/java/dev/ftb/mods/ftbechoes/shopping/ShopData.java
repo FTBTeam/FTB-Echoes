@@ -46,7 +46,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, Optional<C
     );
 
     private DataResult<ShopData> validate() {
-        if (stacks.isEmpty() && (icon.isEmpty() || command.isEmpty() || description.isEmpty())) {
+        if (stacks.isEmpty() && (icon.isEmpty() || command.isEmpty())) {
             return DataResult.error(() -> "when item is empty, icon, description and command must all be specified");
         } else if (!stacks.isEmpty() && command.isPresent()) {
             return DataResult.error(() -> "when item is not empty, icon, command must not be specified");

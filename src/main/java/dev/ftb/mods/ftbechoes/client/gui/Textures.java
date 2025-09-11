@@ -7,7 +7,6 @@ public interface Textures {
     String ICON_LOCATION = FTBEchoes.MOD_ID + ":";
     String GUI_LOCATION = ICON_LOCATION + "icons/";
 
-    ResourceLocation BASKET = iconTexture("basket.png");
     ResourceLocation SPEAKER = iconTexture("speaker");
     ResourceLocation SPEAKER_ACTIVE = iconTexture("speaker_active");
 

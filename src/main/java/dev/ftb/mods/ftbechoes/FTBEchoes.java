@@ -19,7 +19,6 @@ import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.Lazy;
@@ -46,7 +45,7 @@ public class FTBEchoes {
     public static final Lazy<StageProvider> STAGE_PROVIDER
             = Lazy.of(() -> StageHelper.getInstance().getProvider());
 
-    public FTBEchoes(IEventBus eventBus, ModContainer container) {
+    public FTBEchoes(IEventBus eventBus) {
         IEventBus forgeBus = NeoForge.EVENT_BUS;
 
         ConfigManager.getInstance().registerServerConfig(FTBEchoesServerConfig.CONFIG, MOD_ID + ".server_config", false);

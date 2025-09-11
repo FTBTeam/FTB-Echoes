@@ -198,7 +198,7 @@ def getMinorAndPatchFromMc() {
 }
 
 publishMods {
-	def CFToken = providers.environmentVariable("CURSEFORGE_KEY");
+	def CFToken = providers.environmentVariable("CURSEFORGE_KEY")
 
 	dryRun = !CFToken.isPresent()
 	displayName = "[NEOFORGE] ${mod_name} ${project.version}"

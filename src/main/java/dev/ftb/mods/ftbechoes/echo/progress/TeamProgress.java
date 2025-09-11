@@ -68,7 +68,8 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return perEcho.isEmpty();
     }
 
-    public boolean isRewardClaimed(ResourceLocation echoId, Player player, int stage) throws IllegalArgumentException {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isRewardClaimed(ResourceLocation echoId, Player player, int stage) {
         return getPerEchoProgress(echoId).isRewardClaimed(player, stage);
     }
 

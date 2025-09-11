@@ -17,7 +17,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 import java.util.Map;
@@ -94,10 +93,6 @@ public class EchoManager {
 
     public void syncToClient(ServerPlayer sp) {
         PacketDistributor.sendToPlayer(sp, new SyncEchoesMessage(getEchoes()));
-    }
-
-    public void validateEchoId(ResourceLocation echoId) {
-        Validate.isTrue(echoes.containsKey(echoId), "Unknown echo ID: " + echoId);
     }
 
     public Optional<ShopDataCache.ShoppingEntry> getShoppingEntry(ShoppingKey key) {

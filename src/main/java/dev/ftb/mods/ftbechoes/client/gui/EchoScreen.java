@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.echo.CommandInfo;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
@@ -135,23 +136,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             if (!ShoppingBasket.CLIENT_INSTANCE.isEmpty()) {
                 list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
-                ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> {
-                    EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
-                        List<MutableComponent> lines = new ArrayList<>();
-                        List<ItemStack> stacks = data.stacks();
-                        for (int i = 0; i < stacks.size(); i++) {
-                            ItemStack stack = stacks.get(i);
-                            lines.add(Component.literal(i == 0 ? "• " : "  ").append(count * stack.getCount() + " x ").append(stack.getHoverName()));
-                        }
-                        if (!data.command().isEmpty()) {
-                            data.description().ifPresent(d -> lines.add(Component.literal("• ").append(d)));
-                        }
-                        if (!lines.isEmpty()) {
-                            lines.getLast().append(": ").append(MiscUtil.formatCost(count * data.cost()));
-                        }
-                        lines.forEach(list::add);
-                    });
-                });
+                ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
+                    List<MutableComponent> lines = new ArrayList<>();
+                    List<ItemStack> stacks = data.stacks();
+                    for (int i = 0; i < stacks.size(); i++) {
+                        ItemStack stack = stacks.get(i);
+                        lines.add(Component.literal(i == 0 ? "• " : "  ").append(count * stack.getCount() + " x ").append(stack.getHoverName()));
+                    }
+                    data.command().flatMap(CommandInfo::description).ifPresent(desc -> lines.add(Component.literal("• ").append(desc)));
+                    if (!lines.isEmpty()) {
+                        lines.getLast().append(": ").append(MiscUtil.formatCost(count * data.cost()));
+                    }
+                    lines.forEach(list::add);
+                }));
                 list.add(Component.empty());
                 list.add(Component.translatable("ftbechoes.tooltip.total_cost", MiscUtil.formatCost(ShoppingBasket.CLIENT_INSTANCE.getTotalCost())));
                 if (ShoppingBasket.CLIENT_INSTANCE.getTotalCost() > FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player)) {
