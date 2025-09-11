@@ -95,6 +95,23 @@ Fields:
 * `description` - an optional (player-friendly) description for what the command does; if present, it's added to GUI tooltips where relevant
   * Note this is specifically to describe the command; see also the `description` field in the [ShopEntry](#shop-entries) section, which is a more general description of the entry
 
+## Commands
+
+There are a few commands intended for admin/debugging purposes.
+
+* `/ftbechoes progress player <player> <echo_id> set_stage <stage_idx>`
+  * Use to force the current stage for the given player's team and echo
+  * E.g. `/ftbechoes player @s ftbechoes:test_echo1 set_stage 1`
+* `/ftbechoes progress team <team-id> <echo_id> set_stage <stage_idx>`
+  * Equivalent to above, but using team ID directly instead of a player
+* `/ftbechoes progress player <player> <echo_id> reset_reward <stage_idx>`
+  * Resets the completion reward history for a player, echo & stage, allowing the player to claim the reward for that stage again
+  * E.g. `/ftbechoes player @s ftbechoes:test_echo1 reset_reward 1`
+  * Will give an error message if the player isn't currently recorded as having claimed the reward for the echo & stage
+* `/ftbechoes gamestage <add|remove> stagename`
+  * Gives or removes a game stage to a player. This is just a vanilla entity tag, but unlike the `/tag` command, this also syncs the stage to the player's client
+  * Compatible with KubeJS stages, which also use vanilla entity tags, but useful if your instance doesn't have KubeJS installed
+
 ## Support
 
 - For **Modpack** issues, please go here: https://go.ftb.team/support-modpack
