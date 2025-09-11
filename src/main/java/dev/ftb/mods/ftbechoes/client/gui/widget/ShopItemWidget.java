@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.IconAnimation;

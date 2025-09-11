@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
 import dev.ftb.mods.ftbechoes.net.SelectEchoMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;

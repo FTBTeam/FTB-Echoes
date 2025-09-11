@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Progress for a given team and echo. The record members are mutable internally, but should only be modified

@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbechoes.net;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftbechoes.client.FTBEchoesClient;
 import dev.ftb.mods.ftbechoes.registry.ModSounds;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
