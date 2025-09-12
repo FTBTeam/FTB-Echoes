@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -23,11 +24,11 @@ public enum JEIShopSummary {
     }
 
     public boolean hasShopData(ItemStack stack) {
-        return byItemHash.containsKey(ItemStack.hashItemAndComponents(stack));
+        return byItemHash.containsKey(itemKey(stack));
     }
 
     public List<ShopDataSummary> getShopDataFor(ItemStack stack) {
-        return byItemHash.getOrDefault(ItemStack.hashItemAndComponents(stack), List.of());
+        return byItemHash.getOrDefault(itemKey(stack), List.of());
     }
 
     public void buildSummary() {
@@ -40,7 +41,7 @@ public enum JEIShopSummary {
                     if (!data.stacks().isEmpty()) {
                         ShopDataSummary summary = new ShopDataSummary(data, echo.title(), stage.title());
                         for (ItemStack stack : data.stacks()) {
-                            int key = ItemStack.hashItemAndComponents(stack);
+                            int key = itemKey(stack);
                             byItemHash.computeIfAbsent(key, k -> new ArrayList<>()).add(summary);
                         }
                         allShopData.add(summary);
@@ -48,5 +49,10 @@ public enum JEIShopSummary {
                 }
             }
         }
+    }
+
+    private static int itemKey(ItemStack stack) {
+        // note: ignoring component data for the purposes of JEI
+        return BuiltInRegistries.ITEM.getId(stack.getItem());
     }
 }
