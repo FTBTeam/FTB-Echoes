@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.config;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 
 public interface FTBEchoesServerConfig {
@@ -16,4 +17,8 @@ public interface FTBEchoesServerConfig {
 
     SNBTConfig GENERAL = CONFIG.addGroup("general");
 
+    BooleanValue SYNC_STAGES = GENERAL.addBoolean("sync_stage_tags", true)
+            .comment("If true, player entity tags (used for game stages) are sync'd to the client on login.",
+                    "If another mod is handling this (e.g. KubeJS), you can set this to false to save a little network traffic",
+                    "But leave as true otherwise, or Echo progression will break!");
 }

@@ -41,7 +41,7 @@ public class FTBEchoes {
     public static final Logger LOGGER = LoggerFactory.getLogger(FTBEchoes.class);
 
     public static final Lazy<CurrencyProvider> CURRENCY_PROVIDER
-        = Lazy.of(() -> CurrencyHelper.getInstance().getProvider());
+            = Lazy.of(() -> CurrencyHelper.getInstance().getProvider());
     public static final Lazy<StageProvider> STAGE_PROVIDER
             = Lazy.of(() -> StageHelper.getInstance().getProvider());
 
@@ -107,8 +107,8 @@ public class FTBEchoes {
         var player = event.getPlayer();
         var server = Objects.requireNonNull(player.getServer());
         var progress = TeamProgressManager.get(server).getProgress(event.getTeam());
-        if (!progress.isEmpty()) {
-            PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
+        PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
+        if (FTBEchoesServerConfig.SYNC_STAGES.get()) {
             PacketDistributor.sendToPlayer(player, SyncGameStageMessage.add(player.getTags()));
         }
     }
