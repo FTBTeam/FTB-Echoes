@@ -39,7 +39,7 @@ public class TaskEntryPanel extends Panel {
             w.setMinWidth(parent.getWidth() - 20);
             w.setMaxWidth(parent.getWidth() - 20);
             w.setWidth(parent.getWidth() - 20);
-            titleField.reflow();
+            w.reflow();
         });
 
         iconButton.setX(2);
