@@ -33,17 +33,26 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
     public static void handleData(ClaimRewardMessage message, IPayloadContext context) {
         boolean claimedOK = false;
         if (context.player() instanceof ServerPlayer player && player.getServer() != null) {
-            Component msg = null;
+            Component detail = Component.literal(" ");
             if (EchoManager.getServerInstance().isKnownEcho(message.echoId)) {
                 TeamProgressManager mgr = TeamProgressManager.get(player.getServer());
                 var progress = mgr.getProgress(player).orElse(TeamProgress.NONE);
                 if (progress.isStageCompleted(message.echoId, message.stageIdx) && !progress.isRewardClaimed(message.echoId, player, message.stageIdx)) {
                     claimedOK = mgr.claimReward(player, message.echoId, message.stageIdx);
-                    msg = EchoManager.getServerInstance().getEcho(message.echoId).orElseThrow().stages().get(message.stageIdx).title().orElse(null);
+                    if (claimedOK) {
+                        detail = getRewardDetail(message.echoId, message.stageIdx);
+                    }
                 }
                 PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
             }
-            PacketDistributor.sendToPlayer(player, new ClaimRewardResponseMessage(claimedOK, Optional.ofNullable(msg)));
+            PacketDistributor.sendToPlayer(player, new ClaimRewardResponseMessage(claimedOK, Optional.ofNullable(detail)));
         }
+    }
+
+    private static Component getRewardDetail(ResourceLocation id, int stageIdx) {
+        // at this point we know stageIdx is in valid range
+        return EchoManager.getServerInstance().getEcho(id).orElseThrow()
+                .stages().get(stageIdx)
+                .completionRewardSummary(stageIdx + 1);
     }
 }

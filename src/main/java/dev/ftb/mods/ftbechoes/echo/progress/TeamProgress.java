@@ -96,6 +96,10 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return getPerEchoProgress(echoId).setRewardClaimed(player, stageIdx, false);
     }
 
+    public boolean resetAllRewards(ResourceLocation echoId, ServerPlayer player) {
+        return getPerEchoProgress(echoId).clearRewards(player);
+    }
+
     boolean completeStage(ResourceLocation echoId) {
         // only called via TeamProgressManager
         PerEchoProgress per = getPerEchoProgress(echoId);

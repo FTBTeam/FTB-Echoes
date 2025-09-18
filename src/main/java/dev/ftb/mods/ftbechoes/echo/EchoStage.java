@@ -36,4 +36,10 @@ public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  C
             ByteBufCodecs.optional(StageCompletionReward.STREAM_CODEC), EchoStage::completionReward,
             EchoStage::new
     );
+
+    public Component completionRewardSummary(int stageIdx) {
+        return completionReward.flatMap(r -> r.description().isEmpty() ? Optional.empty() : Optional.of(r.description().getFirst()))
+                .or(() -> title)
+                .orElse(Component.translatable("ftbechoes.gui.stage", stageIdx));
+    }
 }

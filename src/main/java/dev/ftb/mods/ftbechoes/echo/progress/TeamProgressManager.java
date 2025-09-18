@@ -130,6 +130,10 @@ public class TeamProgressManager extends SavedData {
         return applyChange(player, progress -> progress.resetReward(echoId, player, stageIdx));
     }
 
+    public boolean resetAllRewards(ServerPlayer player, ResourceLocation echoId) {
+        return applyChange(player, progress -> progress.resetAllRewards(echoId, player));
+    }
+
     private boolean applyChange(ServerPlayer player, Function<TeamProgress, Boolean> task) {
         return FTBTeamsAPI.api().getManager().getTeamForPlayer(player)
                 .map(team -> applyChange(team, task))

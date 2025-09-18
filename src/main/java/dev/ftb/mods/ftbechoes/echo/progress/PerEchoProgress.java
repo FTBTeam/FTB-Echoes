@@ -70,6 +70,13 @@ public record PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> c
         return claimed ? s.add(stage) : s.remove(stage);
     }
 
+    public boolean clearRewards(Player player) {
+        Set<Integer> s = claimedRewards.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+        boolean hadAnyRewards = !s.isEmpty();
+        s.clear();
+        return hadAnyRewards;
+    }
+
     void completeStage() {
         currentStage.increment();
     }

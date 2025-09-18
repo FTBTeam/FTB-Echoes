@@ -14,6 +14,7 @@ import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -48,7 +49,8 @@ class TaskPanel extends EchoScreen.PagePanel {
                         c = stage.notReady();
                     }
                 }
-                add(new TaskEntryPanel(this, icon, stage.title().orElse(Component.empty()), c));
+                Component title = stage.title().orElse(ComponentUtils.wrapInSquareBrackets(Component.translatable("ftbechoes.gui.stage", stageIdx + 1)));
+                add(new TaskEntryPanel(this, icon, title, c));
                 if (icon == Icons.LOCK_OPEN) {
                     add(new CompleteStageButton(this, echo.id()));
                 }

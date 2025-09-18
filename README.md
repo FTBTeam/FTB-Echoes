@@ -71,9 +71,9 @@ Fields:
 
 ### Completion Rewards
 
-Completion rewards define a set of rewards granted to a player when they complete a stage. This includes one or more of an item, some experience, some currency, or a command to be run on behalf of the player (e.g. grant them a game stage)
+Completion rewards define a set of rewards granted to a player when they complete a stage. This includes one or more of an item (or items), some experience, some currency, or a command to be run on behalf of the player (e.g. grant them a game stage)
 
-All fields below are optional, but at least of one `item`, `experience`, `currency` or `command` must be specified.
+All fields below are optional, but at least one of `item`, `experience`, `currency` or `command` must be specified.
 
 Fields:
 
@@ -82,7 +82,7 @@ Fields:
 * `currency` - an integer quantity of currency for the player
 * `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
 * `description` - an optional serialized component, or list of serialized components, used for tooltip purposes on the "Claim Reward" button
-  * This is recommended if there is a command component to this reward
+  * The first line of the description, if it exists, is also shown in the toast popup when a player claims the reward
 
 ### Command Entries
 
@@ -101,6 +101,8 @@ Fields:
 
 There are a few commands intended for admin/debugging purposes.
 
+Note: `<stage_idx>` is a numeric index into the `stages` list of an echo definition, and it's indexed from 0.
+
 * `/ftbechoes progress player <player> <echo_id> set_stage <stage_idx>`
   * Use to force the current stage for the given player's team and echo
   * E.g. `/ftbechoes player @s ftbechoes:test_echo1 set_stage 1`
@@ -110,6 +112,8 @@ There are a few commands intended for admin/debugging purposes.
   * Resets the completion reward history for a player, echo & stage, allowing the player to claim the reward for that stage again
   * E.g. `/ftbechoes player @s ftbechoes:test_echo1 reset_reward 1`
   * Will give an error message if the player isn't currently recorded as having claimed the reward for the echo & stage
+* `/ftbechoes progress player <player> <echo_id> reset_reward`
+  * As above but resets _all_ rewards for the player and echo
 * `/ftbechoes gamestage <add|remove> stagename`
   * Gives or removes a game stage to a player. This is just a vanilla entity tag, but unlike the `/tag` command, this also syncs the stage to the player's client
   * Compatible with KubeJS stages, which also use vanilla entity tags, but useful if your instance doesn't have KubeJS installed

@@ -3,7 +3,7 @@
   "title": { "text": "Test Echo 1", "color": "blue" },
   "stages": [
     {
-      "title": "Stage 1",
+      "title": "The Beginning",
       "lore": [
         { "type": "ftbechoes:text", "text": "This is stage 1! some literal text\nwith an extra line\nand one more" },
         { "type": "ftbechoes:image", "location": "ftblibrary:icons/player", "width": 32, "height": 32, "align": "center" },
@@ -39,7 +39,7 @@
       }
     },
     {
-      "title": { "text": "Stage 2", "color": "aqua" },
+      "title": { "text": "The Next Part", "color": "aqua" },
       "lore": [
         { "type": "ftbechoes:text", "text": "this is stage2!" },
         { "type": "ftbechoes:audio", "location": "music_disc.strad", "text": "strad" },
@@ -53,11 +53,11 @@
       ],
       "completion_reward": {
         "experience": 20,
-        "currency": 6
+        "currency": 6,
+        "description": "Good job!"
       }
     },
     {
-      "title": "Stage 3",
       "lore": [
         { "type": "ftbechoes:text", "text": "welcome to stage 3!" },
         { "type": "ftbechoes:audio", "location": "music_disc.ward", "text": "ward" },

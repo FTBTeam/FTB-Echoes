@@ -35,6 +35,10 @@ public class ProgressCommand {
                                                 )
                                         )
                                         .then(literal("reset_reward")
+                                                .executes(ctx -> resetRewardClaimed(ctx,
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        EchoArgumentType.get(ctx, "echo"), -1)
+                                                )
                                                 .then(argument("stage_idx", IntegerArgumentType.integer(0))
                                                         .executes(ctx -> resetRewardClaimed(ctx,
                                                                 EntityArgument.getPlayer(ctx, "player"),
@@ -84,7 +88,12 @@ public class ProgressCommand {
     }
 
     private static int resetRewardClaimed(CommandContext<CommandSourceStack> ctx, ServerPlayer player, Echo echo, int stageIdx) {
-        if (TeamProgressManager.get(ctx.getSource().getServer()).resetReward(player, echo.id(), stageIdx)) {
+        if (stageIdx < 0) {
+            if (TeamProgressManager.get(ctx.getSource().getServer()).resetAllRewards(player, echo.id())) {
+                ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.reward_reset_all", player.getDisplayName(), echo.id().toString(), stageIdx), false);
+                return Command.SINGLE_SUCCESS;
+            }
+        } else if (TeamProgressManager.get(ctx.getSource().getServer()).resetReward(player, echo.id(), stageIdx)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.reward_reset", player.getDisplayName(), echo.id().toString(), stageIdx), false);
             return Command.SINGLE_SUCCESS;
         }

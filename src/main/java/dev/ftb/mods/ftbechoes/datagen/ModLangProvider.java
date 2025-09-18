@@ -26,6 +26,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.stage_completed", "Stage Completed!");
         add("ftbechoes.gui.shopping_basket", "Shopping Basket");
         add("ftbechoes.gui.claim_reward", "Claim Reward");
+        add("ftbechoes.gui.stage", "Stage %s");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
@@ -34,6 +35,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.commands.progress_changed", "Set progress for '%s' on echo '%s' to stage %s");
         add("ftbechoes.commands.progress_changed.failed", "Progress change failed");
         add("ftbechoes.commands.reward_reset", "Reset reward for '%s' on echo '%s', stage %s");
+        add("ftbechoes.commands.reward_reset_all", "All rewards reset for '%s' on echo '%s'");
         add("ftbechoes.commands.reward_reset.failed", "Could not reset reward - player has not claimed it?");
 
         add("ftbechoes.message.complete_stage", "Complete Stage");
