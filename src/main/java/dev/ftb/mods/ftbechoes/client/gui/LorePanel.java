@@ -4,7 +4,6 @@ import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.gui.widget.*;
-import dev.ftb.mods.ftbechoes.echo.BaseStageEntry;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.ui.Panel;
@@ -41,7 +40,9 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                         add(new TextField(this).setText(Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(title)))
                 );
 
-                addTextLines(stage.lore());
+                stage.lore().forEach(entry ->
+                        StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(this::add, entry, this))
+                );
 
                 vSpace(5);
 
@@ -53,8 +54,12 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                         add(new TextField(this).setText(stage.notReady()));
                     }
                 }
-                if (stageIdx < current && stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
-                    add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
+                if (stageIdx < current) {
+                    Component txt = stage.completed().orElse(Component.translatable("ftbechoes.gui.stage_completed"));
+                    add(new TextField(this).setText(Component.empty().withStyle(ChatFormatting.GRAY).append(txt)));
+                    if (stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
+                        add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
+                    }
                 }
                 if (stageIdx < limit) {
                     add(new HorizontalLineWidget(this, 0.75f));
@@ -69,12 +74,6 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
 
             vSpace(10);
         });
-    }
-
-    private void addTextLines(List<BaseStageEntry> entries) {
-        entries.forEach(entry ->
-                StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(this::add, entry, this))
-        );
     }
 
     @Override

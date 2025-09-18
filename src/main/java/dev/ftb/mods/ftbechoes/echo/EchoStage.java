@@ -13,8 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.List;
 import java.util.Optional;
 
-public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  Component notReady, Component ready, Optional<Component> completed, String requiredGameStage,
-                        List<ShopData> shopUnlocked, Optional<StageCompletionReward> completionReward) {
+public record EchoStage(Optional<Component> title, List<BaseStageEntry> lore,  Component notReady, Component ready, Optional<Component> completed, String requiredGameStage, List<ShopData> shopUnlocked, Optional<StageCompletionReward> completionReward) {
     public static final Codec<EchoStage> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ComponentSerialization.CODEC.optionalFieldOf("title").forGetter(EchoStage::title),
             BaseStageEntry.CODEC.listOf().fieldOf("lore").forGetter(EchoStage::lore),

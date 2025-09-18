@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
+import dev.ftb.mods.ftbechoes.client.gui.widget.ClaimRewardButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.TaskEntryPanel;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
@@ -50,6 +51,9 @@ class TaskPanel extends EchoScreen.PagePanel {
                 add(new TaskEntryPanel(this, icon, stage.title().orElse(Component.empty()), c));
                 if (icon == Icons.LOCK_OPEN) {
                     add(new CompleteStageButton(this, echo.id()));
+                }
+                if (stageIdx < current && stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
+                    add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
                 }
             }
         });

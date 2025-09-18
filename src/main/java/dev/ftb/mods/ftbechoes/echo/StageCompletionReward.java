@@ -62,6 +62,7 @@ public record StageCompletionReward(List<ItemStack> stacks, int exp, int currenc
         if (currency > 0) {
             consumer.accept(bullet().append(MiscUtil.formatCost(currency)));
         }
+        command.ifPresent(cmd -> cmd.description().forEach(line -> consumer.accept(bullet().append(line))));
     }
 
     private static MutableComponent bullet() {
