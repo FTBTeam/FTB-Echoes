@@ -27,7 +27,7 @@ Echo stages define the progression for an Echo. Fields:
 * `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below
 * `not_ready` - serialized component, text displayed after the lore or in the task panel if the player isn't ready to complete the stage
 * `ready` - serialized component, text displayed after the lore or in the task panel if the player _is_ ready to complete the stage
-* `completed` - serialized component, text displayed in the task panel if the player has completed the stage. Optional; defaults to "Stage Completed!"
+* `completed` - serialized component, text displayed in the lore and task panels if the player has completed the stage. Optional; defaults to "Stage Completed!"
 * `required_stage` - a string; the game stage the player must have to complete this echo stage
 * `shop_unlock` - required, but may be empty; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
 * `completion_reward` - optional one-time reward(s) granted to players when they complete the stage; see [Completion Rewards](#completion-rewards) below 
