@@ -22,7 +22,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Progress for a given team. The record members are mutable internally, but only modified
@@ -49,13 +51,8 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
     }
 
     public TeamProgress forSyncTo(ServerPlayer player) {
-        UUID playerId = player.getUUID();
         Map<ResourceLocation, PerEchoProgress> map = new HashMap<>();
-        perEcho.forEach((id, rec) -> {
-            Map<UUID,Set<Integer>> rewards = Map.of(playerId, rec.claimedRewards().getOrDefault(playerId, Set.of()));
-            map.put(id, new PerEchoProgress(rec.currentStage(), rewards));
-        });
-
+        perEcho.forEach((id, rec) -> map.put(id, rec.forSyncToPlayer(player)));
         return new TeamProgress(map);
     }
 
@@ -134,12 +131,12 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
     public Boolean setStage(ResourceLocation echoId, int stageIdx) {
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
-        per.setStage(Mth.clamp(stageIdx, 0, echo.stages().size() - 1));
+        per.setCurrentStage(Mth.clamp(stageIdx, 0, echo.stages().size() - 1));
         return true;
     }
 
     @NotNull
     private PerEchoProgress getPerEchoProgress(ResourceLocation echoId) {
-        return perEcho.computeIfAbsent(echoId, k -> PerEchoProgress.empty());
+        return perEcho.computeIfAbsent(echoId, k -> PerEchoProgress.createEmptyProgress());
     }
 }

@@ -6,59 +6,57 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
- * Progress for a given team and echo. The record members are mutable internally, but should only be modified
- * by mutator methods.
- *
- * @param currentStage last completed stage for this echo (0 indicates team are on first stage, no completions yet)
- * @param claimedRewards the echo rewards claimed by each player on the team, by player UUID
+ * Progress for a given team and echo. Note that mutator methods are package-private (only to be called from
+ * {@link TeamProgress}).
  */
-public record PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> claimedRewards) {
+public final class PerEchoProgress {
     private static final Codec<Map<UUID, Set<Integer>>> REWARDS_CLAIMED
             = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.INT.listOf().xmap(HashSet::new, ArrayList::new));
-//            .xmap(PerEchoProgress::toMutable, PerEchoProgress::convertForSaving);
-
-//    private static Map<UUID, HashSet<Integer>> convertForSaving(Map<UUID, Set<Integer>> m) {
-//        HashMap<UUID,HashSet<Integer>> res = new HashMap<>();
-//        m.forEach((k, v) -> res.put(k, new HashSet<>(v)));
-//        return res;
-//    }
-//
-//    private static Map<UUID, Set<Integer>> toMutable(Map<UUID, HashSet<Integer>> m) {
-//        return new HashMap<>(m);
-//    }
-
-    public static final Codec<PerEchoProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
+    private static final Codec<PerEchoProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.INT.xmap(MutableInt::new, MutableInt::getValue).fieldOf("current_stage").forGetter(p -> p.currentStage),
             REWARDS_CLAIMED.fieldOf("rewards_claimed").forGetter(p -> p.claimedRewards)
     ).apply(builder, PerEchoProgress::new));
     public static final Codec<PerEchoProgress> CODEC = RAW_CODEC.xmap(
             // ensure claimed rewards map is mutable after loading
             in -> new PerEchoProgress(in.currentStage, new HashMap<>(in.claimedRewards)),
-            in -> in
+            Function.identity()
     );
     public static final StreamCodec<FriendlyByteBuf, PerEchoProgress> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT.map(MutableInt::new, MutableInt::getValue), PerEchoProgress::currentStage,
-            ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.collection(HashSet::new))), PerEchoProgress::claimedRewards,
+            ByteBufCodecs.VAR_INT.map(MutableInt::new, MutableInt::getValue), p -> p.currentStage,
+            ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.collection(HashSet::new))), p -> p.claimedRewards,
             PerEchoProgress::new
     );
 
-    public static PerEchoProgress empty() {
-        return new PerEchoProgress(new MutableInt(0), new HashMap<>());
+    private final MutableInt currentStage;
+    private final Map<UUID, Set<Integer>> claimedRewards;
+
+    /**
+     * @param currentStage   last completed stage for this echo (0 indicates team are on first stage, no completions yet)
+     * @param claimedRewards the echo rewards claimed by each player on the team, by player UUID
+     */
+    public PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> claimedRewards) {
+        this.currentStage = currentStage;
+        this.claimedRewards = claimedRewards;
     }
 
-    @Override
-    public Map<UUID, Set<Integer>> claimedRewards() {
-        return Collections.unmodifiableMap(claimedRewards);
+    public static PerEchoProgress createEmptyProgress() {
+        return new PerEchoProgress(new MutableInt(0), new HashMap<>());
     }
 
     public int getCurrentStage() {
         return currentStage.intValue();
+    }
+
+    void setCurrentStage(int stage) {
+        currentStage.setValue(stage);
     }
 
     public boolean isRewardClaimed(Player player, int stage) {
@@ -70,7 +68,7 @@ public record PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> c
         return claimed ? s.add(stage) : s.remove(stage);
     }
 
-    public boolean clearRewards(Player player) {
+    boolean clearRewards(Player player) {
         Set<Integer> s = claimedRewards.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
         boolean hadAnyRewards = !s.isEmpty();
         s.clear();
@@ -81,7 +79,30 @@ public record PerEchoProgress(MutableInt currentStage, Map<UUID, Set<Integer>> c
         currentStage.increment();
     }
 
-    void setStage(int stage) {
-        currentStage.setValue(stage);
+    public PerEchoProgress forSyncToPlayer(ServerPlayer player) {
+        UUID playerId = player.getUUID();
+        Map<UUID,Set<Integer>> rewards = Map.of(playerId, claimedRewards.getOrDefault(playerId, Set.of()));
+        return new PerEchoProgress(new MutableInt(currentStage), rewards);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (PerEchoProgress) obj;
+        return Objects.equals(this.currentStage, that.currentStage) &&
+                Objects.equals(this.claimedRewards, that.claimedRewards);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(currentStage, claimedRewards);
+    }
+
+    @Override
+    public String toString() {
+        return "PerEchoProgress[" +
+                "currentStage=" + currentStage + ", " +
+                "claimedRewards=" + claimedRewards + ']';
     }
 }
