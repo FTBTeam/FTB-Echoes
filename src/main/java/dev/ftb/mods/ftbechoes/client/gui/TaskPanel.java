@@ -10,6 +10,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.Panel;
+import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 import net.minecraft.client.Minecraft;
@@ -64,10 +65,11 @@ class TaskPanel extends EchoScreen.PagePanel {
     @Override
     public void alignWidgets() {
         for (Widget w : widgets) {
+            w.setX(5);
             if (w instanceof Panel p) {
                 p.alignWidgets();
-            } else if (w instanceof CompleteStageButton b) {
-                b.setX(18);
+            } else if (w instanceof SimpleTextButton b) {
+                b.setX(23);
             }
         }
 
