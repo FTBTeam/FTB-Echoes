@@ -27,6 +27,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.shopping_basket", "Shopping Basket");
         add("ftbechoes.gui.claim_reward", "Claim Reward");
         add("ftbechoes.gui.stage", "Stage %s");
+        add("ftbechoes.gui.scroll_to_stage", "Scroll to Stage");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");

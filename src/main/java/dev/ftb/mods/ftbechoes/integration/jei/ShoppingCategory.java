@@ -89,7 +89,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
         recipe.data().description().forEach(tooltip::add);
         recipe.data().command().ifPresent(cmd -> cmd.description().forEach(tooltip::add));
         tooltip.add(Component.translatable("ftbechoes.jei.echo_title", recipe.echoTitle()).withStyle(ChatFormatting.GRAY));
-        recipe.stageTitle().ifPresent(c -> tooltip.add(Component.translatable("ftbechoes.jei.stage_title", c).withStyle(ChatFormatting.GRAY)));
+        tooltip.add(Component.translatable("ftbechoes.jei.stage_title", recipe.stageTitle()).withStyle(ChatFormatting.GRAY));
     }
 
     @Override

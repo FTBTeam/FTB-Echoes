@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
@@ -189,6 +191,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             buttons.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
             buttons.put(EchoScreen.Page.TASKS, new EchoScreen.PageButton(EchoScreen.Page.TASKS, this, Icons.CHAT));
             buttons.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
+
+            // only show selector drop-down after at least one stage has been completed
+            buttons.get(Page.LORE).setDropdownAction(
+                    this::showStageSelector,
+                    () -> echo != null && ClientProgress.get().isStageCompleted(echo.id(), 0)
+            );
         }
 
         @Override
@@ -215,19 +223,21 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             label.setWidth(width);
 
             int bw = width / (buttons.size() + 1) - 4;
+            int by = getTheme().getFontHeight() + 8;
             for (EchoScreen.PageButton w : buttons.values()) {
-                w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), getTheme().getFontHeight() + 8, bw, height - 9);
+                w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), by, bw, height - by);
             }
         }
 
         @Override
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             super.drawBackground(graphics, theme, x, y, w, h);
-            int col = NordColors.FROST_2.withAlpha(60).rgba();
-            graphics.hLine(x, x + buttons.get(Page.LORE).posX, y + height - 1, col);
-            graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.TASKS).posX, y + height - 1, col);
-            graphics.hLine(x + buttons.get(Page.TASKS).posX + buttons.get(Page.TASKS).width, x + buttons.get(Page.SHOP).posX, y + height - 1, col);
-            graphics.hLine(x + buttons.get(Page.SHOP).posX + buttons.get(Page.SHOP).width, x + width - 1, y + height - 1, col);
+            int col = 0xff585d66;  // blends best with tabbed outline
+            graphics.hLine(x, x + buttons.get(Page.LORE).posX - 1, y + height - 2, col);
+            graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.TASKS).posX - 1, y + height - 2, col);
+            graphics.hLine(x + buttons.get(Page.TASKS).posX + buttons.get(Page.TASKS).width, x + buttons.get(Page.SHOP).posX - 1, y + height - 2, col);
+            graphics.hLine(x + buttons.get(Page.SHOP).posX + buttons.get(Page.SHOP).width, x + width - 1, y + height - 2, col);
+            graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
         }
 
         private void showEchoSelector(MouseButton mb) {
@@ -239,9 +249,29 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             ));
         }
 
+        private void showStageSelector() {
+            openContextMenu(Util.make(new ArrayList<>(), list -> {
+                        list.add(ContextMenuItem.title(Component.translatable("ftbechoes.gui.scroll_to_stage")));
+                        list.add(ContextMenuItem.separator());
+                        for (int i = 0; i < echo.stages().size(); i++) {
+                            final int stageIdx = i;
+                            if (ClientProgress.get().isStageCompleted(echo.id(), i)) {
+                                list.add(new ContextMenuItem(echo.stages().get(stageIdx).title(), Icons.BLUE_BUTTON, btn -> scrollToStage(stageIdx)));
+                            }
+                        }
+                    }
+            ));
+        }
+
         private void selectEcho(Echo echo) {
             if (!isCurrentEcho(echo)) {
                 PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
+            }
+        }
+
+        private void scrollToStage(int stageIdx) {
+            if (EchoScreen.this.mainPanel.pages.get(Page.LORE) instanceof LorePanel lorePanel) {
+                EchoScreen.this.scrollBar.setValue(lorePanel.getScrollPos(stageIdx));
             }
         }
 
@@ -392,11 +422,18 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     private class PageButton extends SimpleTextButton {
         private final EchoScreen.Page page;
+        private Runnable onDropDownClicked = null;
+        private BooleanSupplier dropdownPredicate = () -> false;
 
         public PageButton(EchoScreen.Page page, Panel panel, Icon icon) {
             super(panel, page.getLabel(), icon);
 
             this.page = page;
+        }
+
+        public void setDropdownAction(Runnable onClicked, BooleanSupplier predicate) {
+            onDropDownClicked = onClicked;
+            dropdownPredicate = predicate;
         }
 
         @Override
@@ -421,6 +458,15 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             textX += off + iconSize;
 
             theme.drawString(graphics, title, textX, textY + 1, theme.getContentColor(getWidgetType()), 0);
+
+            if (dropdownPredicate.getAsBoolean() && onDropDownClicked != null) {
+                int x1 = x + width - 16;
+                int x2 = x + width - 6;
+                int y0 = y + height / 2;
+                graphics.hLine(x1, x2, y0 - 3, theme.getContentColor(WidgetType.NORMAL).rgba());
+                graphics.hLine(x1, x2, y0, theme.getContentColor(WidgetType.NORMAL).rgba());
+                graphics.hLine(x1, x2, y0 + 3, theme.getContentColor(WidgetType.NORMAL).rgba());
+            }
         }
 
         @Override
@@ -430,6 +476,11 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void onClicked(MouseButton mouseButton) {
+            if (dropdownPredicate.getAsBoolean() && EchoScreen.currentPage == page && getMouseX() < getX() + width - 4 && getMouseX() > getX() + width - 18) {
+                onDropDownClicked.run();
+                return;
+            }
+
             MainPanel mainPanel = EchoScreen.this.mainPanel;
             PanelScrollBar scrollBar = EchoScreen.this.scrollBar;
 

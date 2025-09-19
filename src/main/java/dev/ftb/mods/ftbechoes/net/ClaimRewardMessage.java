@@ -53,6 +53,6 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
         // at this point we know stageIdx is in valid range
         return EchoManager.getServerInstance().getEcho(id).orElseThrow()
                 .stages().get(stageIdx)
-                .completionRewardSummary(stageIdx + 1);
+                .completionRewardSummary();
     }
 }

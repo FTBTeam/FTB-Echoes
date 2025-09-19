@@ -58,6 +58,8 @@
       }
     },
     {
+      "title": { "text": "The Last Part", "color": "yellow" },
+      "show_title_in_lore": false,
       "lore": [
         { "type": "ftbechoes:text", "text": "welcome to stage 3!" },
         { "type": "ftbechoes:audio", "location": "music_disc.ward", "text": "ward" },

@@ -16,6 +16,7 @@
   "ftbechoes.gui.page.shop": "Shop",
   "ftbechoes.gui.page.tasks": "Tasks",
   "ftbechoes.gui.place_order": "Place Order",
+  "ftbechoes.gui.scroll_to_stage": "Scroll to Stage",
   "ftbechoes.gui.shopping_basket": "Shopping Basket",
   "ftbechoes.gui.stage": "Stage %s",
   "ftbechoes.gui.stage_completed": "Stage Completed!",

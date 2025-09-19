@@ -6,18 +6,18 @@ import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.gui.widget.*;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.TextField;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.ui.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
+    private final List<Widget> jumpPointWidgets = new ArrayList<>();
+
     public LorePanel(Panel parent, EchoScreen echoScreen) {
         super(parent, echoScreen, EchoScreen.Page.LORE);
     }
@@ -25,10 +25,11 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
     @Override
     public void addWidgets() {
         getEcho().ifPresent(echo -> {
+            jumpPointWidgets.clear();
             List<EchoStage> stages = echo.stages();
-            int current = ClientProgress.get().getCurrentStage(echo.id());
-            boolean allCompleted = current >= stages.size();
-            int limit = Math.min(stages.size() - 1, current);
+            int currentStage = ClientProgress.get().getCurrentStage(echo.id());
+            boolean allCompleted = currentStage >= stages.size();
+            int limit = Math.min(stages.size() - 1, currentStage);
             Player player = Minecraft.getInstance().player;
 
             vSpace(5);
@@ -36,13 +37,21 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             for (int stageIdx = 0; stageIdx <= limit; stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
 
-                stage.title().ifPresent(title ->
-                        add(new TextField(this).setText(Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(title)))
-                );
+                if (stage.showTitleInLore()) {
+                    TextField titleWidget = new TextField(this).setText(Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(stage.title()));
+                    add(titleWidget);
+                    jumpPointWidgets.add(titleWidget);
+                }
 
+                List<Widget> loreLines = new ArrayList<>();
                 stage.lore().forEach(entry ->
-                        StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(this::add, entry, this))
+                        StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(loreLines::add, entry, this))
                 );
+                if (!stage.showTitleInLore()) {
+                    // if title is hidden, stage scroll point is the first line of lore
+                    jumpPointWidgets.add(loreLines.getFirst());
+                }
+                addAll(loreLines);
 
                 vSpace(5);
 
@@ -54,7 +63,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                         add(new TextField(this).setText(stage.notReady()));
                     }
                 }
-                if (stageIdx < current) {
+                if (stageIdx < currentStage) {
                     Component txt = stage.completed().orElse(Component.translatable("ftbechoes.gui.stage_completed"));
                     add(new TextField(this).setText(Component.empty().withStyle(ChatFormatting.GRAY).append(txt)));
                     if (stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
@@ -114,5 +123,12 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                 ab.stopAudio();
             }
         });
+    }
+
+    public double getScrollPos(int stageIdx) {
+        if (stageIdx >= 0 && stageIdx < jumpPointWidgets.size()) {
+            return jumpPointWidgets.get(stageIdx).getPosY() - 2;
+        }
+        return 0;
     }
 }
