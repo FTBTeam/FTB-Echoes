@@ -52,7 +52,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     @Override
     public boolean onInit() {
-        return setSizeProportional(0.85f, 0.8f);
+        boolean ok = setSizeProportional(0.85f, 0.8f);
+        setWidth(Math.min(getWidth(), 600));
+        return ok;
     }
 
     @Override

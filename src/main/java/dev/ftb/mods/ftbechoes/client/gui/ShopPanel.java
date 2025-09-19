@@ -32,7 +32,7 @@ class ShopPanel extends EchoScreen.PagePanel {
     @Override
     public void alignWidgets() {
         int paddedSize = ShopItemWidget.WIDGET_SIZE + 5;
-        int perRow = (width - 10) / paddedSize;
+        int perRow = (width - 5) / paddedSize;
         int curRow = 0;
         int curCol = 0;
 

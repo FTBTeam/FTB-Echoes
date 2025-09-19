@@ -40,7 +40,7 @@ public class ShopItemWidget extends Panel {
         key = ShoppingKey.of(echo, data);
         costStr = MiscUtil.formatCost(data.cost());
 
-        Component txt = stage.title().orElse(Component.literal(String.valueOf(stageIdx)));
+        Component txt = stage.title().orElse(Component.translatable("ftbechoes.gui.stage", stageIdx + 1));
         tooltip = unlocked ?
                 Component.translatable("ftbechoes.tooltip.unlocked_by", txt.copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY) :
                 Component.translatable("ftbechoes.tooltip.locked");
