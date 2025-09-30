@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.ftb.mods.ftbechoes.echo.Echo;
+import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.data.TeamArgument;
@@ -64,6 +65,18 @@ public class ProgressCommand {
                                         )
                                 )
                         )
+                )
+                .then(literal("reset-all")
+                        .then(literal("player")
+                                .then(argument("player", EntityArgument.player())
+                                        .executes(ctx -> resetAllProgress(ctx, EntityArgument.getPlayer(ctx, "player")))
+                                )
+                        )
+                        .then(literal("team")
+                                .then(argument("team", TeamArgument.create())
+                                        .executes(ctx -> resetAllProgress(ctx, TeamArgument.get(ctx, "team")))
+                                )
+                        )
                 );
     }
 
@@ -89,16 +102,36 @@ public class ProgressCommand {
 
     private static int resetRewardClaimed(CommandContext<CommandSourceStack> ctx, ServerPlayer player, Echo echo, int stageIdx) {
         if (stageIdx < 0) {
-            if (TeamProgressManager.get(ctx.getSource().getServer()).resetAllRewards(player, echo.id())) {
+            if (TeamProgressManager.get(ctx.getSource().getServer()).resetAllRewards(player.getUUID(), echo.id())) {
                 ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.reward_reset_all", player.getDisplayName(), echo.id().toString(), stageIdx), false);
                 return Command.SINGLE_SUCCESS;
             }
-        } else if (TeamProgressManager.get(ctx.getSource().getServer()).resetReward(player, echo.id(), stageIdx)) {
+        } else if (TeamProgressManager.get(ctx.getSource().getServer()).resetReward(player.getUUID(), echo.id(), stageIdx)) {
             ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.reward_reset", player.getDisplayName(), echo.id().toString(), stageIdx), false);
             return Command.SINGLE_SUCCESS;
         }
 
         ctx.getSource().sendFailure(Component.translatable("ftbechoes.commands.reward_reset.failed").withStyle(ChatFormatting.RED));
         return 0;
+    }
+
+    private static int resetAllProgress(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+        var mgr = TeamProgressManager.get(ctx.getSource().getServer());
+        EchoManager.getServerInstance().getEchoes().forEach(echo -> {
+            mgr.setStage(player, echo.id(), 0);
+            mgr.resetAllRewards(player.getUUID(), echo.id());
+        });
+        ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.all_progress_reset", player.getDisplayName()), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resetAllProgress(CommandContext<CommandSourceStack> ctx, Team team) {
+        var mgr = TeamProgressManager.get(ctx.getSource().getServer());
+        EchoManager.getServerInstance().getEchoes().forEach(echo -> {
+            mgr.setStage(team, echo.id(), 0);
+            team.getMembers().forEach(playerId -> mgr.resetAllRewards(playerId, echo.id()));
+        });
+        ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.all_progress_reset", team.getColoredName()), false);
+        return Command.SINGLE_SUCCESS;
     }
 }

@@ -63,13 +63,13 @@ public final class PerEchoProgress {
         return claimedRewards.getOrDefault(player.getUUID(), Set.of()).contains(stage);
     }
 
-    boolean setRewardClaimed(Player player, int stage, boolean claimed) {
-        Set<Integer> s = claimedRewards.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+    boolean setRewardClaimed(UUID playerId, int stage, boolean claimed) {
+        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, k -> new HashSet<>());
         return claimed ? s.add(stage) : s.remove(stage);
     }
 
-    boolean clearRewards(Player player) {
-        Set<Integer> s = claimedRewards.computeIfAbsent(player.getUUID(), k -> new HashSet<>());
+    boolean clearRewards(UUID playerId) {
+        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, k -> new HashSet<>());
         boolean hadAnyRewards = !s.isEmpty();
         s.clear();
         return hadAnyRewards;

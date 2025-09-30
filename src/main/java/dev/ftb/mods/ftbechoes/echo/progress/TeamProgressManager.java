@@ -102,8 +102,8 @@ public class TeamProgressManager extends SavedData {
         return applyChange(team, progress -> progress.setStage(echoId, stageIdx));
     }
 
-    public boolean resetReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
-        return applyChange(player, progress -> progress.resetReward(echoId, player, stageIdx));
+    public boolean resetReward(UUID playerId, ResourceLocation echoId, int stageIdx) {
+        return applyChange(playerId, progress -> progress.resetReward(echoId, playerId, stageIdx));
     }
 
     public void tryCompleteStage(ServerPlayer sp, Team team, Echo echo) {
@@ -138,8 +138,14 @@ public class TeamProgressManager extends SavedData {
         return applyChange(team, progress -> progress.completeStage(echo));
     }
 
-    public boolean resetAllRewards(ServerPlayer player, ResourceLocation echoId) {
-        return applyChange(player, progress -> progress.resetAllRewards(echoId, player));
+    public boolean resetAllRewards(UUID playerId, ResourceLocation echoId) {
+        return applyChange(playerId, progress -> progress.resetAllRewards(echoId, playerId));
+    }
+
+    private boolean applyChange(UUID playerId, Function<TeamProgress, Boolean> task) {
+        return FTBTeamsAPI.api().getManager().getTeamForPlayerID(playerId)
+                .map(team -> applyChange(team, task))
+                .orElse(false);
     }
 
     private boolean applyChange(ServerPlayer player, Function<TeamProgress, Boolean> task) {

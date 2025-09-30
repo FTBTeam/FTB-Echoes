@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Progress for a given team. The record members are mutable internally, but only modified
@@ -65,23 +66,23 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return stageIdx < getCurrentStage(id);
     }
 
-    public boolean resetAllRewards(ResourceLocation echoId, ServerPlayer player) {
-        return getPerEchoProgress(echoId).clearRewards(player);
+    public boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
+        return getPerEchoProgress(echoId).clearRewards(playerId);
     }
 
     /****************************************************************************************
      * mutator methods below here are package-private and only called via TeamProgressManager
      */
 
-    boolean resetReward(ResourceLocation echoId, ServerPlayer player, int stageIdx) {
-        return getPerEchoProgress(echoId).setRewardClaimed(player, stageIdx, false);
+    boolean resetReward(ResourceLocation echoId, UUID playerId, int stageIdx) {
+        return getPerEchoProgress(echoId).setRewardClaimed(playerId, stageIdx, false);
     }
 
     boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
         return EchoManager.getServerInstance().getEcho(echoId).map(echo -> {
             if (stage >= 0 && stage < echo.stages().size()) {
                 echo.stages().get(stage).completionReward().ifPresent(c -> c.giveToPlayer(player));
-                return getPerEchoProgress(echoId).setRewardClaimed(player, stage, true);
+                return getPerEchoProgress(echoId).setRewardClaimed(player.getUUID(), stage, true);
             }
             return false;
         }).orElse(false);

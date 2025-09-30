@@ -41,6 +41,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.commands.reward_reset", "Reset reward for '%s' on echo '%s', stage %s");
         add("ftbechoes.commands.reward_reset_all", "All rewards reset for '%s' on echo '%s'");
         add("ftbechoes.commands.reward_reset.failed", "Could not reset reward - player has not claimed it?");
+        add("ftbechoes.commands.all_progress_reset", "All echo progress & rewards reset for %s");
 
         add("ftbechoes.message.complete_stage", "Complete Stage");
         add("ftbechoes.message.purchase_success", "Purchase Completed!");

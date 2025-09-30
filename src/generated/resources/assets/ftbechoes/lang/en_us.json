@@ -2,6 +2,7 @@
   "block.ftbechoes.echo_projector": "Echo Projector",
   "entity.ftbechoes.echo": "Echo Projection",
   "ftbechoes.commands.added_stage": "Added game stage: %s",
+  "ftbechoes.commands.all_progress_reset": "All echo progress & rewards reset for %s",
   "ftbechoes.commands.invalid_echo": "Invalid Echo id: %s",
   "ftbechoes.commands.progress_changed": "Set progress for '%s' on echo '%s' to stage %s",
   "ftbechoes.commands.progress_changed.failed": "Progress change failed",
