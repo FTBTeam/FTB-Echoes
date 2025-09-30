@@ -166,6 +166,7 @@ tasks.withType(ProcessResources).configureEach {
 			loader_version_range: loader_version_range,
 			// 99.9% of the time we're only going to target a very vague version of neoforge so this is fine.
 			mod_loader_range: mod_loader_range.replace("\${mc_base}", mcMinorAndPatch), // Replace the version in the mod loader range
+			ftb_library_version: ftb_library_version
 	]
 
 	inputs.properties replaceProperties

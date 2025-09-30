@@ -3,20 +3,29 @@ package dev.ftb.mods.ftbechoes.echo.progress;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.echo.Echo;
+import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
@@ -81,39 +90,6 @@ public class TeamProgressManager extends SavedData {
         return get().progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
     }
 
-//    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player) {
-//        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
-//        TeamProgress progress = getProgress(team);
-//        return checkStatus(echo, progress, player, progress.getCurrentStage(echoId));
-//    }
-//
-//    public StageStatus getStageStatus(Team team, ResourceLocation echoId, Player player, int stageToCheck) {
-//        Echo echo = EchoManager.getInstance().getEcho(echoId).orElseThrow();
-//        TeamProgress progress = getProgress(team);
-//        return checkStatus(echo, progress, player, stageToCheck);
-//    }
-//
-//    private StageStatus checkStatus(Echo echo, TeamProgress progress, Player player, int toCheck) {
-//        int currentStage = progress.getCurrentStage(echo.id());
-//        Validate.isTrue(toCheck >= 0 && toCheck <= echo.stages().size());
-//        if (toCheck == echo.stages().size() || toCheck > currentStage) {
-//            return StageStatus.COMPLETED;
-//        } else {
-//            var stage = echo.stages().get(toCheck);
-//            return GameStageHelper.hasStage(player, stage.requiredGameStage()) ?
-//                    StageStatus.READY_TO_COMPLETE :
-//                    StageStatus.IN_PROGRESS;
-//        }
-//    }
-//
-//    public boolean completeStage(ServerPlayer player, ResourceLocation echoId) {
-//        return applyChange(player, progress -> progress.completeStage(echoId));
-//    }
-
-    public boolean completeStage(Team team, ResourceLocation echoId) {
-        return applyChange(team, progress -> progress.completeStage(echoId));
-    }
-
     public boolean claimReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
         return applyChange(player, progress -> progress.claimReward(echoId, player, stageIdx));
     }
@@ -128,6 +104,38 @@ public class TeamProgressManager extends SavedData {
 
     public boolean resetReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
         return applyChange(player, progress -> progress.resetReward(echoId, player, stageIdx));
+    }
+
+    public void tryCompleteStage(ServerPlayer sp, Team team, Echo echo) {
+        final int currentStage = TeamProgressManager.get().getProgress(team).getCurrentStage(echo.id());
+
+        if (currentStage >= 0 && currentStage < echo.stages().size()) {
+            EchoStage stage = echo.stages().get(currentStage);
+            if (FTBEchoes.stageProvider().has(sp, stage.requiredGameStage()) && completeStage(team, echo)) {
+                notifyTeamCompletion(team, echo, currentStage);
+            }
+        }
+    }
+
+    private void notifyTeamCompletion(Team team, Echo echo, int currentStage) {
+        team.getOnlineMembers().forEach(member -> {
+            Vec3 vec = member.position();
+            Component echoTitle = echo.title().copy().withStyle(ChatFormatting.YELLOW);
+            Component stageTitle = echo.stages().get(currentStage).title().copy().withStyle(ChatFormatting.YELLOW);
+            member.displayClientMessage(Component.translatable("ftbechoes.message.echo_stage_complete", echoTitle, stageTitle).withStyle(ChatFormatting.GREEN), false);
+            if (currentStage == echo.stages().size() - 1) {
+                member.displayClientMessage(Component.translatable("ftbechoes.message.echo_complete", echoTitle).withStyle(ChatFormatting.LIGHT_PURPLE), false);
+                member.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE),
+                        SoundSource.PLAYERS, vec.x, vec.y, vec.z, 1f, 1f, 0L));
+            } else {
+                member.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PLAYER_LEVELUP),
+                        SoundSource.PLAYERS, vec.x, vec.y, vec.z, 1f, 1f, 0L));
+            }
+        });
+    }
+
+    private boolean completeStage(Team team, Echo echo) {
+        return applyChange(team, progress -> progress.completeStage(echo));
     }
 
     public boolean resetAllRewards(ServerPlayer player, ResourceLocation echoId) {

@@ -46,7 +46,7 @@ public class EchoArgumentType implements ArgumentType<Echo> {
         return new EchoArgumentType();
     }
 
-    public static Echo get(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    public static Echo get(CommandContext<CommandSourceStack> context, String name) {
         return context.getArgument(name, Echo.class);
     }
 

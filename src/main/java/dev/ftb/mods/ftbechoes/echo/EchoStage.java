@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbechoes.echo;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
-import dev.ftb.mods.ftbechoes.util.MiscUtil;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -30,7 +30,7 @@ public record EchoStage(Component title, boolean showTitleInLore, List<BaseStage
             StageCompletionReward.CODEC.optionalFieldOf("completion_reward").forGetter(EchoStage::completionReward)
     ).apply(builder, EchoStage::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EchoStage> STREAM_CODEC = MiscUtil.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, EchoStage> STREAM_CODEC = NetworkHelper.composite(
             ComponentSerialization.STREAM_CODEC, EchoStage::title,
             ByteBufCodecs.BOOL, EchoStage::showTitleInLore,
             BaseStageEntry.STREAM_CODEC.apply(ByteBufCodecs.list()), EchoStage::lore,

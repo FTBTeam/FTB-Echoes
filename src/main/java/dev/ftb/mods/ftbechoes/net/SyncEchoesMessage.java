@@ -25,7 +25,7 @@ public record SyncEchoesMessage(Collection<Echo> echoes) implements CustomPacket
         return TYPE;
     }
 
-    public static void handleData(SyncEchoesMessage message, IPayloadContext context) {
+    public static void handleData(SyncEchoesMessage message, IPayloadContext ignored) {
         EchoManager.getClientInstance().syncFromServer(message.echoes);
     }
 }

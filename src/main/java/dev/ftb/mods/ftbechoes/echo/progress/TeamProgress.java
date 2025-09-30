@@ -2,24 +2,15 @@ package dev.ftb.mods.ftbechoes.echo.progress;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
-import dev.ftb.mods.ftbteams.api.Team;
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -61,10 +52,6 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return Collections.unmodifiableMap(perEcho);
     }
 
-    public boolean isEmpty() {
-        return perEcho.isEmpty();
-    }
-
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isRewardClaimed(ResourceLocation echoId, Player player, int stage) {
         return getPerEchoProgress(echoId).isRewardClaimed(player, stage);
@@ -78,8 +65,19 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return stageIdx < getCurrentStage(id);
     }
 
+    public boolean resetAllRewards(ResourceLocation echoId, ServerPlayer player) {
+        return getPerEchoProgress(echoId).clearRewards(player);
+    }
+
+    /****************************************************************************************
+     * mutator methods below here are package-private and only called via TeamProgressManager
+     */
+
+    boolean resetReward(ResourceLocation echoId, ServerPlayer player, int stageIdx) {
+        return getPerEchoProgress(echoId).setRewardClaimed(player, stageIdx, false);
+    }
+
     boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
-        // only called via TeamProgressManager
         return EchoManager.getServerInstance().getEcho(echoId).map(echo -> {
             if (stage >= 0 && stage < echo.stages().size()) {
                 echo.stages().get(stage).completionReward().ifPresent(c -> c.giveToPlayer(player));
@@ -89,18 +87,8 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         }).orElse(false);
     }
 
-    boolean resetReward(ResourceLocation echoId, ServerPlayer player, int stageIdx) {
-        return getPerEchoProgress(echoId).setRewardClaimed(player, stageIdx, false);
-    }
-
-    public boolean resetAllRewards(ResourceLocation echoId, ServerPlayer player) {
-        return getPerEchoProgress(echoId).clearRewards(player);
-    }
-
-    boolean completeStage(ResourceLocation echoId) {
-        // only called via TeamProgressManager
-        PerEchoProgress per = getPerEchoProgress(echoId);
-        var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
+    boolean completeStage(Echo echo) {
+        PerEchoProgress per = getPerEchoProgress(echo.id());
         if (per.getCurrentStage() < echo.stages().size()) {
             per.completeStage();
             return true;
@@ -108,27 +96,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return false;
     }
 
-    public void advance(ServerPlayer sp, Team team, Echo echo) {
-        final int currentStage = getCurrentStage(echo.id());
-
-        if (currentStage >= 0 && currentStage < echo.stages().size()) {
-            var stage = echo.stages().get(currentStage);
-            if (FTBEchoes.stageProvider().has(sp, stage.requiredGameStage()) && TeamProgressManager.get().completeStage(team, echo.id())) {
-                team.getOnlineMembers().forEach(member -> {
-                    Vec3 vec = member.position();
-                    if (currentStage == echo.stages().size()) {
-                        // TODO completed all stages, some special reward here?
-                        member.displayClientMessage(Component.literal("All stages completed!").withStyle(ChatFormatting.LIGHT_PURPLE), false);
-                        member.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE), SoundSource.PLAYERS, vec.x, vec.y, vec.z, 1f, 1f, 0L));
-                    } else {
-                        member.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.PLAYER_LEVELUP), SoundSource.PLAYERS, vec.x, vec.y, vec.z, 1f, 1f, 0L));
-                    }
-                });
-            }
-        }
-    }
-
-    public Boolean setStage(ResourceLocation echoId, int stageIdx) {
+    boolean setStage(ResourceLocation echoId, int stageIdx) {
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
         per.setCurrentStage(Mth.clamp(stageIdx, 0, echo.stages().size() - 1));

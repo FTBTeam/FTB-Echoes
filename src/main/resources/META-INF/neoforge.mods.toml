@@ -21,6 +21,13 @@ ordering = "NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
+modId = "ftblibrary"
+mandatory = true
+versionRange = "[${ftb_library_version},)"
+ordering = "NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
 modId = "magic_coins"
 mandatory = true
 versionRange = "[1.0.9,)"

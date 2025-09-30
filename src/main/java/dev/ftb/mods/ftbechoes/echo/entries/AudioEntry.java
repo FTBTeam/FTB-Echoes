@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Optional;
 
 public record AudioEntry(ResourceLocation location, Optional<Component> text) implements BaseStageEntry {
-    public static String ID = "audio";
+    public static final String ID = "audio";
 
     public static final MapCodec<AudioEntry> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("location").forGetter(AudioEntry::location),

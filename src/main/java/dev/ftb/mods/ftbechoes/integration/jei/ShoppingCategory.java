@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbechoes.integration.jei;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftbechoes.client.ShopSummary;
 import dev.ftb.mods.ftbechoes.registry.ModBlocks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static dev.ftb.mods.ftbechoes.integration.jei.FTBEchoesJEIPlugin.guiHelper;
 
-public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
+public class ShoppingCategory implements IRecipeCategory<ShopSummary.SummaryItem> {
     private static final ResourceLocation BG_TEXTURE = FTBEchoes.id("textures/gui/jei_shopping.png");
     public static final ResourceLocation MONEY_BAG = ResourceLocation.fromNamespaceAndPath("ftblibrary", "textures/icons/money_bag.png");
     private static final int OUTPUT_SLOTS = 4;
@@ -38,7 +39,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
     }
 
     @Override
-    public RecipeType<ShopDataSummary> getRecipeType() {
+    public RecipeType<ShopSummary.SummaryItem> getRecipeType() {
         return RecipeTypes.SHOPPING;
     }
 
@@ -53,7 +54,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, ShopDataSummary recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder, ShopSummary.SummaryItem recipe, IFocusGroup focuses) {
         for (int i = 0; i < OUTPUT_SLOTS; i++) {
             IRecipeSlotBuilder b = builder.addOutputSlot(42 + i * 18, 8);
             if (i < recipe.data().stacks().size()) {
@@ -63,7 +64,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
     }
 
     @Override
-    public void draw(ShopDataSummary recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(ShopSummary.SummaryItem recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         background.draw(guiGraphics);
 
         moneyIcon.draw(guiGraphics, 5, 8);
@@ -82,7 +83,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopDataSummary> {
     }
 
     @Override
-    public void getTooltip(ITooltipBuilder tooltip, ShopDataSummary recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+    public void getTooltip(ITooltipBuilder tooltip, ShopSummary.SummaryItem recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
         recipe.data().stacks().forEach(stack ->
                 tooltip.add(stack.getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
         );

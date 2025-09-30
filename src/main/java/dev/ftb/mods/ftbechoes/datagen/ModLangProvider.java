@@ -27,7 +27,10 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.shopping_basket", "Shopping Basket");
         add("ftbechoes.gui.claim_reward", "Claim Reward");
         add("ftbechoes.gui.stage", "Stage %s");
-        add("ftbechoes.gui.scroll_to_stage", "Scroll to Stage");
+        add("ftbechoes.gui.stages", "Stages");
+        add("ftbechoes.gui.collapse_all", "Collapse All");
+        add("ftbechoes.gui.expand_all", "Expand All");
+        add("ftbechoes.gui.all_complete", "All Stages Complete!");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
@@ -40,13 +43,14 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.commands.reward_reset.failed", "Could not reset reward - player has not claimed it?");
 
         add("ftbechoes.message.complete_stage", "Complete Stage");
-        add("ftbechoes.message.all_complete", "All Stages Complete!");
         add("ftbechoes.message.purchase_success", "Purchase Completed!");
         add("ftbechoes.message.purchase_success.2", "Payment Taken: %s");
         add("ftbechoes.message.purchase_failed", "Purchase Failed!");
         add("ftbechoes.message.no_echo", "No Echo Configured");
         add("ftbechoes.message.reward_claimed", "Reward Claimed!");
         add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
+        add("ftbechoes.message.echo_complete", "Echo %s: All stages complete!");
+        add("ftbechoes.message.echo_stage_complete", "Echo %s: stage %s complete!");
 
         add("ftbechoes.tooltip.locked", "Not unlocked yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");

@@ -14,7 +14,7 @@ import net.minecraft.util.StringRepresentable;
 import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 public record ImageEntry(ResourceLocation location, int width, int height, Alignment alignment) implements BaseStageEntry {
-    public static String ID = "image";
+    public static final String ID = "image";
 
     public static final MapCodec<ImageEntry> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("location").forGetter(ImageEntry::location),

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.echo.Echo;
@@ -12,6 +13,7 @@ import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.Key;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.ui.misc.AbstractThreePanelScreen;
 import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
@@ -32,6 +34,9 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
+    private static final Icon COLLAPSE_ICON = Icon.getIcon(Textures.COLLAPSE);
+    private static final Icon EXPAND_ICON = Icon.getIcon(Textures.EXPAND);
+
     static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
 
     private final BlockPos projectorPos;
@@ -86,7 +91,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     @Override
     protected MainPanel createMainPanel() {
-        return new MainPanel(this);
+        return new MainPanel();
     }
 
     @Override
@@ -137,7 +142,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void addMouseOverText(TooltipList list) {
             super.addMouseOverText(list);
 
-            if (!ShoppingBasket.CLIENT_INSTANCE.isEmpty()) {
+            if (ShoppingBasket.CLIENT_INSTANCE.hasContents()) {
                 list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
                     List<MutableComponent> lines = new ArrayList<>();
@@ -167,7 +172,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public boolean isEnabled() {
-            return !ShoppingBasket.CLIENT_INSTANCE.isEmpty()
+            return ShoppingBasket.CLIENT_INSTANCE.hasContents()
                     && currentPage == Page.SHOP
                     && ShoppingBasket.CLIENT_INSTANCE.getTotalCost() <= FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player);
         }
@@ -189,7 +194,6 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             label = new TextField(this);
             settingsButton = SimpleTextButton.create(this, Component.empty(), Icons.SETTINGS, this::showEchoSelector);
             buttons.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
-            buttons.put(EchoScreen.Page.TASKS, new EchoScreen.PageButton(EchoScreen.Page.TASKS, this, Icons.CHAT));
             buttons.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
 
             // only show selector drop-down after at least one stage has been completed
@@ -210,7 +214,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             } else {
                 add(label.setText(Component.empty().withStyle(ChatFormatting.YELLOW).append(echo.title())));
             }
-            for (EchoScreen.Page p : EchoScreen.Page.values()) {
+            for (EchoScreen.Page p : buttons.keySet()) {
                 add(buttons.get(p));
             }
         }
@@ -224,7 +228,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             int bw = width / (buttons.size() + 1) - 4;
             int by = getTheme().getFontHeight() + 8;
-            for (EchoScreen.PageButton w : buttons.values()) {
+            for (PageButton w : buttons.values()) {
                 w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), by, bw, height - by);
             }
         }
@@ -234,10 +238,22 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             super.drawBackground(graphics, theme, x, y, w, h);
             int col = 0xff585d66;  // blends best with tabbed outline
             graphics.hLine(x, x + buttons.get(Page.LORE).posX - 1, y + height - 2, col);
-            graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.TASKS).posX - 1, y + height - 2, col);
-            graphics.hLine(x + buttons.get(Page.TASKS).posX + buttons.get(Page.TASKS).width, x + buttons.get(Page.SHOP).posX - 1, y + height - 2, col);
+            graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.SHOP).posX - 1, y + height - 2, col);
             graphics.hLine(x + buttons.get(Page.SHOP).posX + buttons.get(Page.SHOP).width, x + width - 1, y + height - 2, col);
             graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
+        }
+
+        @Override
+        public boolean keyPressed(Key key) {
+            if (key.is(InputConstants.KEY_ADD) || key.is(InputConstants.KEY_EQUALS)) {
+                collapseAll(false);
+                return true;
+            } else if (key.is(InputConstants.KEY_MINUS) || key.is(333) /* KP_SUBTRACT */) {
+                collapseAll(true);
+                return true;
+            } else {
+                return super.keyPressed(key);
+            }
         }
 
         private void showEchoSelector(MouseButton mb) {
@@ -251,7 +267,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private void showStageSelector() {
             openContextMenu(Util.make(new ArrayList<>(), list -> {
-                        list.add(ContextMenuItem.title(Component.translatable("ftbechoes.gui.scroll_to_stage")));
+                        list.add(ContextMenuItem.title(Component.translatable("ftbechoes.gui.stages")));
                         list.add(ContextMenuItem.separator());
                         for (int i = 0; i < echo.stages().size(); i++) {
                             final int stageIdx = i;
@@ -259,6 +275,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                                 list.add(new ContextMenuItem(echo.stages().get(stageIdx).title(), Icons.BLUE_BUTTON, btn -> scrollToStage(stageIdx)));
                             }
                         }
+                        list.add(ContextMenuItem.separator());
+                        list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.expand_all")
+                                .append(Component.literal(" [+]").withStyle(ChatFormatting.GRAY)),
+                                EXPAND_ICON, btn -> collapseAll(false)));
+                        list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.collapse_all")
+                                .append(Component.literal(" [-]").withStyle(ChatFormatting.GRAY)),
+                                COLLAPSE_ICON, btn -> collapseAll(true)));
                     }
             ));
         }
@@ -271,7 +294,17 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private void scrollToStage(int stageIdx) {
             if (EchoScreen.this.mainPanel.pages.get(Page.LORE) instanceof LorePanel lorePanel) {
+                if (lorePanel.isCollapsed(stageIdx)) {
+                    lorePanel.setCollapsed(stageIdx, false);
+                }
                 EchoScreen.this.scrollBar.setValue(lorePanel.getScrollPos(stageIdx));
+            }
+        }
+
+        private void collapseAll(boolean collapse) {
+            playClickSound();
+            if (EchoScreen.this.mainPanel.pages.get(Page.LORE) instanceof LorePanel lorePanel) {
+                lorePanel.setAllCollapsed(collapse);
             }
         }
 
@@ -280,15 +313,14 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
-    public static class MainPanel extends Panel {
+    public class MainPanel extends Panel {
         private final Map<Page, PagePanel> pages = new EnumMap<>(Page.class);
 
-        public MainPanel(EchoScreen screen) {
-            super(screen);
+        public MainPanel() {
+            super(EchoScreen.this);
 
-            pages.put(Page.LORE, new LorePanel(this, screen));
-            pages.put(Page.TASKS, new TaskPanel(this, screen));
-            pages.put(Page.SHOP, new ShopPanel(this, screen));
+            pages.put(Page.LORE, new LorePanel(this, EchoScreen.this));
+            pages.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
         }
 
         @Override
@@ -302,6 +334,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 p.setPosAndSize(0, 0, width, height);
                 p.alignWidgets();
             });
+            if (getContentHeight() <= getHeight()) {
+                EchoScreen.this.scrollBar.setValue(0.0);
+            }
         }
 
         @Override
@@ -400,13 +435,16 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             return lastScrollPos;
         }
 
+        public void scrollToTop() {
+            echoScreen.scrollBar.setValue(0.0);
+        }
+
         public void onSwitchAway() {
         }
     }
 
     public enum Page {
         LORE("lore"),
-        TASKS("tasks"),
         SHOP("shop");
 
         private final String name;

@@ -14,8 +14,4 @@ public class ModSounds {
     private static DeferredHolder<SoundEvent,SoundEvent> register(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(FTBEchoes.id(name)));
     }
-
-    private static DeferredHolder<SoundEvent,SoundEvent> registerFixed(String name, float range) {
-        return SOUNDS.register(name, () -> SoundEvent.createFixedRangeEvent(FTBEchoes.id(name), range));
-    }
 }

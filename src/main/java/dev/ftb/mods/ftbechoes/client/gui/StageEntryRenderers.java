@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbechoes.client;
+package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.client.gui.widget.AudioButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
@@ -37,6 +37,7 @@ public class StageEntryRenderers {
         void addWidgets(Consumer<Widget> widgetAdder, BaseStageEntry entry, Panel panel);
 
         default T cast(BaseStageEntry entry) {
+            //noinspection unchecked
             return (T) entry;
         }
     }

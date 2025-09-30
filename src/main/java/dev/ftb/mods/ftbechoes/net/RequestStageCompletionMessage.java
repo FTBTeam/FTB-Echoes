@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbechoes.net;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
-import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,12 +24,11 @@ public record RequestStageCompletionMessage(ResourceLocation echoId) implements 
     }
 
     public static void handleData(RequestStageCompletionMessage message, IPayloadContext context) {
-        if (context.player() instanceof ServerPlayer sp) {
-            FTBTeamsAPI.api().getManager().getTeamForPlayer(sp).ifPresent(team -> {
-                TeamProgress progress = TeamProgressManager.get().getProgress(team);
-                EchoManager.getServerInstance().getEcho(message.echoId)
-                        .ifPresent(echo -> progress.advance(sp, team, echo));
-            });
+        if (context.player() instanceof ServerPlayer sp && sp.getServer() != null) {
+            FTBTeamsAPI.api().getManager().getTeamForPlayer(sp).ifPresent(team ->
+                    EchoManager.getServerInstance().getEcho(message.echoId)
+                            .ifPresent(echo -> TeamProgressManager.get(sp.getServer()).tryCompleteStage(sp, team, echo))
+            );
         }
     }
 }

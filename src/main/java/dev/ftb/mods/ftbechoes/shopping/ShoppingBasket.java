@@ -47,8 +47,8 @@ public class ShoppingBasket {
         return orders.getOrDefault(key, 0);
     }
 
-    public boolean isEmpty() {
-        return orders.isEmpty();
+    public boolean hasContents() {
+        return !orders.isEmpty();
     }
 
     public void clear() {

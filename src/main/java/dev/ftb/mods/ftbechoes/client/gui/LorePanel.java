@@ -2,14 +2,19 @@ package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
-import dev.ftb.mods.ftbechoes.client.StageEntryRenderers;
+import dev.ftb.mods.ftbechoes.client.PersistedClientData;
 import dev.ftb.mods.ftbechoes.client.gui.widget.*;
+import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
+import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -36,48 +41,47 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
 
             for (int stageIdx = 0; stageIdx <= limit; stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
+                Component title = Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(stage.title());
+                Widget titleWidget = new CollapsibleSectionTitle(title, stageIdx);
+                add(titleWidget);
+                jumpPointWidgets.add(titleWidget);
 
-                if (stage.showTitleInLore()) {
-                    TextField titleWidget = new TextField(this).setText(Component.empty().withColor(Color4I.LIGHT_GREEN.rgb()).append(stage.title()));
-                    add(titleWidget);
-                    jumpPointWidgets.add(titleWidget);
+                boolean collapsed = PersistedClientData.get().isStageCollapsed(echo, stageIdx);
+                if (!collapsed) {
+                    List<Widget> loreLines = new ArrayList<>();
+                    stage.lore().forEach(entry ->
+                            StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(loreLines::add, entry, this))
+                    );
+                    addAll(loreLines);
+
+                    vSpace(5);
                 }
-
-                List<Widget> loreLines = new ArrayList<>();
-                stage.lore().forEach(entry ->
-                        StageEntryRenderers.get(entry).ifPresent(r -> r.addWidgets(loreLines::add, entry, this))
-                );
-                if (!stage.showTitleInLore()) {
-                    // if title is hidden, stage scroll point is the first line of lore
-                    jumpPointWidgets.add(loreLines.getFirst());
-                }
-                addAll(loreLines);
-
-                vSpace(5);
-
                 if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
                     if (FTBEchoes.stageProvider().has(player, stage.requiredGameStage())) {
-                        add(new TextField(this).setText(stage.ready()));
-                        add(new CompleteStageButton(this, echo.id()));
+                        if (!collapsed) {
+                            add(new TextField(this).setText(stage.ready()));
+                        }
+                        add(new CompleteStageButton(this, echo, stageIdx));
                     } else {
                         add(new TextField(this).setText(stage.notReady()));
                     }
                 }
                 if (stageIdx < currentStage) {
                     Component txt = stage.completed().orElse(Component.translatable("ftbechoes.gui.stage_completed"));
-                    add(new TextField(this).setText(Component.empty().withStyle(ChatFormatting.GRAY).append(txt)));
+                    add(new TextField(this).setText(Component.empty().withStyle(ChatFormatting.GREEN).append(txt)));
                     if (stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
                         add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
                     }
                 }
+
                 if (stageIdx < limit) {
-                    add(new HorizontalLineWidget(this, 0.75f));
+                    add(new HorizontalLineWidget(this, 0.85f));
                 }
             }
 
             if (allCompleted) {
-                add(new HorizontalLineWidget(this, 0.75f));
-                Component msg = echo.allComplete().orElse(Component.translatable("ftbechoes.message.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE));
+                add(new HorizontalLineWidget(this, 0.85f));
+                Component msg = echo.allComplete().orElse(Component.translatable("ftbechoes.gui.all_complete").withStyle(ChatFormatting.LIGHT_PURPLE));
                 add(new TextField(this).setText(msg).setScale(1.25f).addFlags(Theme.CENTERED));
             }
 
@@ -88,7 +92,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
     @Override
     public void alignWidgets() {
         widgets.forEach(w -> {
-            w.setX(5);
+            w.setX(w instanceof CollapsibleSectionTitle ? 5 : 15);
             if (w instanceof ImageButton im) {
                 int xPos = switch (im.getAlignment()) {
                     case LEFT -> 5;
@@ -130,5 +134,56 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             return jumpPointWidgets.get(stageIdx).getPosY() - 2;
         }
         return 0;
+    }
+
+    public boolean isCollapsed(int stageIdx) {
+        return getEcho().map(e -> PersistedClientData.get().isStageCollapsed(e, stageIdx)).orElse(false);
+    }
+
+    public void setCollapsed(int stageIdx, boolean collapsed) {
+        getEcho().ifPresent(echo -> {
+            if (PersistedClientData.get().setStageCollapsed(echo, stageIdx, collapsed)) {
+                refreshWidgets();
+            }
+        });
+    }
+
+    public void setAllCollapsed(boolean collapse) {
+        getEcho().ifPresent(echo -> {
+            for (int i = 0; i < echo.stages().size(); i++) {
+                PersistedClientData.get().setStageCollapsed(echo, i, collapse);
+            }
+            refreshWidgets();
+        });
+    }
+
+    private class CollapsibleSectionTitle extends SimpleTextButton {
+        private final int stageIdx;
+
+        public CollapsibleSectionTitle(Component title, int stageIdx) {
+            super(LorePanel.this, title, Icon.empty());
+
+            setSize(getGui().getTheme().getStringWidth(title) + 25, getGui().getTheme().getFontHeight() + 7);
+            this.stageIdx = stageIdx;
+        }
+
+        @Override
+        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        }
+
+        @Override
+        public void onClicked(MouseButton mouseButton) {
+            playClickSound();
+            Echo echo = getEcho().orElseThrow();
+            PersistedClientData pcd = PersistedClientData.get();
+            pcd.setStageCollapsed(echo, stageIdx, !pcd.isStageCollapsed(echo, stageIdx));
+            LorePanel.this.refreshWidgets();
+        }
+
+        @Override
+        public Component getTitle() {
+            MutableComponent arrow = Component.literal(PersistedClientData.get().isStageCollapsed(getEcho().orElseThrow(), stageIdx) ? "▶ " : "▼ ");
+            return arrow.append(super.getTitle());
+        }
     }
 }

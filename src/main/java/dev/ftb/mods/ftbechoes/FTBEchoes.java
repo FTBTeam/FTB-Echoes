@@ -5,7 +5,6 @@ import dev.ftb.mods.ftbechoes.config.FTBEchoesServerConfig;
 import dev.ftb.mods.ftbechoes.datagen.DataGenerators;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
-import dev.ftb.mods.ftbechoes.net.SyncGameStageMessage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.registry.*;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
@@ -108,8 +107,9 @@ public class FTBEchoes {
         var server = Objects.requireNonNull(player.getServer());
         var progress = TeamProgressManager.get(server).getProgress(event.getTeam());
         PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
+
         if (FTBEchoesServerConfig.SYNC_STAGES.get()) {
-            PacketDistributor.sendToPlayer(player, SyncGameStageMessage.add(player.getTags()));
+            StageHelper.getInstance().getProvider().sync(player);
         }
     }
 

@@ -3,10 +3,10 @@ package dev.ftb.mods.ftbechoes.client.gui.widget;
 import dev.ftb.mods.ftbechoes.client.gui.AudioButtonHolder;
 import dev.ftb.mods.ftbechoes.client.gui.Textures;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
@@ -23,6 +23,12 @@ public class AudioButton extends SimpleTextButton {
         super(panel, text, INACTIVE);
 
         this.sound = sound;
+    }
+
+    @Override
+    public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        theme.drawPanelBackground(graphics, x + 2, y + 3, w - 4, h - 6);
+        GuiHelper.drawHollowRect(graphics, x + 1, y + 2, w - 2, h - 4, theme.getContentColor(WidgetType.DISABLED), true);
     }
 
     @Override

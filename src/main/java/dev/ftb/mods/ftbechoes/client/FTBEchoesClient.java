@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbechoes.client;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
 import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
+import dev.ftb.mods.ftbechoes.client.gui.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
 import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
@@ -19,25 +20,25 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = FTBEchoes.MOD_ID, dist = Dist.CLIENT)
 public class FTBEchoesClient {
     public FTBEchoesClient(IEventBus modEventBus) {
-        modEventBus.addListener(FTBEchoesClient::clientSetup);
-
         NeoForge.EVENT_BUS.addListener(FTBEchoesClient::playerLoggedIn);
         NeoForge.EVENT_BUS.addListener(FTBEchoesClient::playerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(FTBEchoesClient::clientTick);
 
         modEventBus.addListener(FTBEchoesClient::registerRenderers);
 
         StageEntryRenderers.init();
     }
 
-    public static void clientSetup(FMLClientSetupEvent event) {
+    private static void clientTick(ClientTickEvent.Post event) {
+        PersistedClientData.get().save();
     }
 
     private static void playerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import dev.ftb.mods.ftbechoes.integration.jei.JEIShopSummary;
+import dev.ftb.mods.ftbechoes.client.ShopSummary;
 import dev.ftb.mods.ftbechoes.net.SyncEchoesMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShopDataCache;
@@ -32,6 +32,7 @@ public class EchoManager {
     private final ShopDataCache shoppingCache = new ShopDataCache(this);
 
     public static void initClient() {
+        assert serverInstance == null;
         if (clientInstance == null) {
             clientInstance = new EchoManager();
         }
@@ -45,6 +46,7 @@ public class EchoManager {
     }
 
     public static void initServer() {
+        assert clientInstance == null;
         if (serverInstance == null) {
             serverInstance = new EchoManager();
         }
@@ -86,7 +88,7 @@ public class EchoManager {
 
         clear();
         echoes.forEach(echo -> this.echoes.put(echo.id(), echo));
-        JEIShopSummary.INSTANCE.buildSummary();
+        ShopSummary.INSTANCE.buildSummary();
 
         FTBEchoes.LOGGER.debug("{} echoes sync'd from server", echoes.size());
     }

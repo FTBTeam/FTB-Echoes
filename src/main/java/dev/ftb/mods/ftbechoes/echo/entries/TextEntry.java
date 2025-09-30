@@ -11,7 +11,7 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 
 public record TextEntry(Component text) implements BaseStageEntry {
-    public static String ID = "text";
+    public static final String ID = "text";
 
     public static final MapCodec<TextEntry> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
             ComponentSerialization.CODEC.fieldOf("text").forGetter(TextEntry::text)

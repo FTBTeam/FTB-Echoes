@@ -31,7 +31,7 @@ public class ShopItemWidget extends Panel {
     private final Component tooltip;
     private final boolean isCommand;
 
-    public ShopItemWidget(Panel parent, Echo echo, ShopData data, int stageIdx, EchoStage stage, boolean unlocked) {
+    public ShopItemWidget(Panel parent, Echo echo, ShopData data, EchoStage stage, boolean unlocked) {
         super(parent);
 
         this.data = data;
