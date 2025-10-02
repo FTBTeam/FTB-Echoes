@@ -66,13 +66,13 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
         return stageIdx < getCurrentStage(id);
     }
 
-    public boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
-        return getPerEchoProgress(echoId).clearRewards(playerId);
-    }
-
     /****************************************************************************************
      * mutator methods below here are package-private and only called via TeamProgressManager
      */
+
+    public boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
+        return getPerEchoProgress(echoId).clearRewards(playerId);
+    }
 
     boolean resetReward(ResourceLocation echoId, UUID playerId, int stageIdx) {
         return getPerEchoProgress(echoId).setRewardClaimed(playerId, stageIdx, false);
