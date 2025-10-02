@@ -70,7 +70,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
      * mutator methods below here are package-private and only called via TeamProgressManager
      */
 
-    public boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
+    boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
         return getPerEchoProgress(echoId).clearRewards(playerId);
     }
 
