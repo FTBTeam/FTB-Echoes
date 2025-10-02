@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbechoes.registry.ModEntityTypes;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -38,6 +39,10 @@ public class FTBEchoesClient {
     }
 
     private static void clientTick(ClientTickEvent.Post event) {
+        if (!FTBTeamsAPI.api().isClientManagerLoaded()) {
+            return;
+        }
+
         PersistedClientData.get().save();
     }
 

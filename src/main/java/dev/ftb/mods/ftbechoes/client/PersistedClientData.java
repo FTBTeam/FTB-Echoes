@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.snbt.config.ConfigUtil;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -30,9 +31,10 @@ public class PersistedClientData {
             COLLAPSED_CODEC.fieldOf("collapsed").forGetter(p -> p.collapsedStages)
     ).apply(builder, PersistedClientData::new));
 
-    private static final String DATA_FILE = "ftbechoes-clientdata.snbt";
+    private static final String DATA_FILE = "clientdata-{id}.snbt";
 
     private static PersistedClientData INSTANCE;
+    private static UUID lastTeamId;
 
     private boolean saveNeeded = true;
     private final Map<ResourceLocation, Set<Integer>> collapsedStages;
@@ -46,8 +48,14 @@ public class PersistedClientData {
     }
 
     public static PersistedClientData get() {
+        var teamId = FTBTeamsAPI.api().getClientManager().getManagerId();
+        if (INSTANCE != null && !Objects.equals(lastTeamId, teamId)) {
+            INSTANCE = null; // team changed, reload data
+        }
+
         if (INSTANCE == null) {
-            Path file = ConfigUtil.LOCAL_DIR.resolve(DATA_FILE);
+            lastTeamId = teamId;
+            Path file = savePath();
             if (!Files.exists(file)) {
                 createNew().save();
             }
@@ -66,7 +74,7 @@ public class PersistedClientData {
 
     public void save() {
         if (saveNeeded) {
-            Path file = ConfigUtil.LOCAL_DIR.resolve(DATA_FILE);
+            Path file = savePath();
             try {
                 Tag tag = CODEC.encodeStart(NbtOps.INSTANCE, this).resultOrPartial(FTBEchoes.LOGGER::error).orElse(new CompoundTag());
                 if (tag instanceof CompoundTag c) {
@@ -98,5 +106,10 @@ public class PersistedClientData {
             return true;
         }
         return false;
+    }
+
+    private static Path savePath() {
+        var teamId = FTBTeamsAPI.api().getClientManager().getManagerId();
+        return ConfigUtil.LOCAL_DIR.resolve("ftbechos").resolve(DATA_FILE.replace("{id}", teamId == null ? "default" : teamId.toString()));
     }
 }
