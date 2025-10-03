@@ -41,6 +41,7 @@
   "ftbechoes.tooltip.claimed": "Already claimed allowed amount.",
   "ftbechoes.tooltip.locked": "Not unlocked yet!",
   "ftbechoes.tooltip.reward_header": "Reward",
+  "ftbechoes.tooltip.stock": "Stock",
   "ftbechoes.tooltip.too_expensive": "Too Expensive! Can't place order",
   "ftbechoes.tooltip.total_cost": "Total Cost: %s",
   "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s"

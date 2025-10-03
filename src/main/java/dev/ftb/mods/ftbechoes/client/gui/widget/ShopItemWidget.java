@@ -105,7 +105,7 @@ public class ShopItemWidget extends Panel {
             pose.pushPose();
             pose.translate(x + 4, y + 4, 0);
             pose.scale(0.70F, 0.70F, 1F);
-            theme.drawString(graphics, Component.literal("Stock "), 0, 0, theme.getContentColor(WidgetType.NORMAL).withAlpha(200), 0);
+            theme.drawString(graphics, Component.translatable("ftbechoes.tooltip.stock"), 0, 0, theme.getContentColor(WidgetType.NORMAL).withAlpha(200), 0);
             pose.popPose();
             theme.drawString(graphics, Component.literal(String.valueOf(getRemainingLimit())), x + 4, y + 12, theme.getContentColor(WidgetType.NORMAL), 0);
         }
