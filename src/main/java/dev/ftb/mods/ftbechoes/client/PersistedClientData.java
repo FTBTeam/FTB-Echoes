@@ -34,7 +34,6 @@ public class PersistedClientData {
     private static final String DATA_FILE = "clientdata-{id}.snbt";
 
     private static PersistedClientData INSTANCE;
-    private static UUID lastTeamId;
 
     private boolean saveNeeded = true;
     private final Map<ResourceLocation, Set<Integer>> collapsedStages;
@@ -48,13 +47,7 @@ public class PersistedClientData {
     }
 
     public static PersistedClientData get() {
-        var teamId = FTBTeamsAPI.api().getClientManager().getManagerId();
-        if (INSTANCE != null && !Objects.equals(lastTeamId, teamId)) {
-            INSTANCE = null; // team changed, reload data
-        }
-
         if (INSTANCE == null) {
-            lastTeamId = teamId;
             Path file = savePath();
             if (!Files.exists(file)) {
                 createNew().save();
@@ -108,8 +101,12 @@ public class PersistedClientData {
         return false;
     }
 
+    public static void refreshInstance() {
+        INSTANCE = null;
+    }
+
     private static Path savePath() {
         var teamId = FTBTeamsAPI.api().getClientManager().getManagerId();
-        return ConfigUtil.LOCAL_DIR.resolve("ftbechos").resolve(DATA_FILE.replace("{id}", teamId == null ? "default" : teamId.toString()));
+        return ConfigUtil.LOCAL_DIR.resolve(FTBEchoes.MOD_ID).resolve(DATA_FILE.replace("{id}", teamId == null ? "default" : teamId.toString()));
     }
 }

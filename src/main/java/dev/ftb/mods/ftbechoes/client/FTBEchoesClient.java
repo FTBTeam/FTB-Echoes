@@ -18,44 +18,47 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 @Mod(value = FTBEchoes.MOD_ID, dist = Dist.CLIENT)
 public class FTBEchoesClient {
     public FTBEchoesClient(IEventBus modEventBus) {
-        NeoForge.EVENT_BUS.addListener(FTBEchoesClient::playerLoggedIn);
-        NeoForge.EVENT_BUS.addListener(FTBEchoesClient::playerLoggedOut);
-        NeoForge.EVENT_BUS.addListener(FTBEchoesClient::clientTick);
+        NeoForge.EVENT_BUS.addListener(this::playerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(this::playerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(this::clientTick);
 
-        modEventBus.addListener(FTBEchoesClient::registerRenderers);
+        modEventBus.addListener(this::registerRenderers);
 
         StageEntryRenderers.init();
     }
 
-    private static void clientTick(ClientTickEvent.Post event) {
-        if (!FTBTeamsAPI.api().isClientManagerLoaded()) {
+    private void clientTick(LevelTickEvent.Post event) {
+        Level level = event.getLevel();
+        if (!level.isClientSide() || !FTBTeamsAPI.api().isClientManagerLoaded()) {
             return;
         }
 
         PersistedClientData.get().save();
     }
 
-    private static void playerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
+    private void playerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
         EchoManager.initClient();
     }
 
-    private static void playerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+    private void playerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         EchoManager.shutdownClient();
         ShoppingBasket.CLIENT_INSTANCE.clear();
+        PersistedClientData.refreshInstance();
     }
 
-    private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+    private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntityTypes.ECHO_PROJECTOR.get(), EchoProjectorRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.ECHO.get(), EchoEntityRenderer::new);
     }
