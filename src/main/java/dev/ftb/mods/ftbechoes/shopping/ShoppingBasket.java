@@ -66,7 +66,7 @@ public class ShoppingBasket {
 
     public void giveTo(ServerPlayer player) {
         EchoManager mgr = EchoManager.getServerInstance();
-        orders.forEach((key, nOrders) -> mgr.getShopData(key).ifPresent(data -> data.giveTo(player, nOrders)));
+        orders.forEach((key, nOrders) -> mgr.getShopData(key).ifPresent(data -> data.giveTo(key, player, nOrders)));
     }
 
     /**
@@ -83,7 +83,9 @@ public class ShoppingBasket {
             TeamProgressManager.get(player.getServer()).getProgress(player).ifPresent(progress -> {
                 EchoManager mgr = EchoManager.getServerInstance();
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
-                    if (progress.isStageCompleted(key.echoId(), entry.stageIdx())) {
+                    // If the claim is limited, make sure we don't exceed the allowed number
+                    boolean isWithinAllowedLimit = entry.data().maxClaims().isEmpty() || progress.getRemainingLimitedShopPurchases(key, entry.data()) >= amount;
+                    if (isWithinAllowedLimit && progress.isStageCompleted(key.echoId(), entry.stageIdx())) {
                         map.put(key, amount);
                     }
                 }));

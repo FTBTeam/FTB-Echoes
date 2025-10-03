@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
+import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import net.minecraft.ChatFormatting;
@@ -36,7 +37,7 @@ public class TeamProgressManager extends SavedData {
     private static final String SAVE_NAME = FTBEchoes.MOD_ID + "_progress";
 
     // serialization!  using xmap here, so we get mutable hashmaps in the live manager
-    private static final Codec<Map<UUID,TeamProgress>> PROGRESS_CODEC
+    private static final Codec<Map<UUID, TeamProgress>> PROGRESS_CODEC
             = Codec.unboundedMap(UUIDUtil.STRING_CODEC, TeamProgress.CODEC).xmap(HashMap::new, Map::copyOf);
 
     public static final Codec<TeamProgressManager> CODEC = RecordCodecBuilder.create(builder -> builder.group(
@@ -76,10 +77,13 @@ public class TeamProgressManager extends SavedData {
 
     @Override
     public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
-        return Util.make(new CompoundTag(), tag ->
-                tag.put("progress", CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this)
-                        .resultOrPartial(err -> FTBEchoes.LOGGER.error("failed to serialize progress data: {}", err))
-                        .orElse(new CompoundTag())));
+        return Util.make(new CompoundTag(), tag -> {
+            var t = CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this)
+                    .resultOrPartial(err -> FTBEchoes.LOGGER.error("failed to serialize progress data: {}", err))
+                    .orElse(new CompoundTag());
+
+            tag.put("progress", t);
+        });
     }
 
     public Optional<TeamProgress> getProgress(ServerPlayer sp) {
@@ -140,6 +144,13 @@ public class TeamProgressManager extends SavedData {
 
     public boolean resetAllRewards(UUID playerId, ResourceLocation echoId) {
         return applyChange(playerId, progress -> progress.resetAllRewards(echoId, playerId));
+    }
+
+    public void consumeLimitedShopPurchase(ServerPlayer player, ShoppingKey key, int count) {
+        applyChange(player, progress -> {
+            progress.consumeLimitedShopPurchase(key, count);
+            return true;
+        });
     }
 
     private boolean applyChange(UUID playerId, Function<TeamProgress, Boolean> task) {

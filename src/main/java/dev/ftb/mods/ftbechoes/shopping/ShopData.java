@@ -4,8 +4,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.echo.CommandInfo;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbechoes.util.EchoCodecs;
 import dev.ftb.mods.ftblibrary.icon.Icon;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -20,25 +23,27 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command) {
+public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command, Optional<Integer> maxClaims) {
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
             EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("cost", 1).forGetter(ShopData::cost),
             EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(ShopData::description),
             Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
-            CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command)
+            CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command),
+            Codec.INT.optionalFieldOf("max_claims").forGetter(ShopData::maxClaims)
     ).apply(builder, ShopData::new));
 
     public static final Codec<ShopData> CODEC = RAW_CODEC.validate(ShopData::validate);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = NetworkHelper.composite(
             ByteBufCodecs.STRING_UTF8, ShopData::name,
-            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
+            ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
             ByteBufCodecs.VAR_INT, ShopData::cost,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
             ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), ShopData::command,
+            ByteBufCodecs.optional(ByteBufCodecs.INT), ShopData::maxClaims,
             ShopData::new
     );
 
@@ -51,7 +56,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
         return DataResult.success(this);
     }
 
-    public void giveTo(ServerPlayer player, int nOrders) {
+    public void giveTo(ShoppingKey key, ServerPlayer player, int nOrders) {
         for (ItemStack stack : stacks()) {
             int total = stack.getCount() * nOrders;
             while (total > 0) {
@@ -61,6 +66,9 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
             }
         }
         command.ifPresent(cmdInfo -> cmdInfo.runForPlayer(player));
+        if (maxClaims().isPresent()) {
+            TeamProgressManager.get().consumeLimitedShopPurchase(player, key, nOrders);
+        }
     }
 
     @Override

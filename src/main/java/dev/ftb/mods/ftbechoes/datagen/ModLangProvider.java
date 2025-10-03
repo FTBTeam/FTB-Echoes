@@ -55,9 +55,11 @@ public class ModLangProvider extends LanguageProvider {
 
         add("ftbechoes.tooltip.locked", "Not unlocked yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
+        add("ftbechoes.tooltip.claimed", "Already claimed allowed amount.");
         add("ftbechoes.tooltip.total_cost", "Total Cost: %s");
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
         add("ftbechoes.tooltip.reward_header", "Reward");
+        add("ftbechoes.tooltip.stock", "Stock");
 
         add("ftbechoes.jei.shop.title", "Echo Shop");
         add("ftbechoes.jei.echo_title", "Sold by Echo: %s");
