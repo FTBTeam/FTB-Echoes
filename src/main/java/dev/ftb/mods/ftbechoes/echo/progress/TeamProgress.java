@@ -1,12 +1,13 @@
 package dev.ftb.mods.ftbechoes.echo.progress;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,10 +31,13 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
 
     private static final Codec<Map<ResourceLocation,PerEchoProgress>> ECHO_STAGE
             = Codec.unboundedMap(ResourceLocation.CODEC, PerEchoProgress.CODEC).xmap(HashMap::new, Map::copyOf);
+    public static final Codec<Map<ShoppingKey, Integer>> LIMITED_PURCHASE_CODEC
+            = Codec.list(Codec.pair(ShoppingKey.CODEC.fieldOf("key").codec(), Codec.INT.fieldOf("count").codec()))
+            .xmap(TeamProgress::toMap, TeamProgress::toList);
 
     public static final Codec<TeamProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ECHO_STAGE.fieldOf("per_echo").forGetter(p -> p.perEcho),
-            Codec.unboundedMap(ShoppingKey.CODEC, Codec.INT).fieldOf("limited_shop_purchases").forGetter(p -> p.limitedShopPurchases)
+            ECHO_STAGE.fieldOf("per_echo").forGetter(TeamProgress::perEcho),
+            LIMITED_PURCHASE_CODEC.fieldOf("limited_shop_purchases").forGetter(TeamProgress::limitedShopPurchases)
     ).apply(builder, TeamProgress::new));
 
     public static final Codec<TeamProgress> CODEC = RAW_CODEC.xmap(
@@ -47,6 +51,14 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
             ByteBufCodecs.map(HashMap::new, ShoppingKey.STREAM_CODEC, ByteBufCodecs.INT), p -> p.limitedShopPurchases,
             TeamProgress::new
     );
+
+    private static <K,V> Map<K,V> toMap(List<Pair<K,V>> list) {
+        return Util.make(new HashMap<>(), map -> list.forEach(pair -> map.put(pair.getFirst(), pair.getSecond())));
+    }
+
+    private static <K,V> List<Pair<K,V>> toList(Map<K,V> map) {
+        return Util.make(new ArrayList<>(), list -> map.forEach((k,v) -> list.add(Pair.of(k, v))));
+    }
 
     public static TeamProgress createNew() {
         return new TeamProgress(new HashMap<>(), new HashMap<>());
