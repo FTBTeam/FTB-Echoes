@@ -16,7 +16,7 @@
       "ready": "Well done! You are ready to finish stage 1",
       "required_stage": "echo1_stage1",
       "shop_unlock": [
-        { "name": "diamond_1", "item": { "id": "minecraft:diamond", "count": 10 }, "description": { "text": "Fancy jewels", "color":  "aqua"}, "cost": 5 },
+        { "name": "diamond_1", "item": { "id": "minecraft:diamond", "count": 10 }, "description": { "text": "Fancy jewels", "color":  "aqua"}, "cost": 5, "max_claims": 5 },
         { "name": "emerald_1","item": { "id": "minecraft:emerald", "count": 5 }, "cost": 3 },
         {
           "name": "nice_axe",
@@ -27,6 +27,7 @@
               "minecraft:enchantments":{ "levels": { "minecraft:sharpness": 3 } }
             }
           },
+          "max_claims": 5,
           "cost": 6
         }
       ],

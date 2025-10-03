@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.shopping.ShopData;
+import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,10 +16,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 
 /**
  * Progress for a given team. The record members are mutable internally, but only modified
@@ -24,28 +25,37 @@ import java.util.UUID;
  *
  * @param perEcho progress on an echo, by echo ID
  */
-public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
-    public static final TeamProgress NONE = new TeamProgress(Map.of());
+public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<ShoppingKey, Integer> limitedShopPurchases) {
+    public static final TeamProgress NONE = new TeamProgress(Map.of(), Map.of());
 
     private static final Codec<Map<ResourceLocation,PerEchoProgress>> ECHO_STAGE
             = Codec.unboundedMap(ResourceLocation.CODEC, PerEchoProgress.CODEC).xmap(HashMap::new, Map::copyOf);
 
-    public static final Codec<TeamProgress> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ECHO_STAGE.fieldOf("per_echo").forGetter(p -> p.perEcho)
+    public static final Codec<TeamProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            ECHO_STAGE.fieldOf("per_echo").forGetter(p -> p.perEcho),
+            Codec.unboundedMap(ShoppingKey.CODEC, Codec.INT).fieldOf("limited_shop_purchases").forGetter(p -> p.limitedShopPurchases)
     ).apply(builder, TeamProgress::new));
+
+    public static final Codec<TeamProgress> CODEC = RAW_CODEC.xmap(
+            // ensure maps are mutable after loading
+            in -> new TeamProgress(new HashMap<>(in.perEcho), new HashMap<>(in.limitedShopPurchases)),
+            Function.identity()
+    );
+
     public static final StreamCodec<FriendlyByteBuf, TeamProgress> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, PerEchoProgress.STREAM_CODEC), TeamProgress::perEcho,
+            ByteBufCodecs.map(HashMap::new, ShoppingKey.STREAM_CODEC, ByteBufCodecs.INT), p -> p.limitedShopPurchases,
             TeamProgress::new
     );
 
     public static TeamProgress createNew() {
-        return new TeamProgress(new HashMap<>());
+        return new TeamProgress(new HashMap<>(), new HashMap<>());
     }
 
     public TeamProgress forSyncTo(ServerPlayer player) {
         Map<ResourceLocation, PerEchoProgress> map = new HashMap<>();
         perEcho.forEach((id, rec) -> map.put(id, rec.forSyncToPlayer(player)));
-        return new TeamProgress(map);
+        return new TeamProgress(map, limitedShopPurchases);
     }
 
     @Override
@@ -69,6 +79,10 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
     /****************************************************************************************
      * mutator methods below here are package-private and only called via TeamProgressManager
      */
+
+    void consumeLimitedShopPurchase(ShoppingKey key, int count) {
+        limitedShopPurchases.merge(key, count, Integer::sum);
+    }
 
     boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
         return getPerEchoProgress(echoId).clearRewards(playerId);
@@ -107,5 +121,9 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho) {
     @NotNull
     private PerEchoProgress getPerEchoProgress(ResourceLocation echoId) {
         return perEcho.computeIfAbsent(echoId, k -> PerEchoProgress.createEmptyProgress());
+    }
+
+    public int getRemainingLimitedShopPurchases(ShoppingKey key, ShopData data) {
+        return data.maxClaims().orElse(0) - limitedShopPurchases.getOrDefault(key, 0);
     }
 }

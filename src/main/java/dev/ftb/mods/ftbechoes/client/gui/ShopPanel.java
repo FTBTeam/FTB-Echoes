@@ -3,13 +3,14 @@ package dev.ftb.mods.ftbechoes.client.gui;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ShopItemWidget;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Widget;
 
 import java.util.List;
 
-class ShopPanel extends EchoScreen.PagePanel {
+public class ShopPanel extends EchoScreen.PagePanel {
     public ShopPanel(Panel parent, EchoScreen echoScreen) {
         super(parent, echoScreen, EchoScreen.Page.SHOP);
     }
@@ -18,12 +19,13 @@ class ShopPanel extends EchoScreen.PagePanel {
     public void addWidgets() {
         getEcho().ifPresent(echo -> {
             List<EchoStage> stages = echo.stages();
-            int currentStage = ClientProgress.get().getCurrentStage(echo.id());
+            TeamProgress teamProgress = ClientProgress.get();
+            int currentStage = teamProgress.getCurrentStage(echo.id());
 
             for (int stageIdx = 0; stageIdx < stages.size(); stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
                 for (ShopData data : stage.shopUnlocked()) {
-                    add(new ShopItemWidget(this, echo, data, stage, stageIdx < currentStage));
+                    add(new ShopItemWidget(this, echo, data, stage, stageIdx < currentStage, teamProgress));
                 }
             }
         });

@@ -38,6 +38,7 @@
   "ftbechoes.message.reward_claimed": "Reward Claimed!",
   "ftbechoes.message.reward_not_claimed": "Reward could not be claimed!",
   "ftbechoes.subtitle.coins_clink": "Coins clink",
+  "ftbechoes.tooltip.claimed": "Already claimed allowed amount.",
   "ftbechoes.tooltip.locked": "Not unlocked yet!",
   "ftbechoes.tooltip.reward_header": "Reward",
   "ftbechoes.tooltip.too_expensive": "Too Expensive! Can't place order",

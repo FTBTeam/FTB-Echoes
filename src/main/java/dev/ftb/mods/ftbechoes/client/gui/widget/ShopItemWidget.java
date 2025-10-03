@@ -1,7 +1,9 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
@@ -16,6 +18,7 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 public class ShopItemWidget extends Panel {
@@ -30,19 +33,25 @@ public class ShopItemWidget extends Panel {
     private final Component costStr;
     private final Component tooltip;
     private final boolean isCommand;
+    private final TeamProgress teamProgress;
 
-    public ShopItemWidget(Panel parent, Echo echo, ShopData data, EchoStage stage, boolean unlocked) {
+    public ShopItemWidget(Panel parent, Echo echo, ShopData data, EchoStage stage, boolean unlocked, TeamProgress teamProgress) {
         super(parent);
 
         this.data = data;
         this.unlocked = unlocked;
+        this.teamProgress = teamProgress;
 
         key = ShoppingKey.of(echo, data);
         costStr = MiscUtil.formatCost(data.cost());
 
-        tooltip = unlocked ?
-                Component.translatable("ftbechoes.tooltip.unlocked_by", stage.title().copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY) :
-                Component.translatable("ftbechoes.tooltip.locked");
+        if (data.maxClaims().isPresent() && getRemainingLimit() <= 0) {
+            tooltip = Component.translatable("ftbechoes.tooltip.claimed");
+        } else {
+            tooltip = unlocked ?
+                    Component.translatable("ftbechoes.tooltip.unlocked_by", stage.title().copy().withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY) :
+                    Component.translatable("ftbechoes.tooltip.locked");
+        }
 
         setSize(WIDGET_SIZE, WIDGET_SIZE);
 
@@ -69,7 +78,10 @@ public class ShopItemWidget extends Panel {
 
     private void adjustAmount(int adjustment) {
         if (unlocked) {
-            ShoppingBasket.CLIENT_INSTANCE.adjust(key, adjustment * (ScreenWrapper.hasShiftDown() ? 10 : 1), isCommand ? 1 : Integer.MAX_VALUE);
+            ShoppingBasket.CLIENT_INSTANCE.adjust(
+                    key,
+                    adjustment * (ScreenWrapper.hasShiftDown() ? 10 : 1),
+                    isCommand ? 1 : data.maxClaims().map((max) -> getRemainingLimit()).orElse(Integer.MAX_VALUE));
         }
     }
 
@@ -83,12 +95,22 @@ public class ShopItemWidget extends Panel {
         super.draw(graphics, theme, x, y, w, h);
 
         Component amountStr = Component.literal(String.valueOf(ShoppingBasket.CLIENT_INSTANCE.get(key)));
+
         int sx = 16 + (32 - theme.getStringWidth(amountStr)) / 2;
         theme.drawString(graphics, amountStr, x + sx, y + height - INC_BTN_SIZE, theme.getContentColor(WidgetType.NORMAL), 0);
 
         theme.drawString(graphics, costStr, x + width - theme.getStringWidth(costStr) - 4, y + 4, theme.getContentColor(WidgetType.NORMAL), 0);
+        if (data.maxClaims().isPresent()) {
+            PoseStack pose = graphics.pose();
+            pose.pushPose();
+            pose.translate(x + 4, y + 4, 0);
+            pose.scale(0.70F, 0.70F, 1F);
+            theme.drawString(graphics, Component.literal("Stock "), 0, 0, theme.getContentColor(WidgetType.NORMAL).withAlpha(200), 0);
+            pose.popPose();
+            theme.drawString(graphics, Component.literal(String.valueOf(getRemainingLimit())), x + 4, y + 12, theme.getContentColor(WidgetType.NORMAL), 0);
+        }
 
-        if (!unlocked) {
+        if (!unlocked || (data.maxClaims().isPresent() && getRemainingLimit() <= 0)) {
             graphics.pose().translate(0, 0, 300);
             Color4I.DARK_GRAY.withAlpha(160).draw(graphics, x, y, w, h);
             graphics.pose().translate(0, 0, -300);
@@ -105,10 +127,16 @@ public class ShopItemWidget extends Panel {
         }
     }
 
+    int getRemainingLimit() {
+        return data.maxClaims()
+                .map((max) -> teamProgress.getRemainingLimitedShopPurchases(key, data))
+                .orElse(Integer.MAX_VALUE);
+    }
+
     private class AdjustButton extends SimpleTextButton {
         private final boolean forward;
 
-        public AdjustButton(Panel panel, boolean forward) {
+        public AdjustButton(ShopItemWidget panel, boolean forward) {
             super(panel, Component.literal(forward ? "+": "-"), Icon.empty());
             this.forward = forward;
         }
@@ -120,7 +148,7 @@ public class ShopItemWidget extends Panel {
 
         @Override
         public boolean isEnabled() {
-            return unlocked;
+            return unlocked && ((ShopItemWidget)this.parent).getRemainingLimit() > 0;
         }
 
         @Override
