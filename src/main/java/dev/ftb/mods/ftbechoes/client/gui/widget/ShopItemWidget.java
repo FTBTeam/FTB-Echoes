@@ -18,7 +18,6 @@ import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 public class ShopItemWidget extends Panel {
@@ -104,7 +103,7 @@ public class ShopItemWidget extends Panel {
             PoseStack pose = graphics.pose();
             pose.pushPose();
             pose.translate(x + 4, y + 4, 0);
-            pose.scale(0.70F, 0.70F, 1F);
+            pose.scale(0.75F, 0.75F, 1F);
             theme.drawString(graphics, Component.translatable("ftbechoes.tooltip.stock"), 0, 0, theme.getContentColor(WidgetType.NORMAL).withAlpha(200), 0);
             pose.popPose();
             theme.drawString(graphics, Component.literal(String.valueOf(getRemainingLimit())), x + 4, y + 12, theme.getContentColor(WidgetType.NORMAL), 0);
