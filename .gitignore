@@ -23,3 +23,6 @@ eclipse
 run
 .vscode
 runs
+
+repo
+src/generated/resources/.cache
