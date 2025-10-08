@@ -92,18 +92,20 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
     @Override
     public void alignWidgets() {
         widgets.forEach(w -> {
+            int xPos = w instanceof CollapsibleSectionTitle ? 5 : 15;
+            int xWid = width - (w instanceof CollapsibleSectionTitle ? 10 : 20);
             w.setX(w instanceof CollapsibleSectionTitle ? 5 : 15);
             if (w instanceof ImageButton im) {
-                int xPos = switch (im.getAlignment()) {
-                    case LEFT -> 5;
-                    case CENTER -> (width - im.getWidth()) / 2;
-                    case RIGHT -> width - im.getWidth() - 5;
+                int imgX = switch (im.getAlignment()) {
+                    case LEFT -> xPos;
+                    case CENTER -> xPos + (xWid - im.getWidth()) / 2;
+                    case RIGHT -> xPos + xWid - im.getWidth() - 5;
                 };
-                im.setX(xPos);
+                im.setX(imgX);
             } else if (w instanceof TextField t) {
-                t.setWidth(width - 10);
-                t.setMinWidth(width - 10);
-                t.setMaxWidth(width - 10);
+                t.setWidth(xWid);
+                t.setMinWidth(xWid);
+                t.setMaxWidth(xWid);
                 t.reflow();
             }
         });
