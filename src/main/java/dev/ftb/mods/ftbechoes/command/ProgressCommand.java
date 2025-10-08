@@ -77,6 +77,28 @@ public class ProgressCommand {
                                         .executes(ctx -> resetAllProgress(ctx, TeamArgument.get(ctx, "team")))
                                 )
                         )
+                )
+                .then(literal("reset-stock")
+                        .then(literal("player")
+                                .then(argument("player", EntityArgument.player())
+                                        .then(argument("echo", EchoArgumentType.echo())
+                                                .executes(ctx -> resetShopStock(ctx,
+                                                        EntityArgument.getPlayer(ctx, "player"),
+                                                        EchoArgumentType.get(ctx, "echo")
+                                                ))
+                                        )
+                                )
+                        )
+                        .then(literal("team")
+                                .then(argument("team", TeamArgument.create())
+                                        .then(argument("echo", EchoArgumentType.echo())
+                                                .executes(ctx -> resetShopStock(ctx,
+                                                        TeamArgument.get(ctx, "team"),
+                                                        EchoArgumentType.get(ctx, "echo")
+                                                ))
+                                        )
+                                )
+                        )
                 );
     }
 
@@ -133,5 +155,23 @@ public class ProgressCommand {
         });
         ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.all_progress_reset", team.getColoredName()), false);
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resetShopStock(CommandContext<CommandSourceStack> ctx, ServerPlayer player, Echo echo) {
+        if (TeamProgressManager.get(ctx.getSource().getServer()).resetShopStock(player, echo.id())) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.shop_stock_reset", echo.id().toString()), false);
+            return Command.SINGLE_SUCCESS;
+        }
+        ctx.getSource().sendFailure(Component.translatable("ftbechoes.commands.shop_stock_reset.failed", echo.id().toString()).withStyle(ChatFormatting.RED));
+        return 0;
+    }
+
+    private static int resetShopStock(CommandContext<CommandSourceStack> ctx, Team team, Echo echo) {
+        if (TeamProgressManager.get(ctx.getSource().getServer()).resetShopStock(team, echo.id())) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.shop_stock_reset", echo.id().toString()), false);
+            return Command.SINGLE_SUCCESS;
+        }
+        ctx.getSource().sendFailure(Component.translatable("ftbechoes.commands.shop_stock_reset.failed", echo.id().toString()).withStyle(ChatFormatting.RED));
+        return 0;
     }
 }

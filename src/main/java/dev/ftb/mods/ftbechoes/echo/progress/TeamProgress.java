@@ -96,6 +96,10 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
         limitedShopPurchases.merge(key, count, Integer::sum);
     }
 
+    boolean resetShopStock(ResourceLocation echoId) {
+        return limitedShopPurchases.entrySet().removeIf(e -> e.getKey().echoId().equals(echoId));
+    }
+
     boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
         return getPerEchoProgress(echoId).clearRewards(playerId);
     }

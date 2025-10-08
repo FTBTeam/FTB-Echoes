@@ -153,6 +153,14 @@ public class TeamProgressManager extends SavedData {
         });
     }
 
+    public boolean resetShopStock(ServerPlayer player, ResourceLocation echoId) {
+        return applyChange(player, progress -> progress.resetShopStock(echoId));
+    }
+
+    public boolean resetShopStock(Team team, ResourceLocation echoId) {
+        return applyChange(team, progress -> progress.resetShopStock(echoId));
+    }
+
     private boolean applyChange(UUID playerId, Function<TeamProgress, Boolean> task) {
         return FTBTeamsAPI.api().getManager().getTeamForPlayerID(playerId)
                 .map(team -> applyChange(team, task))
