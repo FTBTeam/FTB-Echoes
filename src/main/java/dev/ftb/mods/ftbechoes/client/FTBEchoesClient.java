@@ -2,14 +2,18 @@ package dev.ftb.mods.ftbechoes.client;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
+import dev.ftb.mods.ftbechoes.client.gui.EchoProgressInfo;
 import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
 import dev.ftb.mods.ftbechoes.client.gui.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
 import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
+import dev.ftb.mods.ftbechoes.net.ReturnTeamProgressToScreenMessage;
 import dev.ftb.mods.ftbechoes.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbechoes.registry.ModEntityTypes;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
+import dev.ftb.mods.ftblibrary.ui.ScreenWrapper;
 import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
 import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
@@ -26,6 +30,10 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+
+import java.util.Collection;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mod(value = FTBEchoes.MOD_ID, dist = Dist.CLIENT)
 public class FTBEchoesClient {
@@ -80,6 +88,18 @@ public class FTBEchoesClient {
         EchoScreen screen = ClientUtils.getCurrentGuiAs(EchoScreen.class);
         if (screen != null) {
             screen.onProgressUpdated();
+        }
+    }
+
+    public static void onTeamProgressProvided(UUID teamId, TeamProgress progress, Collection<ReturnTeamProgressToScreenMessage.PlayerNameEntry> playerNameEntries) {
+        var screen = Minecraft.getInstance().screen;
+        if (screen instanceof ScreenWrapper wrapper && wrapper.getGui() instanceof EchoProgressInfo progressInfoScreen) {
+            var referencedPlayers = playerNameEntries.stream().collect(Collectors.toMap(
+                    ReturnTeamProgressToScreenMessage.PlayerNameEntry::playerId,
+                    ReturnTeamProgressToScreenMessage.PlayerNameEntry::playerName
+            ));
+
+            progressInfoScreen.setProgress(teamId, progress, referencedPlayers);
         }
     }
 
