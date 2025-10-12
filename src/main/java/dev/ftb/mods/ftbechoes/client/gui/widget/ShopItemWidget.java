@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
+import dev.ftb.mods.ftbechoes.integration.quests.FTBQuestsIntegration;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
@@ -19,6 +20,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.fml.ModList;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ShopItemWidget extends Panel {
     public static final int WIDGET_SIZE = 64;
@@ -30,9 +35,12 @@ public class ShopItemWidget extends Panel {
     private final Button iconButton;
     private final ShoppingKey key;
     private final Component costStr;
-    private final Component tooltip;
+    private Component tooltip;
     private final boolean isCommand;
     private final TeamProgress teamProgress;
+
+    @Nullable
+    private List<Component> extraInfo = null;
 
     public ShopItemWidget(Panel parent, Echo echo, ShopData data, EchoStage stage, boolean unlocked, TeamProgress teamProgress) {
         super(parent);
@@ -59,6 +67,10 @@ public class ShopItemWidget extends Panel {
         iconButton = new IconButton(getActualIcon());
 
         isCommand = data.command().isPresent();
+
+        if (unlocked && ModList.get().isLoaded("ftbquests")) {
+            extraInfo = FTBQuestsIntegration.getLootData(this.data);
+        }
     }
 
     @Override
@@ -174,6 +186,15 @@ public class ShopItemWidget extends Panel {
             data.description().forEach(list::add);
             list.add(Component.empty());
             list.add(tooltip);
+
+            if (extraInfo != null) {
+                list.add(Component.empty());
+                if (!ScreenWrapper.hasShiftDown()) {
+                    list.add(Component.translatable("ftbechoes.tooltip.hold_shift_for_more").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                } else {
+                    extraInfo.forEach(list::add);
+                }
+            }
         }
 
         private static Component stackDesc(ItemStack stack) {
