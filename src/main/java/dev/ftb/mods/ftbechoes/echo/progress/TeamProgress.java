@@ -37,7 +37,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
 
     public static final Codec<TeamProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ECHO_STAGE.fieldOf("per_echo").forGetter(TeamProgress::perEcho),
-            LIMITED_PURCHASE_CODEC.fieldOf("limited_shop_purchases").forGetter(TeamProgress::limitedShopPurchases)
+            LIMITED_PURCHASE_CODEC.optionalFieldOf("limited_shop_purchases", new HashMap<>()).forGetter(TeamProgress::limitedShopPurchases)
     ).apply(builder, TeamProgress::new));
 
     public static final Codec<TeamProgress> CODEC = RAW_CODEC.xmap(
