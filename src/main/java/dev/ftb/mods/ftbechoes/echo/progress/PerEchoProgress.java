@@ -85,6 +85,10 @@ public final class PerEchoProgress {
         return new PerEchoProgress(new MutableInt(currentStage), rewards);
     }
 
+    public Map<UUID, Set<Integer>> claimedRewards() {
+        return claimedRewards;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;

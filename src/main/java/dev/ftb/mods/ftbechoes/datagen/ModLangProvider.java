@@ -62,6 +62,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.tooltip.too_expensive", "Too Expensive! Can't place order");
         add("ftbechoes.tooltip.reward_header", "Reward");
         add("ftbechoes.tooltip.stock", "Stock");
+        add("ftbechoes.tooltip.hold_shift_for_more", "Hold SHIFT for more...");
 
         add("ftbechoes.jei.shop.title", "Echo Shop");
         add("ftbechoes.jei.echo_title", "Sold by Echo: %s");
