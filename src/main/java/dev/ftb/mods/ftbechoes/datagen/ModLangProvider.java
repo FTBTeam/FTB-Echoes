@@ -51,6 +51,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.purchase_failed", "Purchase Failed!");
         add("ftbechoes.message.no_echo", "No Echo Configured");
         add("ftbechoes.message.reward_claimed", "Reward Claimed!");
+        add("ftbechoes.message.reward_claimed_offline", "Rewards autoclaimed for completed Echo stages:");
         add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
         add("ftbechoes.message.echo_complete", "Echo %s: All stages complete!");
         add("ftbechoes.message.echo_stage_complete", "Echo %s: stage %s complete!");

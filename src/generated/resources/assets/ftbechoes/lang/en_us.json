@@ -38,6 +38,7 @@
   "ftbechoes.message.purchase_success": "Purchase Completed!",
   "ftbechoes.message.purchase_success.2": "Payment Taken: %s",
   "ftbechoes.message.reward_claimed": "Reward Claimed!",
+  "ftbechoes.message.reward_claimed_offline": "Rewards autoclaimed for completed Echo stages:",
   "ftbechoes.message.reward_not_claimed": "Reward could not be claimed!",
   "ftbechoes.subtitle.coins_clink": "Coins clink",
   "ftbechoes.tooltip.claimed": "Already claimed allowed amount.",

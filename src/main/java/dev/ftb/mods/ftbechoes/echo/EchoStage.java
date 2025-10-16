@@ -47,4 +47,8 @@ public record EchoStage(Component title, boolean showTitleInLore, List<BaseStage
         return completionReward.flatMap(r -> r.description().isEmpty() ? Optional.empty() : Optional.of(r.description().getFirst()))
                 .orElse(title);
     }
+
+    public boolean isAutoclaimReward() {
+        return completionReward.map(StageCompletionReward::autoclaim).orElse(false);
+    }
 }

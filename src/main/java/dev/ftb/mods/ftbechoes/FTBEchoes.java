@@ -15,6 +15,7 @@ import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
@@ -99,7 +100,27 @@ public class FTBEchoes {
     private void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             EchoManager.getServerInstance().syncToClient(sp);
+            checkForAutoclaimRewards(sp);
         }
+    }
+
+    private void checkForAutoclaimRewards(ServerPlayer sp) {
+        TeamProgressManager mgr = TeamProgressManager.get(sp.getServer());
+        mgr.getProgress(sp).ifPresent(progress -> {
+            var res = progress.checkForAutoclaim(sp);
+            if (!res.isEmpty()) {
+                PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(progress, sp));
+                sp.displayClientMessage(Component.translatable("ftbechoes.message.reward_claimed_offline"), false);
+                res.forEach(echoAndStage -> {
+                    Component msg = Component.literal("• ")
+                            .append(echoAndStage.getFirst().title())
+                            .append(" | ")
+                            .append(echoAndStage.getFirst().stages().get(echoAndStage.getSecond()).title());
+                    sp.displayClientMessage(msg, false);
+                });
+                mgr.setDirty();
+            }
+        });
     }
 
     private void onPlayerTeamLogin(PlayerLoggedInAfterTeamEvent event) {

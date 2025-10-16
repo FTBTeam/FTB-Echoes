@@ -142,4 +142,22 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
     public int getRemainingLimitedShopPurchases(ShoppingKey key, ShopData data) {
         return data.maxClaims().orElse(0) - limitedShopPurchases.getOrDefault(key, 0);
     }
+
+    public List<Pair<Echo,Integer>> checkForAutoclaim(ServerPlayer sp) {
+        List<Pair<Echo,Integer>> res = new ArrayList<>();
+
+        perEcho.forEach((id, per) -> {
+            EchoManager.getServerInstance().getEcho(id).ifPresent(echo -> {
+                for (int stage = 0; stage < echo.stages().size(); stage++) {
+                    if (echo.stages().get(stage).isAutoclaimReward() && !per.isRewardClaimed(sp, stage)) {
+                        if (claimReward(id, sp, stage)) {
+                            res.add(Pair.of(echo, stage));
+                        }
+                    }
+                }
+            });
+        });
+
+        return res;
+    }
 }

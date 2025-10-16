@@ -83,6 +83,8 @@ Fields:
 * `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
 * `description` - an optional serialized component, or list of serialized components, used for tooltip purposes on the "Claim Reward" button
   * The first line of the description, if it exists, is also shown in the toast popup when a player claims the reward
+* `autoclaim` - an optional boolean, true by default; if true, then the completion reward is claimed as soon as the player completes the stage
+  * Also checked for when players log in, to handle the case of party teams and offline players
 
 ### Command Entries
 
