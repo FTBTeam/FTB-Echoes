@@ -69,7 +69,7 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                 if (stageIdx < currentStage) {
                     Component txt = stage.completed().orElse(Component.translatable("ftbechoes.gui.stage_completed"));
                     add(new TextField(this).setText(Component.empty().withStyle(ChatFormatting.GREEN).append(txt)));
-                    if (stage.completionReward().isPresent() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
+                    if (stage.completionReward().isPresent() && !stage.completionReward().get().autoclaim() && !ClientProgress.get().isRewardClaimed(echo.id(), player, stageIdx)) {
                         add(new ClaimRewardButton(this, echo, stageIdx, stage.completionReward().get()));
                     }
                 }

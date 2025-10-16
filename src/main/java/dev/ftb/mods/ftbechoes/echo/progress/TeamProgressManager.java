@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
+import dev.ftb.mods.ftbechoes.net.ClaimRewardResponseMessage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
@@ -111,13 +112,23 @@ public class TeamProgressManager extends SavedData {
     }
 
     public void tryCompleteStage(ServerPlayer sp, Team team, Echo echo) {
-        final int currentStage = TeamProgressManager.get().getProgress(team).getCurrentStage(echo.id());
+        TeamProgress teamProgress = TeamProgressManager.get().getProgress(team);
+        final int currentStage = teamProgress.getCurrentStage(echo.id());
 
         if (currentStage >= 0 && currentStage < echo.stages().size()) {
             EchoStage stage = echo.stages().get(currentStage);
             if (FTBEchoes.stageProvider().has(sp, stage.requiredGameStage()) && completeStage(team, echo)) {
                 notifyTeamCompletion(team, echo, currentStage);
             }
+            stage.completionReward().ifPresent(reward -> {
+                if (reward.autoclaim() && !teamProgress.isRewardClaimed(echo.id(), sp, currentStage)) {
+                    if (teamProgress.claimReward(echo.id(), sp, currentStage)) {
+                        PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(teamProgress, sp));
+                        PacketDistributor.sendToPlayer(sp, new ClaimRewardResponseMessage(true, Optional.ofNullable(stage.completionRewardSummary())));
+                        setDirty();
+                    }
+                }
+            });
         }
     }
 

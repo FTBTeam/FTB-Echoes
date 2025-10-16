@@ -16,6 +16,9 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Set;
+import java.util.UUID;
+
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -54,8 +57,8 @@ public class ProgressCommand {
                 .then(literal("team")
                         .then(argument("team", TeamArgument.create())
                                 .then(argument("echo", EchoArgumentType.echo())
-                                        .then(argument("stage", IntegerArgumentType.integer(0))
-                                                .then(literal("set_stage")
+                                        .then(literal("set_stage")
+                                                .then(argument("stage", IntegerArgumentType.integer(0))
                                                         .executes(ctx -> setProgress(ctx,
                                                                 TeamArgument.get(ctx, "team"),
                                                                 EchoArgumentType.get(ctx, "echo"),
@@ -151,7 +154,8 @@ public class ProgressCommand {
         var mgr = TeamProgressManager.get(ctx.getSource().getServer());
         EchoManager.getServerInstance().getEchoes().forEach(echo -> {
             mgr.setStage(team, echo.id(), 0);
-            team.getMembers().forEach(playerId -> mgr.resetAllRewards(playerId, echo.id()));
+            Set<UUID> ids = team.isPartyTeam() ? team.getMembers() : Set.of(team.getOwner());
+            ids.forEach(playerId -> mgr.resetAllRewards(playerId, echo.id()));
         });
         ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.all_progress_reset", team.getColoredName()), false);
         return Command.SINGLE_SUCCESS;

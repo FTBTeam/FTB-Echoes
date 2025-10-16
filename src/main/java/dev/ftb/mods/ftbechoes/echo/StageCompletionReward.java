@@ -21,13 +21,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record StageCompletionReward(List<ItemStack> stacks, int exp, int currency, Optional<CommandInfo> command, List<Component> description) {
+public record StageCompletionReward(List<ItemStack> stacks, int exp, int currency, Optional<CommandInfo> command, List<Component> description, boolean autoclaim) {
     public static final Codec<StageCompletionReward> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(StageCompletionReward::stacks),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("experience", 0).forGetter(StageCompletionReward::exp),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("currency", 0).forGetter(StageCompletionReward::currency),
             CommandInfo.CODEC.optionalFieldOf("command").forGetter(StageCompletionReward::command),
-            EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(StageCompletionReward::description)
+            EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(StageCompletionReward::description),
+            Codec.BOOL.optionalFieldOf("autoclaim", true).forGetter(StageCompletionReward::autoclaim)
     ).apply(builder, StageCompletionReward::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StageCompletionReward> STREAM_CODEC = StreamCodec.composite(
@@ -36,6 +37,7 @@ public record StageCompletionReward(List<ItemStack> stacks, int exp, int currenc
             ByteBufCodecs.VAR_INT, StageCompletionReward::currency,
             ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), StageCompletionReward::command,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), StageCompletionReward::description,
+            ByteBufCodecs.BOOL, StageCompletionReward::autoclaim,
             StageCompletionReward::new
     );
 
