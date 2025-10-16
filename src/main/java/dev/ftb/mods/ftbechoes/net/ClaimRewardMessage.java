@@ -37,7 +37,7 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
             if (EchoManager.getServerInstance().isKnownEcho(message.echoId)) {
                 TeamProgressManager mgr = TeamProgressManager.get(player.getServer());
                 var progress = mgr.getProgress(player).orElse(TeamProgress.NONE);
-                if (progress.isStageCompleted(message.echoId, message.stageIdx) && !progress.isRewardClaimed(message.echoId, player, message.stageIdx)) {
+                if (progress.isStageCompleted(message.echoId, message.stageIdx)) {
                     claimedOK = mgr.claimReward(player, message.echoId, message.stageIdx);
                     if (claimedOK) {
                         detail = getRewardDetail(message.echoId, message.stageIdx);

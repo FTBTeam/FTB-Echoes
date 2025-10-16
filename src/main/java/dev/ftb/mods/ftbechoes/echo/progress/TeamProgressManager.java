@@ -121,7 +121,7 @@ public class TeamProgressManager extends SavedData {
                 notifyTeamCompletion(team, echo, currentStage);
             }
             stage.completionReward().ifPresent(reward -> {
-                if (reward.autoclaim() && !teamProgress.isRewardClaimed(echo.id(), sp, currentStage)) {
+                if (reward.autoclaim()) {
                     if (teamProgress.claimReward(echo.id(), sp, currentStage)) {
                         PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(teamProgress, sp));
                         PacketDistributor.sendToPlayer(sp, new ClaimRewardResponseMessage(true, Optional.ofNullable(stage.completionRewardSummary())));

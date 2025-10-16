@@ -109,6 +109,9 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
     }
 
     boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
+        if (isRewardClaimed(echoId, player, stage)) {
+            return false;
+        }
         return EchoManager.getServerInstance().getEcho(echoId).map(echo -> {
             if (stage >= 0 && stage < echo.stages().size()) {
                 echo.stages().get(stage).completionReward().ifPresent(c -> c.giveToPlayer(player));
@@ -149,7 +152,7 @@ public record TeamProgress(Map<ResourceLocation, PerEchoProgress> perEcho, Map<S
         perEcho.forEach((id, per) -> {
             EchoManager.getServerInstance().getEcho(id).ifPresent(echo -> {
                 for (int stage = 0; stage < echo.stages().size(); stage++) {
-                    if (echo.stages().get(stage).isAutoclaimReward() && !per.isRewardClaimed(sp, stage)) {
+                    if (echo.stages().get(stage).isAutoclaimReward() && isStageCompleted(echo.id(), stage)) {
                         if (claimReward(id, sp, stage)) {
                             res.add(Pair.of(echo, stage));
                         }
