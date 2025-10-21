@@ -32,12 +32,22 @@ public class FTBQuestsIntegration {
 
                 foundLootItem = true;
                 RewardTable table = crate.getTable();
-                List<WeightedReward> weightedRewards = table.getWeightedRewards();
+                float totalWeight = table.getTotalWeight(true);
+
+                // Sorted by chance with the highest chance first
+                List<WeightedReward> weightedRewards = table.getWeightedRewards()
+                        .stream()
+                        .sorted((a, b) -> {
+                            float aChance = a.getWeight() / totalWeight;
+                            float bChance = b.getWeight() / totalWeight;
+
+                            return Float.compare(bChance, aChance);
+                        })
+                        .toList();
+
                 for (var weightedReward : weightedRewards) {
                     Reward reward = weightedReward.getReward();
                     float weight = weightedReward.getWeight();
-
-                    float totalWeight = table.getTotalWeight(true);
 
                     components.add(reward.getTitle().copy().append(Component.literal(" [" + WeightedReward.chanceString(weight, totalWeight) + "]").withStyle(ChatFormatting.DARK_GRAY)));
                 }
