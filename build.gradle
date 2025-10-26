@@ -2,8 +2,8 @@ plugins {
 	id 'java-library'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '2.0.78'
-	id "me.modmuss50.mod-publish-plugin" version "0.8.3"
+	id 'net.neoforged.moddev' version '2.0.115'
+	id "me.modmuss50.mod-publish-plugin" version "1.0.0"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -145,19 +145,8 @@ tasks.register("sourcesJar", Jar) {
 	from sourceSets.main.allJava
 }
 
-// Uncomment this if you want to create an API jar
-// tasks.register("apiJar", Jar) {
-// 	archiveClassifier.set("api")
-
-// 	from sourceSets.main.output
-
-// 	include 'dev/ftb/mods/{package_name}/api/**'
-// }
-
 tasks.named("jar") {
 	dependsOn("sourcesJar")
-	// Uncomment this if you want to create an API jar
-	// dependsOn("apiJar")
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -220,6 +209,9 @@ publishMods {
 		projectId = project.curseforge_id
 		minecraftVersions.add(project.minecraft_version)
 		javaVersions.add(JavaVersion.VERSION_21)
+		required("ftb-library")
+		required("magic-coins")
+		required("curios")
 	}
 }
 
@@ -230,8 +222,6 @@ publishing {
 			artifactId = archives_base_name
 			from components.java
 			artifact sourcesJar
-			// Uncomment this if you want to create an API jar
-			// artifact apiJar
 		}
 	}
 

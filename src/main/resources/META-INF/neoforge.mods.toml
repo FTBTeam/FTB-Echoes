@@ -10,7 +10,7 @@ displayURL = "https://www.curseforge.com/minecraft/mc-mods/ftb-echoes"
 #logoFile = "logo.png"
 authors = "FTB Team"
 description = '''
-Description
+Lore driven progress milestones presents in a friendly and usable way with a built-in shop system for rewards.
 '''
 
 [[dependencies.${mod_id}]]
