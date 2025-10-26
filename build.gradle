@@ -209,7 +209,7 @@ publishMods {
 		projectId = project.curseforge_id
 		minecraftVersions.add(project.minecraft_version)
 		javaVersions.add(JavaVersion.VERSION_21)
-        requires("ftb-library")
+        requires("ftb-library-forge")
         requires("magic-coins")
         requires("curios")
 	}
