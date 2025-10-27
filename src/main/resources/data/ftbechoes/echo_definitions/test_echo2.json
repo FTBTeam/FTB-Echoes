@@ -29,7 +29,12 @@
           "item": [
             { "id": "minecraft:amethyst_shard", "count": 1 },
             { "id": "minecraft:redstone", "count": 1 },
-            { "id": "minecraft:gold_nugget", "count": 2 }
+            { "id": "minecraft:gold_nugget", "count": 2 },
+            { "id": "ftbquests:lootcrate",
+              "components": {
+                "ftbquests:loot_crate": "tbl1"
+              }
+            }
           ],
           "cost": 2
         },
