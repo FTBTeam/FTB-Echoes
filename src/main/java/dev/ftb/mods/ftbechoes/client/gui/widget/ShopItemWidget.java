@@ -15,19 +15,25 @@ import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.util.ModUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ShopItemWidget extends Panel {
     public static final int WIDGET_SIZE = 64;
     public static final int INC_BTN_SIZE = 14;
+    public static final int ICON_BTN_SIZE = 24;
 
     private final ShopData data;
     private final boolean unlocked;
@@ -35,9 +41,10 @@ public class ShopItemWidget extends Panel {
     private final Button iconButton;
     private final ShoppingKey key;
     private final Component costStr;
-    private Component tooltip;
+    private final Component tooltip;
     private final boolean isCommand;
     private final TeamProgress teamProgress;
+    private final Map<String,List<ItemStack>> byMod;  // organising for tooltip purposes
 
     @Nullable
     private List<Component> extraInfo = null;
@@ -51,6 +58,11 @@ public class ShopItemWidget extends Panel {
 
         key = ShoppingKey.of(echo, data);
         costStr = MiscUtil.formatCost(data.cost());
+
+        byMod = new HashMap<>();
+        for (ItemStack stack : data.stacks()) {
+            byMod.computeIfAbsent(getModForItem(stack), k -> new ArrayList<>()).add(stack);
+        }
 
         if (data.maxClaims().isPresent() && getRemainingLimit() <= 0) {
             tooltip = Component.translatable("ftbechoes.tooltip.claimed");
@@ -73,6 +85,13 @@ public class ShopItemWidget extends Panel {
         }
     }
 
+    private String getModForItem(ItemStack stack) {
+        if (BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals("ftbquests:lootcrate")) {
+            return "";
+        }
+        return ModUtils.getModName(stack.getItem()).orElse("");
+    }
+
     @Override
     public void addWidgets() {
         add(decrButton);
@@ -84,7 +103,7 @@ public class ShopItemWidget extends Panel {
     public void alignWidgets() {
         decrButton.setPosAndSize(4, height - (INC_BTN_SIZE + 4), INC_BTN_SIZE, INC_BTN_SIZE);
         incrButton.setPosAndSize(width - (INC_BTN_SIZE + 4), height - (INC_BTN_SIZE + 4), INC_BTN_SIZE, INC_BTN_SIZE);
-        iconButton.setPosAndSize(20, 12, 24, 24);
+        iconButton.setPosAndSize((width - ICON_BTN_SIZE) / 2, 16, ICON_BTN_SIZE, ICON_BTN_SIZE);
     }
 
     private void adjustAmount(int adjustment) {
@@ -179,9 +198,12 @@ public class ShopItemWidget extends Panel {
 
         @Override
         public void addMouseOverText(TooltipList list) {
-            data.stacks().stream()
-                    .map(IconButton::stackDesc)
-                    .forEach(list::add);
+            byMod.forEach((modName, stacks) -> {
+                stacks.forEach(s -> list.add(IconButton.stackDesc(s)));
+                if (!modName.isEmpty()) {
+                    list.add(Component.literal(modName).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC));
+                }
+            });
             data.command().ifPresent(cmd -> cmd.description().forEach(list::add));
             data.description().forEach(list::add);
             list.add(Component.empty());

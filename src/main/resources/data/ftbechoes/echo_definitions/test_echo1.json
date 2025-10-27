@@ -24,11 +24,20 @@
             "id": "minecraft:iron_axe",
             "components": {
               "minecraft:custom_name": "{text:'Nice Axe', color:'light_purple', italic:false}",
-              "minecraft:enchantments":{ "levels": { "minecraft:sharpness": 3 } }
+              "minecraft:enchantments": { "levels": { "minecraft:sharpness": 3 } }
+            },
+            "max_claims": 5,
+            "cost": 6
+          }
+        },
+        {
+          "name": "Loot Crate: tbl1",
+          "item": {
+            "id": "ftbquests:lootcrate",
+            "components": {
+              "ftbquests:loot_crate": "tbl1"
             }
-          },
-          "max_claims": 5,
-          "cost": 6
+          }
         }
       ],
       "completion_reward": {
