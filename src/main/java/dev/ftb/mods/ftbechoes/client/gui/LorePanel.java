@@ -57,13 +57,15 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                     vSpace(5);
                 }
                 if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
+                    // TODO update to:
+//                    if (TeamStages.hasTeamStage(FTBTeamsAPI.api().getClientManager().selfTeam(), stage.requiredGameStage())) {
                     if (FTBEchoes.stageProvider().has(player, stage.requiredGameStage())) {
                         if (!collapsed) {
-                            add(new TextField(this).setText(stage.ready()));
+                            add(new BorderedTextField(this).setText(stage.ready()));
                         }
                         add(new CompleteStageButton(this, echo, stageIdx));
                     } else {
-                        add(new TextField(this).setText(stage.notReady()));
+                        add(new BorderedTextField(this).setText(stage.notReady()));
                     }
                 }
                 if (stageIdx < currentStage) {
@@ -107,6 +109,9 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
                 t.setMinWidth(xWid);
                 t.setMaxWidth(xWid);
                 t.reflow();
+            } else if (w instanceof BorderedTextField) {
+                w.setWidth(xWid);
+                ((BorderedTextField) w).alignWidgets();
             }
         });
 
@@ -186,6 +191,48 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
         public Component getTitle() {
             MutableComponent arrow = Component.literal(PersistedClientData.get().isStageCollapsed(getEcho().orElseThrow(), stageIdx) ? "▶ " : "▼ ");
             return arrow.append(super.getTitle());
+        }
+    }
+
+    private static class BorderedTextField extends Panel {
+        private static final Icon TASKS_ICON = Icon.getIcon(Textures.TASKS);
+
+        private final TextField textField;
+        private final int padding = 4;
+
+        public BorderedTextField(Panel parent) {
+            super(parent);
+
+            textField = new TextField(this);
+        }
+
+        @Override
+        public void addWidgets() {
+            add(textField);
+        }
+
+        @Override
+        public void alignWidgets() {
+            int textwidth = width - padding * 2 - 16;
+            textField.setWidth(textwidth);
+            textField.setMinWidth(textwidth);
+            textField.setMaxWidth(textwidth);
+            textField.reflow();
+            setHeight(Math.max(20, textField.height + padding * 2));
+            textField.setPos(padding * 2 + 16, (height - textField.height) / 2);
+        }
+
+        @Override
+        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+            GuiHelper.drawHollowRect(graphics, x, y, w, h, theme.getContentColor(WidgetType.NORMAL).withAlpha(80), false);
+
+            TASKS_ICON.draw(graphics, x + padding, y + (height - 16) / 2, 16, 16);
+            super.draw(graphics, theme, x, y, w, h);
+        }
+
+        public BorderedTextField setText(Component text) {
+            textField.setText(text);
+            return this;
         }
     }
 }

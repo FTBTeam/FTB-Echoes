@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+// Will be replaced by SyncTeamStageMessage soon
+@Deprecated
 public record SyncGameStageMessage(Collection<String> stages, boolean adding) implements CustomPacketPayload {
     public static final Type<SyncGameStageMessage> TYPE = new Type<>(FTBEchoes.id("sync_game_stage"));
     public static final StreamCodec<FriendlyByteBuf, SyncGameStageMessage> STREAM_CODEC = StreamCodec.composite(

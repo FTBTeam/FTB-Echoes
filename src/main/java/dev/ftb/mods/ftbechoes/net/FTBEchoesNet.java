@@ -19,6 +19,7 @@ public class FTBEchoesNet {
         registrar.playToClient(SyncEchoesMessage.TYPE, SyncEchoesMessage.STREAM_CODEC, SyncEchoesMessage::handleData);
         registrar.playToClient(SyncProgressMessage.TYPE, SyncProgressMessage.STREAM_CODEC, SyncProgressMessage::handleData);
         registrar.playToClient(SyncGameStageMessage.TYPE, SyncGameStageMessage.STREAM_CODEC, SyncGameStageMessage::handleData);
+        registrar.playToClient(SyncTeamStageMessage.TYPE, SyncTeamStageMessage.STREAM_CODEC, SyncTeamStageMessage::handleData);
         registrar.playToClient(PlaceOrderResponseMessage.TYPE, PlaceOrderResponseMessage.STREAM_CODEC, PlaceOrderResponseMessage::handleData);
         registrar.playToClient(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handleData);
         registrar.playToClient(ReturnTeamProgressToScreenMessage.TYPE, ReturnTeamProgressToScreenMessage.STREAM_CODEC, ReturnTeamProgressToScreenMessage::handleData);

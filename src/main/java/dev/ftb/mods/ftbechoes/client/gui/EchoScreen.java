@@ -34,9 +34,6 @@ import java.util.*;
 import java.util.function.BooleanSupplier;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
-    private static final Icon COLLAPSE_ICON = Icon.getIcon(Textures.COLLAPSE);
-    private static final Icon EXPAND_ICON = Icon.getIcon(Textures.EXPAND);
-
     static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
 
     private final BlockPos projectorPos;
@@ -278,10 +275,10 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                         list.add(ContextMenuItem.separator());
                         list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.expand_all")
                                 .append(Component.literal(" [+]").withStyle(ChatFormatting.GRAY)),
-                                EXPAND_ICON, btn -> collapseAll(false)));
+                                Icons.EXPAND, btn -> collapseAll(false)));
                         list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.collapse_all")
                                 .append(Component.literal(" [-]").withStyle(ChatFormatting.GRAY)),
-                                COLLAPSE_ICON, btn -> collapseAll(true)));
+                                Icons.COLLAPSE, btn -> collapseAll(true)));
                     }
             ));
         }

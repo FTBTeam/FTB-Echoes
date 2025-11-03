@@ -9,8 +9,7 @@ public interface Textures {
 
     ResourceLocation SPEAKER = iconTexture("speaker");
     ResourceLocation SPEAKER_ACTIVE = iconTexture("speaker_active");
-    ResourceLocation EXPAND = iconTexture("expand");
-    ResourceLocation COLLAPSE = iconTexture("collapse");
+    ResourceLocation TASKS = iconTexture("tasks");
 
     static ResourceLocation iconTexture(String img) {
         return ResourceLocation.parse(GUI_LOCATION + img);
