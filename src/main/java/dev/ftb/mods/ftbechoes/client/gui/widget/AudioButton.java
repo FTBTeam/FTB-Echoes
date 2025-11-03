@@ -54,7 +54,7 @@ public class AudioButton extends SimpleTextButton {
     }
 
     public void startAudio() {
-        playing = SimpleSoundInstance.forUI(sound, 1f);
+        playing = SimpleSoundInstance.forUI(sound, 1f, 1f);
         Minecraft.getInstance().getSoundManager().play(playing);
         setIcon(ACTIVE);
         if (parent instanceof AudioButtonHolder h) {
