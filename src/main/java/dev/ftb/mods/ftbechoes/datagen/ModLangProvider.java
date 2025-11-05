@@ -31,6 +31,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.collapse_all", "Collapse All");
         add("ftbechoes.gui.expand_all", "Expand All");
         add("ftbechoes.gui.all_complete", "All Stages Complete!");
+        add("ftbechoes.gui.stop_audio", "Stop Current Audio Clip");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");

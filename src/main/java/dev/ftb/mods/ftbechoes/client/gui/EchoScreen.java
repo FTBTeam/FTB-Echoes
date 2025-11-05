@@ -22,11 +22,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -39,6 +42,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     private final BlockPos projectorPos;
     private Echo echo;
     private boolean pendingScrollToEnd;
+    private SoundEvent playingSound = null;
+    private SoundInstance playingSoundInstance = null;
 
     public EchoScreen(BlockPos projectorPos, Echo echo) {
         super();
@@ -66,6 +71,11 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         if (currentPage == Page.LORE) {
             scrollBar.setValue(scrollBar.getMaxValue());
         }
+    }
+
+    @Override
+    public void onClosed() {
+        stopPlayingSound();
     }
 
     @Override
@@ -115,6 +125,25 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     public BlockPos getProjectorPos() {
         return projectorPos;
+    }
+
+    public void startPlayingSound(SoundEvent soundEvent) {
+        if (playingSoundInstance != null) {
+            Minecraft.getInstance().getSoundManager().stop(playingSoundInstance);
+        }
+        playingSound = soundEvent;
+        playingSoundInstance = playingSound == null ? null : SimpleSoundInstance.forUI(playingSound, 1f, 1f);
+        if (playingSoundInstance != null) {
+            Minecraft.getInstance().getSoundManager().play(playingSoundInstance);
+        }
+    }
+
+    public void stopPlayingSound() {
+        startPlayingSound(null);
+    }
+
+    public boolean isPlayingSound(SoundEvent soundEvent) {
+        return playingSound != null && playingSound.getLocation().equals(soundEvent.getLocation());
     }
 
     static class PurchaseButton extends SimpleTextButton {
@@ -183,13 +212,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     private class TopPanel extends Panel {
         private final TextField label;
         private final Button settingsButton;
+        private final Button stopAudioButton;
         private final Map<EchoScreen.Page, EchoScreen.PageButton> buttons = new EnumMap<>(EchoScreen.Page.class);
+        private final boolean adminPlayer;
 
         public TopPanel() {
             super(EchoScreen.this);
 
+            var player = Objects.requireNonNull(Minecraft.getInstance().player);
+            adminPlayer = player.hasPermissions(Commands.LEVEL_GAMEMASTERS) && player.isCreative();
+
             label = new TextField(this);
             settingsButton = SimpleTextButton.create(this, Component.empty(), Icons.SETTINGS, this::showEchoSelector);
+            stopAudioButton = new StopAudioButton();
             buttons.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
             buttons.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
 
@@ -202,10 +237,10 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void addWidgets() {
-            var player = Objects.requireNonNull(Minecraft.getInstance().player);
-            if (player.hasPermissions(Commands.LEVEL_GAMEMASTERS) && player.isCreative()) {
+            if (adminPlayer) {
                 add(settingsButton);
             }
+            add(stopAudioButton);
             if (echo == null) {
                 add(label.setText(Component.translatable("ftbechoes.message.no_echo").withStyle(ChatFormatting.ITALIC, ChatFormatting.GOLD)));
             } else {
@@ -219,6 +254,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         @Override
         public void alignWidgets() {
             settingsButton.setPosAndSize(width - 18, 2, 16, 16);
+            stopAudioButton.setPosAndSize(width - (adminPlayer ? 36 : 18), 2, 16, 16);
 
             label.setPos(4, 5);
             label.setWidth(width);
@@ -307,6 +343,29 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private boolean isCurrentEcho(Echo e) {
             return EchoScreen.this.echo != null && e.id().equals(EchoScreen.this.echo.id());
+        }
+
+        private class StopAudioButton extends SimpleTextButton {
+            private static final Icon STOP_AUDIO_ICON = Icon.getIcon(Textures.STOP_AUDIO);
+
+            public StopAudioButton() {
+                super(TopPanel.this, Component.empty(), STOP_AUDIO_ICON);
+            }
+
+            @Override
+            public void onClicked(MouseButton mouseButton) {
+                EchoScreen.this.stopPlayingSound();
+            }
+
+            @Override
+            public boolean shouldDraw() {
+                return EchoScreen.this.playingSound != null;
+            }
+
+            @Override
+            public void addMouseOverText(TooltipList list) {
+                list.add(Component.translatable("ftbechoes.gui.stop_audio"));
+            }
         }
     }
 

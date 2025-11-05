@@ -10,6 +10,7 @@ public interface Textures {
     ResourceLocation SPEAKER = iconTexture("speaker");
     ResourceLocation SPEAKER_ACTIVE = iconTexture("speaker_active");
     ResourceLocation TASKS = iconTexture("tasks");
+    ResourceLocation STOP_AUDIO = iconTexture("stop_audio");
 
     static ResourceLocation iconTexture(String img) {
         return ResourceLocation.parse(GUI_LOCATION + img);

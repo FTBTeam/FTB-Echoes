@@ -26,6 +26,7 @@
   "ftbechoes.gui.stage": "Stage %s",
   "ftbechoes.gui.stage_completed": "Stage Completed!",
   "ftbechoes.gui.stages": "Stages",
+  "ftbechoes.gui.stop_audio": "Stop Current Audio Clip",
   "ftbechoes.gui.wallet": "Wallet: %s",
   "ftbechoes.jei.echo_title": "Sold by Echo: %s",
   "ftbechoes.jei.shop.title": "Echo Shop",
