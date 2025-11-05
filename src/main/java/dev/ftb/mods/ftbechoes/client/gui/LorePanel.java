@@ -3,7 +3,10 @@ package dev.ftb.mods.ftbechoes.client.gui;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.PersistedClientData;
-import dev.ftb.mods.ftbechoes.client.gui.widget.*;
+import dev.ftb.mods.ftbechoes.client.gui.widget.ClaimRewardButton;
+import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
+import dev.ftb.mods.ftbechoes.client.gui.widget.HorizontalLineWidget;
+import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -20,7 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
+class LorePanel extends EchoScreen.PagePanel /*implements AudioButtonHolder*/ {
     private final List<Widget> jumpPointWidgets = new ArrayList<>();
 
     public LorePanel(Panel parent, EchoScreen echoScreen) {
@@ -97,43 +100,31 @@ class LorePanel extends EchoScreen.PagePanel implements AudioButtonHolder {
             int xPos = w instanceof CollapsibleSectionTitle ? 5 : 15;
             int xWid = width - (w instanceof CollapsibleSectionTitle ? 10 : 20);
             w.setX(w instanceof CollapsibleSectionTitle ? 5 : 15);
-            if (w instanceof ImageButton im) {
-                int imgX = switch (im.getAlignment()) {
-                    case LEFT -> xPos;
-                    case CENTER -> xPos + (xWid - im.getWidth()) / 2;
-                    case RIGHT -> xPos + xWid - im.getWidth() - 5;
-                };
-                im.setX(imgX);
-            } else if (w instanceof TextField t) {
-                t.setWidth(xWid);
-                t.setMinWidth(xWid);
-                t.setMaxWidth(xWid);
-                t.reflow();
-            } else if (w instanceof BorderedTextField) {
-                w.setWidth(xWid);
-                ((BorderedTextField) w).alignWidgets();
+            switch (w) {
+                case ImageButton im -> {
+                    int imgX = switch (im.getAlignment()) {
+                        case LEFT -> xPos;
+                        case CENTER -> xPos + (xWid - im.getWidth()) / 2;
+                        case RIGHT -> xPos + xWid - im.getWidth() - 5;
+                    };
+                    im.setX(imgX);
+                }
+                case TextField t -> {
+                    t.setWidth(xWid);
+                    t.setMinWidth(xWid);
+                    t.setMaxWidth(xWid);
+                    t.reflow();
+                }
+                case BorderedTextField borderedTextField -> {
+                    w.setWidth(xWid);
+                    borderedTextField.alignWidgets();
+                }
+                default -> {
+                }
             }
         });
 
         setHeight(align(new WidgetLayout.Vertical(0, 2, 0)) + 12);
-    }
-
-    @Override
-    public void onAudioStart(AudioButton button) {
-        widgets.forEach(w -> {
-            if (w != button && w instanceof AudioButton ab) {
-                ab.stopAudio();
-            }
-        });
-    }
-
-    @Override
-    public void onSwitchAway() {
-        widgets.forEach(w -> {
-            if (w instanceof AudioButton ab) {
-                ab.stopAudio();
-            }
-        });
     }
 
     public double getScrollPos(int stageIdx) {
