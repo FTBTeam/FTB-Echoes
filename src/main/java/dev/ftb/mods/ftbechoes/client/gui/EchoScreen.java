@@ -30,8 +30,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -132,7 +134,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             Minecraft.getInstance().getSoundManager().stop(playingSoundInstance);
         }
         playingSound = soundEvent;
-        playingSoundInstance = playingSound == null ? null : SimpleSoundInstance.forUI(playingSound, 1f, 1f);
+        playingSoundInstance = createSoundInstance(playingSound);
         if (playingSoundInstance != null) {
             Minecraft.getInstance().getSoundManager().play(playingSoundInstance);
         }
@@ -144,6 +146,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     public boolean isPlayingSound(SoundEvent soundEvent) {
         return playingSound != null && playingSound.getLocation().equals(soundEvent.getLocation());
+    }
+
+    @Nullable
+    private static SimpleSoundInstance createSoundInstance(SoundEvent sound) {
+        if (sound == null) {
+            return null;
+        }
+        return new SimpleSoundInstance(sound.getLocation(), SoundSource.VOICE,
+                1f, 1f, SoundInstance.createUnseededRandom(), false, 0,
+                SoundInstance.Attenuation.NONE,
+                0.0, 0.0, 0.0,
+                true
+        );
     }
 
     static class PurchaseButton extends SimpleTextButton {
