@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added ru_ru translation (thanks @BazZziliuS)
-- 
+
 ### Changed
 - Now using the "Voice" category for echo audio clips
 
