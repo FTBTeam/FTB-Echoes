@@ -1,11 +1,10 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
+import dev.ftb.mods.ftbechoes.client.gui.EchoSoundClipHandler;
 import dev.ftb.mods.ftbechoes.client.gui.Textures;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -30,21 +29,15 @@ public class AudioButton extends SimpleTextButton {
 
     @Override
     public void onClicked(MouseButton mouseButton) {
-        EchoScreen screen = ClientUtils.getCurrentGuiAs(EchoScreen.class);
-        if (screen != null) {
-            if (screen.isPlayingSound(sound)) {
-                screen.stopPlayingSound();
-            } else {
-                screen.startPlayingSound(sound);
-            }
+        if (EchoSoundClipHandler.INSTANCE.isPlayingSound(sound)) {
+            EchoSoundClipHandler.INSTANCE.stopPlayingSound();
+        } else {
+            EchoSoundClipHandler.INSTANCE.startPlayingSound(sound);
         }
     }
 
     @Override
     public void tick() {
-        EchoScreen screen = ClientUtils.getCurrentGuiAs(EchoScreen.class);
-        if (screen != null) {
-            setIcon(screen.isPlayingSound(sound) ? ACTIVE : INACTIVE);
-        }
+        setIcon(EchoSoundClipHandler.INSTANCE.isPlayingSound(sound) ? ACTIVE : INACTIVE);
     }
 }

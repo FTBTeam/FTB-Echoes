@@ -22,18 +22,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -44,8 +39,6 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     private final BlockPos projectorPos;
     private Echo echo;
     private boolean pendingScrollToEnd;
-    private SoundEvent playingSound = null;
-    private SoundInstance playingSoundInstance = null;
 
     public EchoScreen(BlockPos projectorPos, Echo echo) {
         super();
@@ -77,7 +70,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     @Override
     public void onClosed() {
-        stopPlayingSound();
+        if (EchoSoundClipHandler.INSTANCE.isPlayingSound() && Minecraft.getInstance().screen != null) {
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("ftbechoes.message.hold_alt_to_stop_sound").withStyle(ChatFormatting.AQUA), true);
+        }
     }
 
     @Override
@@ -127,38 +122,6 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     public BlockPos getProjectorPos() {
         return projectorPos;
-    }
-
-    public void startPlayingSound(SoundEvent soundEvent) {
-        if (playingSoundInstance != null) {
-            Minecraft.getInstance().getSoundManager().stop(playingSoundInstance);
-        }
-        playingSound = soundEvent;
-        playingSoundInstance = createSoundInstance(playingSound);
-        if (playingSoundInstance != null) {
-            Minecraft.getInstance().getSoundManager().play(playingSoundInstance);
-        }
-    }
-
-    public void stopPlayingSound() {
-        startPlayingSound(null);
-    }
-
-    public boolean isPlayingSound(SoundEvent soundEvent) {
-        return playingSound != null && playingSound.getLocation().equals(soundEvent.getLocation());
-    }
-
-    @Nullable
-    private static SimpleSoundInstance createSoundInstance(SoundEvent sound) {
-        if (sound == null) {
-            return null;
-        }
-        return new SimpleSoundInstance(sound.getLocation(), SoundSource.VOICE,
-                1f, 1f, SoundInstance.createUnseededRandom(), false, 0,
-                SoundInstance.Attenuation.NONE,
-                0.0, 0.0, 0.0,
-                true
-        );
     }
 
     static class PurchaseButton extends SimpleTextButton {
@@ -276,7 +239,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             int bw = width / (buttons.size() + 1) - 4;
             int by = getTheme().getFontHeight() + 8;
-            for (PageButton w : buttons.values()) {
+            for (EchoScreen.PageButton w : buttons.values()) {
                 w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), by, bw, height - by);
             }
         }
@@ -369,12 +332,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             @Override
             public void onClicked(MouseButton mouseButton) {
-                EchoScreen.this.stopPlayingSound();
+                EchoSoundClipHandler.INSTANCE.stopPlayingSound();
             }
 
             @Override
             public boolean shouldDraw() {
-                return EchoScreen.this.playingSound != null;
+                return EchoSoundClipHandler.INSTANCE.isPlayingSound();
             }
 
             @Override

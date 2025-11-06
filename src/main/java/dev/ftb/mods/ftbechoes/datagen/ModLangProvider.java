@@ -56,6 +56,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
         add("ftbechoes.message.echo_complete", "Echo %s: All stages complete!");
         add("ftbechoes.message.echo_stage_complete", "Echo %s: stage %s complete!");
+        add("ftbechoes.message.hold_alt_to_stop_sound", "Hold [Alt] for 2 seconds to stop audio");
 
         add("ftbechoes.tooltip.locked", "Not unlocked yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");
