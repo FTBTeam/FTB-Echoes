@@ -337,12 +337,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             @Override
             public boolean shouldDraw() {
+                return isEnabled();
+            }
+
+            @Override
+            public boolean isEnabled() {
                 return EchoSoundClipHandler.INSTANCE.isPlayingSound();
             }
 
             @Override
             public void addMouseOverText(TooltipList list) {
-                list.add(Component.translatable("ftbechoes.gui.stop_audio"));
+                if (shouldDraw()) {
+                    list.add(Component.translatable("ftbechoes.gui.stop_audio"));
+                }
             }
         }
     }

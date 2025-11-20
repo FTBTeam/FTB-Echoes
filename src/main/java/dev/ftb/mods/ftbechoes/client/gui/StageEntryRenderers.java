@@ -10,9 +10,7 @@ import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.TextField;
 import dev.ftb.mods.ftblibrary.ui.Widget;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,8 +64,7 @@ public class StageEntryRenderers {
         @Override
         public void addWidgets(Consumer<Widget> widgetAdder, BaseStageEntry entry, Panel panel) {
             AudioEntry a = cast(entry);
-            var sound = BuiltInRegistries.SOUND_EVENT.getOptional(a.location()).orElse(SoundEvents.EMPTY);
-            AudioButton btn = new AudioButton(panel, a.text().orElse(Component.empty()), sound);
+            AudioButton btn = new AudioButton(panel, a.text().orElse(Component.empty()), a.location());
             btn.setX(2);
             widgetAdder.accept(btn);
         }

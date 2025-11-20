@@ -6,7 +6,8 @@
       "title": "Stage I",
       "lore": [
         { "type": "ftbechoes:text", "text": "Hello world" },
-        { "type": "ftbechoes:audio", "location": "entity.ender_dragon.growl", "text": "dragon" }
+        { "type": "ftbechoes:audio", "location": "entity.ender_dragon.growl", "text": "dragon" },
+        { "type": "ftbechoes:audio", "location": "ftbechoes:missing", "text": "Oops" }
       ],
       "not_ready": "You're not ready yet :(",
       "ready": "Ok, good to go",
@@ -18,6 +19,7 @@
     {
       "title": "Stage II",
       "lore": [
+        { "type": "ftbechoes:audio", "location": "ftbechoes:this_is_an_echo", "text": "This is an echo!" },
         { "type": "ftbechoes:text", "text": "Welcome to stage II !" }
       ],
       "not_ready": "Not yet...",
