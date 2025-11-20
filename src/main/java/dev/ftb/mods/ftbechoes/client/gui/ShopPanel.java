@@ -25,7 +25,9 @@ public class ShopPanel extends EchoScreen.PagePanel {
             for (int stageIdx = 0; stageIdx < stages.size(); stageIdx++) {
                 EchoStage stage = stages.get(stageIdx);
                 for (ShopData data : stage.shopUnlocked()) {
-                    add(new ShopItemWidget(this, echo, data, stage, stageIdx < currentStage, teamProgress));
+                    if (data.maxStage() == 0 || currentStage <= data.maxStage()) {
+                        add(new ShopItemWidget(this, echo, data, stage, stageIdx < currentStage, teamProgress));
+                    }
                 }
             }
         });

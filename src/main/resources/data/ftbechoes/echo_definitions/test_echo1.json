@@ -17,7 +17,7 @@
       "required_stage": "echo1_stage1",
       "shop_unlock": [
         { "name": "diamond_1", "item": { "id": "minecraft:diamond", "count": 10 }, "description": { "text": "Fancy jewels", "color":  "ftb:rainbow"}, "cost": 5, "max_claims": 5 },
-        { "name": "emerald_1","item": { "id": "minecraft:emerald", "count": 5 }, "cost": 3 },
+        { "name": "emerald_1","item": { "id": "minecraft:emerald", "count": 5 }, "cost": 3, "max_stage": 1 },
         {
           "name": "nice_axe",
           "item": {
@@ -59,7 +59,8 @@
       "ready": "Not only did you survive the §3Vault§r, you actually successfully insued the alloy! I'm... sorry I ever doubted you. Pops will be glad to hear of your achievements.\nYou'll need to pipe some stress straight into the bottom of the main §6World Engine§r block using some §aEncased Chain Drives§r, and here's a schematic to help you place those casings.",
       "required_stage": "echo1_stage2",
       "shop_unlock": [
-        { "name": "nether_star_2", "item": { "id": "minecraft:nether_star", "count": 1 }, "cost": 10 }
+        { "name": "nether_star_2", "item": { "id": "minecraft:nether_star", "count": 1 }, "cost": 10 },
+        { "name": "emerald_2","item": { "id": "minecraft:emerald", "count": 5 }, "cost": 1 }
       ],
       "completion_reward": {
         "experience": 20,
