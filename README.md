@@ -16,21 +16,23 @@ An Echo json has the following top-level fields, all required:
 
 * `id` - must be unique to the Echo; match the path & filename
 * `title` - displayed in the Echo GUI, a serialized component
-* `stages` - a list of Echo stages for this echo, see below
+* `stages` - an ordered list of Echo stages for this echo, see below
 * `all_complete` - a message displayed at the end of the Echo GUI lore panel when the team has completed all stages. Optional, defaults to "All Stages Complete!"
 
 ### Echo Stages
 
 Echo stages define the progression for an Echo. Fields:
 
-* `title` - optional, displayed in the Lore page as the first text line of a stage if present
+* `title` - optional, a serialized component displayed in the Lore page as the first text line of a stage if present
 * `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below
 * `not_ready` - serialized component, text displayed after the lore or in the task panel if the player isn't ready to complete the stage
 * `ready` - serialized component, text displayed after the lore or in the task panel if the player _is_ ready to complete the stage
 * `completed` - serialized component, text displayed in the lore and task panels if the player has completed the stage. Optional; defaults to "Stage Completed!"
 * `required_stage` - a string; the game stage the player must have to complete this echo stage
-* `shop_unlock` - required, but may be empty; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
+* `shop_unlock` - optional, defaults to an empty list; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
 * `completion_reward` - optional one-time reward(s) granted to players when they complete the stage; see [Completion Rewards](#completion-rewards) below 
+
+Note that if none of the stages of an echo define any shop entries via `shop_unlock`, the "Shop" tab in the GUI is simply not displayed.
 
 ### Lore Entry Components
 
@@ -51,7 +53,7 @@ For `ftbechoes:image`:
 
 For `ftbechoes:audio`:
 
-* `location` - the resource location for an audio clip, which is a Minecraft sound event name
+* `location` - the resource location for an audio clip, which is a registered Minecraft sound event name
 
 ### Shop Entries
 
@@ -68,10 +70,14 @@ Fields:
 * `icon` - the resource location for an icon image; may be omitted if `item` is specified
 * `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
   * This is exclusive with the `item` field.
+* `max_claims` - an optional integer; if present, this limits the number of times this entry can be purchased, on a per-team basis
+* `max_stage` - an optional stage number which limits the _maximum_ stage that a player can reach and still see this entry
+  * This can be used to hide earlier entries when the player has progressed beyond a certain stage, perhaps to replace that entry with a better or cheaper version
+  * The value is a numeric index into the `stages` list of an echo definition, indexed from 0
 
 ### Completion Rewards
 
-Completion rewards define a set of rewards granted to a player when they complete a stage. This includes one or more of an item (or items), some experience, some currency, or a command to be run on behalf of the player (e.g. grant them a game stage)
+Completion rewards define a set of rewards granted to a player when they complete a stage. This includes one or more of an item (or items), some experience, some currency, or a command to be run on behalf of the player or player's team (e.g. grant them a game stage)
 
 All fields below are optional, but at least one of `item`, `experience`, `currency` or `command` must be specified.
 
@@ -93,8 +99,8 @@ Command entries define a string command, with an optional permission level and s
 Fields:
 
 * `run` - the command string, mandatory
-* `permission` - the integer permission level in range 0..4, optional (default: 0)
-* `silent` - a boolean to suppress normal command output, optional (default: true)
+* `permission` - the optional integer permission level in range 0..4, default: 0
+* `silent` - an optional boolean to suppress normal command output, default: true
 * `description` - an optional serialized component, or list of serialized components
   * A (player-friendly) description for what the command does; added to GUI tooltips where relevant
   * This is specifically to describe the command; see also the `description` field in the [ShopEntry](#shop-entries) section, which is more general lore for the shop entry

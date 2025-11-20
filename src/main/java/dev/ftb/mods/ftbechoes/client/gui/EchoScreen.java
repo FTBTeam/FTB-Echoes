@@ -27,20 +27,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
-    static EchoScreen.Page currentPage = EchoScreen.Page.LORE;
+    static Map<ResourceLocation,EchoScreen.Page> currentPage = new HashMap<>();
 
     private final BlockPos projectorPos;
-    private Echo echo;
-    private boolean pendingScrollToEnd;
 
-    public EchoScreen(BlockPos projectorPos, Echo echo) {
+    private boolean pendingScrollToEnd;
+    @Nullable private Echo echo;
+
+    public EchoScreen(BlockPos projectorPos, @Nullable Echo echo) {
         super();
 
         this.projectorPos = projectorPos;
@@ -51,6 +55,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     public void setEcho(Echo echo) {
         this.echo = echo;
+        ((TopPanel) topPanel).tabButtons.invalidate();
+        mainPanel.pages.invalidate();
         refreshWidgets();
     }
 
@@ -63,14 +69,14 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     @Override
     public void onPostInit() {
-        if (currentPage == Page.LORE) {
+        if (getCurrentPage() == Page.LORE) {
             scrollBar.setValue(scrollBar.getMaxValue());
         }
     }
 
     @Override
     public void onClosed() {
-        if (EchoSoundClipHandler.INSTANCE.isPlayingSound() && Minecraft.getInstance().screen != null) {
+        if (EchoSoundClipHandler.INSTANCE.isPlayingSound() && Minecraft.getInstance().screen != null && Minecraft.getInstance().player != null) {
             Minecraft.getInstance().player.displayClientMessage(Component.translatable("ftbechoes.message.hold_alt_to_stop_sound").withStyle(ChatFormatting.AQUA), true);
         }
     }
@@ -113,9 +119,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
+    public Page getCurrentPage() {
+        return echo == null ? Page.LORE : currentPage.getOrDefault(echo.id(), Page.LORE);
+    }
+
+    private void setCurrentPage(Page page) {
+        if (echo != null) {
+            currentPage.put(echo.id(), page);
+        }
+    }
+
     public void onProgressUpdated() {
         refreshWidgets();
-        if (currentPage == Page.LORE) {
+        if (getCurrentPage() == Page.LORE) {
             pendingScrollToEnd = true;
         }
     }
@@ -124,7 +140,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         return projectorPos;
     }
 
-    static class PurchaseButton extends SimpleTextButton {
+    class PurchaseButton extends SimpleTextButton {
         public PurchaseButton(Panel parent) {
             super(parent, Component.translatable("ftbechoes.gui.place_order"), Icons.MONEY_BAG);
         }
@@ -176,13 +192,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         @Override
         public boolean isEnabled() {
             return ShoppingBasket.CLIENT_INSTANCE.hasContents()
-                    && currentPage == Page.SHOP
+                    && getCurrentPage() == Page.SHOP
                     && ShoppingBasket.CLIENT_INSTANCE.getTotalCost() <= FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player);
         }
 
         @Override
         public boolean shouldDraw() {
-            return currentPage == Page.SHOP;
+            return getCurrentPage() == Page.SHOP;
         }
     }
 
@@ -190,7 +206,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         private final TextField label;
         private final Button settingsButton;
         private final Button stopAudioButton;
-        private final Map<EchoScreen.Page, EchoScreen.PageButton> buttons = new EnumMap<>(EchoScreen.Page.class);
+        private final Lazy<Map<EchoScreen.Page, EchoScreen.PageButton>> tabButtons = Lazy.of(this::buildTabButtons);
         private final boolean adminPlayer;
 
         public TopPanel() {
@@ -202,14 +218,26 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             label = new TextField(this);
             settingsButton = SimpleTextButton.create(this, Component.empty(), Icons.SETTINGS, this::showEchoSelector);
             stopAudioButton = new StopAudioButton();
-            buttons.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
-            buttons.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
+        }
+
+        private Map<EchoScreen.Page, EchoScreen.PageButton> buildTabButtons() {
+            Map<EchoScreen.Page, EchoScreen.PageButton> res = new EnumMap<>(EchoScreen.Page.class);
+
+            res.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
+            if (echo != null && echo.hasAnyShopItems()) {
+                res.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
+            }
 
             // only show selector drop-down after at least one stage has been completed
-            buttons.get(Page.LORE).setDropdownAction(
+            res.get(Page.LORE).setDropdownAction(
                     this::showStageSelector,
                     () -> echo != null && ClientProgress.get().isStageCompleted(echo.id(), 0)
             );
+            return res;
+        }
+
+        private Map<EchoScreen.Page, EchoScreen.PageButton> getTabButtons() {
+            return tabButtons.get();
         }
 
         @Override
@@ -223,9 +251,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             } else {
                 add(label.setText(Component.empty().withStyle(ChatFormatting.YELLOW).append(echo.title())));
             }
-            for (EchoScreen.Page p : buttons.keySet()) {
-                add(buttons.get(p));
-            }
+            addAll(getTabButtons().values());
         }
 
         @Override
@@ -236,9 +262,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             label.setPos(4, 5);
             label.setWidth(width);
 
-            int bw = width / (buttons.size() + 1) - 4;
+            int bw = width / (getTabButtons().size() + 1) - 4;
             int by = getTheme().getFontHeight() + 8;
-            for (EchoScreen.PageButton w : buttons.values()) {
+            for (EchoScreen.PageButton w : getTabButtons().values()) {
                 w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), by, bw, height - by);
             }
         }
@@ -247,9 +273,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             super.drawBackground(graphics, theme, x, y, w, h);
             int col = 0xff585d66;  // blends best with tabbed outline
-            graphics.hLine(x, x + buttons.get(Page.LORE).posX - 1, y + height - 2, col);
-            graphics.hLine(x + buttons.get(Page.LORE).posX + buttons.get(Page.LORE).width, x + buttons.get(Page.SHOP).posX - 1, y + height - 2, col);
-            graphics.hLine(x + buttons.get(Page.SHOP).posX + buttons.get(Page.SHOP).width, x + width - 1, y + height - 2, col);
+            graphics.hLine(x, x + getTabButtons().get(Page.LORE).posX - 1, y + height - 2, col);
+            if (echo != null && echo.hasAnyShopItems()) {
+                graphics.hLine(x + getTabButtons().get(Page.LORE).posX + getTabButtons().get(Page.LORE).width, x + getTabButtons().get(Page.SHOP).posX - 1, y + height - 2, col);
+                graphics.hLine(x + getTabButtons().get(Page.SHOP).posX + getTabButtons().get(Page.SHOP).width, x + width - 1, y + height - 2, col);
+            } else {
+                graphics.hLine(x + getTabButtons().get(Page.LORE).posX + getTabButtons().get(Page.LORE).width, x + width - 1, y + height - 2, col);
+            }
             graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
         }
 
@@ -276,6 +306,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         private void showStageSelector() {
+            if (echo == null) return;
             openContextMenu(Util.make(new ArrayList<>(), list -> {
                         list.add(ContextMenuItem.title(Component.translatable("ftbechoes.gui.stages")));
                         list.add(ContextMenuItem.separator());
@@ -303,7 +334,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         private void scrollToStage(int stageIdx) {
-            if (EchoScreen.this.mainPanel.pages.get(Page.LORE) instanceof LorePanel lorePanel) {
+            if (EchoScreen.this.mainPanel.getPages().get(Page.LORE) instanceof LorePanel lorePanel) {
                 if (lorePanel.isCollapsed(stageIdx)) {
                     lorePanel.setCollapsed(stageIdx, false);
                 }
@@ -313,7 +344,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private void collapseAll(boolean collapse) {
             playClickSound();
-            if (EchoScreen.this.mainPanel.pages.get(Page.LORE) instanceof LorePanel lorePanel) {
+            if (EchoScreen.this.mainPanel.getPages().get(Page.LORE) instanceof LorePanel lorePanel) {
                 lorePanel.setAllCollapsed(collapse);
             }
         }
@@ -354,23 +385,33 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     }
 
     public class MainPanel extends Panel {
-        private final Map<Page, PagePanel> pages = new EnumMap<>(Page.class);
+        private final Lazy<Map<Page, PagePanel>> pages = Lazy.of(this::buildPages);
 
         public MainPanel() {
             super(EchoScreen.this);
+        }
 
-            pages.put(Page.LORE, new LorePanel(this, EchoScreen.this));
-            pages.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
+        private Map<Page, PagePanel> buildPages() {
+            Map<Page,PagePanel> map = new EnumMap<>(Page.class);
+            map.put(Page.LORE, new LorePanel(this, EchoScreen.this));
+            if (echo != null && echo.hasAnyShopItems()) {
+                map.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
+            }
+            return map;
+        }
+
+        private Map<Page,PagePanel> getPages() {
+            return pages.get();
         }
 
         @Override
         public void addWidgets() {
-            addAll(pages.values());
+            addAll(getPages().values());
         }
 
         @Override
         public void alignWidgets() {
-            pages.values().forEach(p -> {
+            getPages().values().forEach(p -> {
                 p.setPosAndSize(0, 0, width, height);
                 p.alignWidgets();
             });
@@ -379,21 +420,30 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             }
         }
 
+        private PagePanel getCurrentPagePanel() {
+            PagePanel res = getPages().get(getCurrentPage());
+            if (res == null) {
+                setCurrentPage(Page.LORE);
+                return getPages().get(Page.LORE);
+            }
+            return res;
+        }
+
         @Override
         public int getContentHeight() {
-            return pages.get(currentPage).getContentHeight();
+            return getCurrentPagePanel().getContentHeight();
         }
 
         public void storeScrollPos() {
-            pages.get(currentPage).storeScrollPos();
+            getCurrentPagePanel().storeScrollPos();
         }
 
         public double fetchScrollPos() {
-            return pages.get(currentPage).fetchScrollPos();
+            return getCurrentPagePanel().fetchScrollPos();
         }
 
         public void onSwitchAway() {
-            pages.get(currentPage).onSwitchAway();
+            getCurrentPagePanel().onSwitchAway();
         }
 
         @Override
@@ -402,7 +452,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
-    private static class BottomPanel extends Panel {
+    private class BottomPanel extends Panel {
         private final PurchaseButton purchaseButton;
 
         public BottomPanel(Panel panel) {
@@ -451,12 +501,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public boolean shouldDraw() {
-            return page == currentPage;
+            return page == echoScreen.getCurrentPage();
         }
 
         @Override
         public boolean isEnabled() {
-            return page == currentPage;
+            return page == echoScreen.getCurrentPage();
         }
 
         protected Optional<Echo> getEcho() {
@@ -473,10 +523,6 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         public double fetchScrollPos() {
             return lastScrollPos;
-        }
-
-        public void scrollToTop() {
-            echoScreen.scrollBar.setValue(0.0);
         }
 
         public void onSwitchAway() {
@@ -549,12 +595,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-            theme.drawHorizontalTab(graphics, x, y, w, h, EchoScreen.currentPage == page);
+            theme.drawHorizontalTab(graphics, x, y, w, h, getCurrentPage() == page);
         }
 
         @Override
         public void onClicked(MouseButton mouseButton) {
-            if (dropdownPredicate.getAsBoolean() && EchoScreen.currentPage == page && getMouseX() < getX() + width - 4 && getMouseX() > getX() + width - 18) {
+            if (dropdownPredicate.getAsBoolean() && getCurrentPage() == page && getMouseX() < getX() + width - 4 && getMouseX() > getX() + width - 18) {
                 onDropDownClicked.run();
                 return;
             }
@@ -564,7 +610,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             mainPanel.onSwitchAway();
             mainPanel.storeScrollPos();
-            EchoScreen.currentPage = page;
+            setCurrentPage(page);
             mainPanel.refreshWidgets();
             scrollBar.setValue(mainPanel.fetchScrollPos());
         }

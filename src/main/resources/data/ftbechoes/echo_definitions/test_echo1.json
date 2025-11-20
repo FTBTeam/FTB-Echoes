@@ -25,10 +25,10 @@
             "components": {
               "minecraft:custom_name": "{text:'Nice Axe', color:'light_purple', italic:false}",
               "minecraft:enchantments": { "levels": { "minecraft:sharpness": 3 } }
-            },
-            "max_claims": 5,
-            "cost": 6
-          }
+            }
+          },
+          "max_claims": 5,
+          "cost": 6
         },
         {
           "name": "Loot Crate: tbl1",
