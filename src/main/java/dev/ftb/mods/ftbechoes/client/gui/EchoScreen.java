@@ -131,7 +131,6 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         @Override
         public void onClicked(MouseButton mouseButton) {
-            // TODO send order to server
             playClickSound();
 
             PacketDistributor.sendToServer(new PlaceOrderMessage(ShoppingBasket.CLIENT_INSTANCE));

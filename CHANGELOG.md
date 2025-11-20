@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Audio clips now continue playing after the Echo UI is closed
   - Players can hold Alt key down for 2 seconds (inside or outside the UI) to stop any playing audio clip
+- Localization for audio clips
+- Optional `max_stage` entry for shop entries to allow items from older stages to be removed from the shop for teams beyond a given stage
 
 ## [21.1.5]
 
