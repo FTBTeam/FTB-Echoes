@@ -31,7 +31,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
             Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
             CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command),
             Codec.INT.optionalFieldOf("max_claims").forGetter(ShopData::maxClaims),
-            Codec.INT.optionalFieldOf("max_stage", 0).forGetter(ShopData::maxStage)
+            Codec.INT.optionalFieldOf("max_stage", Integer.MAX_VALUE).forGetter(ShopData::maxStage)
     ).apply(builder, ShopData::new));
 
     public static final Codec<ShopData> CODEC = RAW_CODEC.validate(ShopData::validate);

@@ -86,10 +86,8 @@ public class ShoppingBasket {
                     // If the claim is limited, make sure we don't exceed the allowed number
                     boolean stockAvailable = entry.data().maxClaims().isEmpty()
                             || progress.getRemainingLimitedShopPurchases(key, entry.data()) >= amount;
-                    if (stockAvailable
-                            && progress.isStageCompleted(key.echoId(), entry.stageIdx())
-                            && progress.getCurrentStage(key.echoId()) <= entry.data().maxStage())
-                    {
+                    int currentStage = progress.getCurrentStage(key.echoId());
+                    if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
                         map.put(key, amount);
                     }
                 }));

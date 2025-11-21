@@ -9,7 +9,7 @@
       ],
       "not_ready": "You're not ready yet :(",
       "ready": "Ok, good to go",
-      "required_stage": "echo3_stage1",
+      "required_stage": "echo3_stage1"
     },
     {
       "title": "Stage II",
@@ -18,7 +18,7 @@
       ],
       "not_ready": "Not yet...",
       "ready": "Ok good",
-      "required_stage": "echo3_stage2",
+      "required_stage": "echo3_stage2"
     }
   ]
 }
