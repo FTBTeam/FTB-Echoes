@@ -203,4 +203,14 @@ public class TeamProgressManager extends SavedData {
         setDirty();
         return TeamProgress.createNew();
     }
+
+    public void injectProgressData(UUID teamId, TeamProgress progress) {
+        // called via the /ftbechoes nbtedit command
+        progressMap.put(teamId, progress);
+        setDirty();
+        FTBTeamsAPI.api().getManager().getTeamByID(teamId)
+                .ifPresent(team -> team.getOnlineMembers().forEach(sp ->
+                        PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(progress, sp)))
+                );
+    }
 }

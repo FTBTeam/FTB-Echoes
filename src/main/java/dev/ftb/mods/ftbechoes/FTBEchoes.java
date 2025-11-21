@@ -1,9 +1,11 @@
 package dev.ftb.mods.ftbechoes;
 
 import dev.ftb.mods.ftbechoes.command.FTBEchoesCommands;
+import dev.ftb.mods.ftbechoes.command.NBTEditCommand;
 import dev.ftb.mods.ftbechoes.config.FTBEchoesServerConfig;
 import dev.ftb.mods.ftbechoes.datagen.DataGenerators;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.registry.*;
@@ -13,9 +15,12 @@ import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
+import dev.ftb.mods.ftblibrary.nbtedit.NBTEditResponseHandlers;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamEvent;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,6 +98,16 @@ public class FTBEchoes {
 
     private void onServerAboutToStart(ServerAboutToStartEvent event) {
         EchoManager.initServer();
+
+        NBTEditResponseHandlers.INSTANCE.registerHandler(NBTEditCommand.FTBECHOES_PROGRESS, (serverPlayer, info, data) -> {
+            FTBTeamsAPI.api().getManager().getTeamForPlayerID(info.getUUID("id")).ifPresent(team -> {
+                TeamProgress.CODEC.parse(NbtOps.INSTANCE, data)
+                        .ifSuccess(progress -> {
+                            serverPlayer.displayClientMessage(Component.translatable("ftbechoes.message.progress_edited", team.getColoredName()), false);
+                            TeamProgressManager.get(event.getServer()).injectProgressData(team.getTeamId(), progress);
+                        });
+            });
+        });
     }
 
     private void onServerStopped(ServerStoppedEvent event) {

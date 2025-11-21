@@ -148,6 +148,14 @@ public class ShopItemWidget extends Panel {
         }
     }
 
+    @Override
+    public void addMouseOverText(TooltipList list) {
+        if (getMouseY() < getY() + 16 && getMouseX() < getX() + width / 2 && data.maxClaims().isPresent()) {
+            list.add(Component.translatable("ftbechoes.gui.stock_remaining", getRemainingLimit(), data.maxClaims().get()));
+            list.add(Component.translatable("ftbechoes.gui.stock_limit." + (data.perPlayerMax() ? "player": "team")).withStyle(ChatFormatting.GRAY));
+        }
+    }
+
     private Icon getActualIcon() {
         if (data.stacks().size() == 1) {
             return data.icon().orElse(ItemIcon.getItemIcon(data.stacks().getFirst()));
