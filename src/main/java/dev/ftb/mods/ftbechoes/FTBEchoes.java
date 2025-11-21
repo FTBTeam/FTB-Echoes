@@ -13,6 +13,7 @@ import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
 import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
+import dev.ftb.mods.ftbteams.api.event.PlayerChangedTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.PlayerLoggedInAfterTeamEvent;
 import dev.ftb.mods.ftbteams.api.event.TeamEvent;
 import net.minecraft.network.chat.Component;
@@ -63,6 +64,7 @@ public class FTBEchoes {
         forgeBus.addListener(FTBEchoesCommands::registerCommands);
 
         TeamEvent.PLAYER_LOGGED_IN.register(this::onPlayerTeamLogin);
+        TeamEvent.PLAYER_CHANGED.register(this::onPlayerTeamChange);
     }
 
     public static CurrencyProvider currencyProvider() {
@@ -131,6 +133,14 @@ public class FTBEchoes {
 
         if (FTBEchoesServerConfig.SYNC_STAGES.get()) {
             StageHelper.getInstance().getProvider().sync(player);
+        }
+    }
+
+    private void onPlayerTeamChange(PlayerChangedTeamEvent event) {
+        if (event.getPlayer() instanceof ServerPlayer sp) {
+            var server = Objects.requireNonNull(sp.getServer());
+            var progress = TeamProgressManager.get(server).getProgress(event.getTeam());
+            PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(progress, sp));
         }
     }
 

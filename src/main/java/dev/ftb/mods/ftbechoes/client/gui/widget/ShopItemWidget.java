@@ -18,6 +18,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ModUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -159,7 +160,7 @@ public class ShopItemWidget extends Panel {
 
     int getRemainingLimit() {
         return data.maxClaims()
-                .map((max) -> teamProgress.getRemainingLimitedShopPurchases(key, data))
+                .map((max) -> teamProgress.getRemainingShopStock(Minecraft.getInstance().player, key, data))
                 .orElse(Integer.MAX_VALUE);
     }
 

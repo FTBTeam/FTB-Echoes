@@ -28,6 +28,7 @@
             }
           },
           "max_claims": 5,
+          "per_player_max_claims": true,
           "cost": 6
         },
         {

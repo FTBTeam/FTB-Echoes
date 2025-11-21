@@ -85,7 +85,7 @@ public class ShoppingBasket {
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
                     // If the claim is limited, make sure we don't exceed the allowed number
                     boolean stockAvailable = entry.data().maxClaims().isEmpty()
-                            || progress.getRemainingLimitedShopPurchases(key, entry.data()) >= amount;
+                            || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
                     int currentStage = progress.getCurrentStage(key.echoId());
                     if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
                         map.put(key, amount);
