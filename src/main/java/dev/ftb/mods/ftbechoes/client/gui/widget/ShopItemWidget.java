@@ -153,6 +153,8 @@ public class ShopItemWidget extends Panel {
         if (getMouseY() < getY() + 16 && getMouseX() < getX() + width / 2 && data.maxClaims().isPresent()) {
             list.add(Component.translatable("ftbechoes.gui.stock_remaining", getRemainingLimit(), data.maxClaims().get()));
             list.add(Component.translatable("ftbechoes.gui.stock_limit." + (data.perPlayerMax() ? "player": "team")).withStyle(ChatFormatting.GRAY));
+        } else {
+            super.addMouseOverText(list);
         }
     }
 
