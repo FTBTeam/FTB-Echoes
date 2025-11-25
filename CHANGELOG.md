@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.6]
+
+### Added
+- Audio clips now continue playing after the Echo UI is closed
+  - Players can hold Alt key down for 2 seconds (inside or outside the UI) to stop any playing audio clip
+- Localization for audio clips used in `ftbechoes:audio` lore entries
+  - The mod first looks for a clip under the `<lang>` subdirectory (where `<lang>` is the current language for the game) then under `en_us`,
+  - e.g. `ftb:clip1` will be checked for in `assets/ftb/sounds/<lang>/clip1.ogg`, then in `assets/ftb/sounds/en_us/clip1.ogg`, then finally `assets/ftb/sounds/clip1.ogg`
+- Optional `max_stage` entry for shop entries to allow items from older stages to be removed from the shop for teams beyond a given stage
+- Added `pt_br` translation (thanks @PrincessStellar)
+- Max claims for a shop item can now optionally be per-player instead of per-team
+  - New `per_player_max_claims` boolean field (default false) in shop entry json
+- Added `/ftbechoes nbtedit <player>` admin command to view/edit a player's team's echo progression
+  - Take care with this: bad edits can wreck progression for a team! Make backups!
+
+### Changed
+- If no stage of an echo defines any shop entries, the "Shop" tab is now simply not displayed
+- The current GUI tab ("Lore" or "Shop") is now tracked on a per-echo basis instead of being global to all echoes
+- The `shop_unlock` field in the echo definition is now optional, defaulting to an empty list
+
 ## [21.1.5]
 
 ### Added

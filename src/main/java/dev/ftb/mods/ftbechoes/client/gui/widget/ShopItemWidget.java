@@ -18,6 +18,7 @@ import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.ModUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -147,6 +148,16 @@ public class ShopItemWidget extends Panel {
         }
     }
 
+    @Override
+    public void addMouseOverText(TooltipList list) {
+        if (getMouseY() < getY() + 16 && getMouseX() < getX() + width / 2 && data.maxClaims().isPresent()) {
+            list.add(Component.translatable("ftbechoes.gui.stock_remaining", getRemainingLimit(), data.maxClaims().get()));
+            list.add(Component.translatable("ftbechoes.gui.stock_limit." + (data.perPlayerMax() ? "player": "team")).withStyle(ChatFormatting.GRAY));
+        } else {
+            super.addMouseOverText(list);
+        }
+    }
+
     private Icon getActualIcon() {
         if (data.stacks().size() == 1) {
             return data.icon().orElse(ItemIcon.getItemIcon(data.stacks().getFirst()));
@@ -159,7 +170,7 @@ public class ShopItemWidget extends Panel {
 
     int getRemainingLimit() {
         return data.maxClaims()
-                .map((max) -> teamProgress.getRemainingLimitedShopPurchases(key, data))
+                .map((max) -> teamProgress.getRemainingShopStock(Minecraft.getInstance().player, key, data))
                 .orElse(Integer.MAX_VALUE);
     }
 

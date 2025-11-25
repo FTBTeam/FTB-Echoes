@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.net.ClaimRewardResponseMessage;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
+import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
@@ -159,9 +160,9 @@ public class TeamProgressManager extends SavedData {
         return applyChange(playerId, progress -> progress.resetAllRewards(echoId, playerId));
     }
 
-    public void consumeLimitedShopPurchase(ServerPlayer player, ShoppingKey key, int count) {
+    public void consumeLimitedShopPurchase(ServerPlayer player, ShoppingKey key, int count, ShopData shopData) {
         applyChange(player, progress -> {
-            progress.consumeLimitedShopPurchase(key, count);
+            progress.consumeShopStock(player, key, count, shopData);
             return true;
         });
     }
@@ -201,5 +202,15 @@ public class TeamProgressManager extends SavedData {
     private TeamProgress newProgress() {
         setDirty();
         return TeamProgress.createNew();
+    }
+
+    public void injectProgressData(UUID teamId, TeamProgress progress) {
+        // called via the /ftbechoes nbtedit command
+        progressMap.put(teamId, progress);
+        setDirty();
+        FTBTeamsAPI.api().getManager().getTeamByID(teamId)
+                .ifPresent(team -> team.getOnlineMembers().forEach(sp ->
+                        PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(progress, sp)))
+                );
     }
 }

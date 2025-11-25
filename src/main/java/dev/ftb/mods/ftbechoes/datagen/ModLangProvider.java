@@ -32,6 +32,9 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.expand_all", "Expand All");
         add("ftbechoes.gui.all_complete", "All Stages Complete!");
         add("ftbechoes.gui.stop_audio", "Stop Current Audio Clip");
+        add("ftbechoes.gui.stock_remaining", "Stock Remaining: %s/%s");
+        add("ftbechoes.gui.stock_limit.player", "Per-player limit");
+        add("ftbechoes.gui.stock_limit.team", "Per-team limit");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
@@ -56,6 +59,8 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.message.reward_not_claimed", "Reward could not be claimed!");
         add("ftbechoes.message.echo_complete", "Echo %s: All stages complete!");
         add("ftbechoes.message.echo_stage_complete", "Echo %s: stage %s complete!");
+        add("ftbechoes.message.hold_alt_to_stop_sound", "Hold [Alt] for 2 seconds to stop audio");
+        add("ftbechoes.message.progress_edited", "Echo progress for team '%s' has been edited via GUI");
 
         add("ftbechoes.tooltip.locked", "Not unlocked yet!");
         add("ftbechoes.tooltip.unlocked_by", "Unlocked by: %s");

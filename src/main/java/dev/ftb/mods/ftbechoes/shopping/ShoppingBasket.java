@@ -84,8 +84,10 @@ public class ShoppingBasket {
                 EchoManager mgr = EchoManager.getServerInstance();
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
                     // If the claim is limited, make sure we don't exceed the allowed number
-                    boolean isWithinAllowedLimit = entry.data().maxClaims().isEmpty() || progress.getRemainingLimitedShopPurchases(key, entry.data()) >= amount;
-                    if (isWithinAllowedLimit && progress.isStageCompleted(key.echoId(), entry.stageIdx())) {
+                    boolean stockAvailable = entry.data().maxClaims().isEmpty()
+                            || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
+                    int currentStage = progress.getCurrentStage(key.echoId());
+                    if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
                         map.put(key, amount);
                     }
                 }));

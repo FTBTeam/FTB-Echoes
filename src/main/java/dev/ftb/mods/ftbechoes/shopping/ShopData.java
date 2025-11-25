@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbechoes.util.EchoCodecs;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command, Optional<Integer> maxClaims) {
+public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command, Optional<Integer> maxClaims, boolean perPlayerMax, int maxStage) {
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
             EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
@@ -31,7 +30,9 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
             EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(ShopData::description),
             Icon.STRING_CODEC.optionalFieldOf("icon").forGetter(ShopData::icon),
             CommandInfo.CODEC.optionalFieldOf("command").forGetter(ShopData::command),
-            Codec.INT.optionalFieldOf("max_claims").forGetter(ShopData::maxClaims)
+            Codec.INT.optionalFieldOf("max_claims").forGetter(ShopData::maxClaims),
+            Codec.BOOL.optionalFieldOf("per_player_max_claims", false).forGetter(ShopData::perPlayerMax),
+            Codec.INT.optionalFieldOf("max_stage", Integer.MAX_VALUE).forGetter(ShopData::maxStage)
     ).apply(builder, ShopData::new));
 
     public static final Codec<ShopData> CODEC = RAW_CODEC.validate(ShopData::validate);
@@ -43,7 +44,9 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
             ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), ShopData::command,
-            ByteBufCodecs.optional(ByteBufCodecs.INT), ShopData::maxClaims,
+            ByteBufCodecs.optional(ByteBufCodecs.VAR_INT), ShopData::maxClaims,
+            ByteBufCodecs.BOOL, ShopData::perPlayerMax,
+            ByteBufCodecs.VAR_INT, ShopData::maxStage,
             ShopData::new
     );
 
@@ -67,7 +70,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
         }
         command.ifPresent(cmdInfo -> cmdInfo.runForPlayer(player));
         if (maxClaims().isPresent()) {
-            TeamProgressManager.get().consumeLimitedShopPurchase(player, key, nOrders);
+            TeamProgressManager.get().consumeLimitedShopPurchase(player, key, nOrders, this);
         }
     }
 

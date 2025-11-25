@@ -55,4 +55,8 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
         }
         return DataResult.success(this);
     }
+
+    public boolean hasAnyShopItems() {
+        return stages.stream().anyMatch(s -> !s.shopUnlocked().isEmpty());
+    }
 }

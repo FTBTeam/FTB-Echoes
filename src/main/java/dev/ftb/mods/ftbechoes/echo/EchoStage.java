@@ -26,7 +26,7 @@ public record EchoStage(Component title, boolean showTitleInLore, List<BaseStage
             ComponentSerialization.CODEC.fieldOf("ready").forGetter(EchoStage::ready),
             ComponentSerialization.CODEC.optionalFieldOf("completed").forGetter(EchoStage::completed),
             Codec.STRING.fieldOf("required_stage").forGetter(EchoStage::requiredGameStage),
-            ShopData.CODEC.listOf().fieldOf("shop_unlock").forGetter(EchoStage::shopUnlocked),
+            ShopData.CODEC.listOf().optionalFieldOf("shop_unlock", List.of()).forGetter(EchoStage::shopUnlocked),
             StageCompletionReward.CODEC.optionalFieldOf("completion_reward").forGetter(EchoStage::completionReward)
     ).apply(builder, EchoStage::new));
 

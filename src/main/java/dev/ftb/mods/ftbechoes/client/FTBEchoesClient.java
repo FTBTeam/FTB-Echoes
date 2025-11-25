@@ -4,6 +4,7 @@ import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
 import dev.ftb.mods.ftbechoes.client.gui.EchoProgressInfo;
 import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
+import dev.ftb.mods.ftbechoes.client.gui.EchoSoundClipHandler;
 import dev.ftb.mods.ftbechoes.client.gui.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
 import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
@@ -22,6 +23,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -37,6 +39,8 @@ import java.util.stream.Collectors;
 
 @Mod(value = FTBEchoes.MOD_ID, dist = Dist.CLIENT)
 public class FTBEchoesClient {
+    private int altKeyTime = 0;
+
     public FTBEchoesClient(IEventBus modEventBus) {
         NeoForge.EVENT_BUS.addListener(this::playerLoggedIn);
         NeoForge.EVENT_BUS.addListener(this::playerLoggedOut);
@@ -51,6 +55,16 @@ public class FTBEchoesClient {
         Level level = event.getLevel();
         if (!level.isClientSide() || !FTBTeamsAPI.api().isClientManagerLoaded()) {
             return;
+        }
+
+        if (ScreenWrapper.hasAltDown()) {
+            altKeyTime++;
+            if (altKeyTime >= 40 && EchoSoundClipHandler.INSTANCE.isPlayingSound()) {
+                EchoSoundClipHandler.INSTANCE.stopPlayingSound();
+                Minecraft.getInstance().player.playSound(SoundEvents.COMPARATOR_CLICK, 0.7f, 0.5f);
+            }
+        } else {
+            altKeyTime = 0;
         }
 
         PersistedClientData.get().save();

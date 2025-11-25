@@ -4,5 +4,20 @@
       "ftbechoes:coins"
     ],
     "subtitle": "ftbechoes.subtitle.coins_clink"
+  },
+  "en_gb/this_is_an_echo": {
+    "sounds": [
+      "ftbechoes:en_gb/this_is_an_echo"
+    ]
+  },
+  "fr_fr/this_is_an_echo": {
+    "sounds": [
+      "ftbechoes:fr_fr/this_is_an_echo"
+    ]
+  },
+  "this_is_an_echo": {
+    "sounds": [
+      "ftbechoes:this_is_an_echo"
+    ]
   }
 }
