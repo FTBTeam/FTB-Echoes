@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTSyntaxException;
 import dev.ftb.mods.ftblibrary.snbt.config.ConfigUtil;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.nbt.CompoundTag;
@@ -57,7 +58,7 @@ public class PersistedClientData {
                 INSTANCE = CODEC.parse(NbtOps.INSTANCE, tag)
                         .resultOrPartial(FTBEchoes.LOGGER::error)
                         .orElse(createNew());
-            } catch (IOException e) {
+            } catch (IOException | SNBTSyntaxException e) {
                 FTBEchoes.LOGGER.error("can't read {}, using default persisted client data", file);
                 INSTANCE = createNew();
             }
