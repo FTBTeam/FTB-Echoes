@@ -38,8 +38,6 @@ public class ModLangProvider extends LanguageProvider {
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
-        add("ftbechoes.commands.added_stage", "Added game stage: %s");  // TODO update to "team stage"
-        add("ftbechoes.commands.removed_stage", "Removed game stage: %s");  // TODO update to "team stage"
         add("ftbechoes.commands.progress_changed", "Set progress for '%s' on echo '%s' to stage %s");
         add("ftbechoes.commands.progress_changed.failed", "Progress change failed");
         add("ftbechoes.commands.reward_reset", "Reset reward for '%s' on echo '%s', stage %s");
@@ -47,7 +45,7 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.commands.reward_reset.failed", "Could not reset reward - player has not claimed it?");
         add("ftbechoes.commands.all_progress_reset", "All echo progress & rewards reset for %s");
         add("ftbechoes.commands.shop_stock_reset", "Shop stock reset to full for echo '%s'");
-        add("ftbechoes.commands.shop_stock_reset.failed", "No purchass to reset for echo '%s'");
+        add("ftbechoes.commands.shop_stock_reset.failed", "No purchases to reset for echo '%s'");
 
         add("ftbechoes.message.complete_stage", "Complete Stage");
         add("ftbechoes.message.purchase_success", "Purchase Completed!");

@@ -2,15 +2,14 @@ package dev.ftb.mods.ftbechoes;
 
 import dev.ftb.mods.ftbechoes.command.FTBEchoesCommands;
 import dev.ftb.mods.ftbechoes.command.NBTEditCommand;
-import dev.ftb.mods.ftbechoes.config.FTBEchoesServerConfig;
 import dev.ftb.mods.ftbechoes.datagen.DataGenerators;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.registry.*;
+import dev.ftb.mods.ftbechoes.util.StageMigration;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
-import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
 import dev.ftb.mods.ftblibrary.integration.stages.StageHelper;
@@ -50,11 +49,10 @@ public class FTBEchoes {
             = Lazy.of(() -> CurrencyHelper.getInstance().getProvider());
     public static final Lazy<StageProvider> STAGE_PROVIDER
             = Lazy.of(() -> StageHelper.getInstance().getProvider());
+    private static final String STAGES_MIGRATED = "ftbechoes:stages_migrated";
 
     public FTBEchoes(IEventBus eventBus) {
         IEventBus forgeBus = NeoForge.EVENT_BUS;
-
-        ConfigManager.getInstance().registerServerConfig(FTBEchoesServerConfig.CONFIG, MOD_ID + ".server_config", false);
 
         eventBus.addListener(this::addCreative);
         eventBus.addListener(DataGenerators::gatherData);
@@ -146,8 +144,9 @@ public class FTBEchoes {
         var progress = TeamProgressManager.get(server).getProgress(event.getTeam());
         PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
 
-        if (FTBEchoesServerConfig.SYNC_STAGES.get()) {
-            StageHelper.getInstance().getProvider().sync(player);
+        if (!player.getTags().contains(STAGES_MIGRATED)) {
+            StageMigration.migrateStages(player, event.getTeam());
+            player.getTags().add(STAGES_MIGRATED);
         }
     }
 

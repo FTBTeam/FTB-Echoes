@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
+import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
@@ -118,9 +119,7 @@ public class TeamProgressManager extends SavedData {
 
         if (currentStage >= 0 && currentStage < echo.stages().size()) {
             EchoStage stage = echo.stages().get(currentStage);
-            // TODO update to:
-            //if (TeamStages.hasTeamStage(team, stage.requiredGameStage()) && completeStage(team, echo)) {
-            if (FTBEchoes.stageProvider().has(sp, stage.requiredGameStage()) && completeStage(team, echo)) {
+            if (TeamStagesHelper.hasTeamStage(team, stage.requiredGameStage()) && completeStage(team, echo)) {
                 notifyTeamCompletion(team, echo, currentStage);
             }
             stage.completionReward().ifPresent(reward -> {
