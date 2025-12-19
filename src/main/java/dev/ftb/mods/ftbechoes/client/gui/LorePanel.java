@@ -8,12 +8,12 @@ import dev.ftb.mods.ftbechoes.client.gui.widget.HorizontalLineWidget;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
+import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
-import dev.ftb.mods.ftbteams.api.TeamStagesHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -61,7 +61,7 @@ class LorePanel extends EchoScreen.PagePanel {
                     vSpace(5);
                 }
                 if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
-                    if (TeamStagesHelper.hasTeamStage(FTBTeamsAPI.api().getClientManager().selfTeam(), stage.requiredGameStage())) {
+                    if (MiscUtil.hasStage(Minecraft.getInstance().player, FTBTeamsAPI.api().getClientManager().selfTeam(), stage.requiredGameStage())) {
                         if (!collapsed) {
                             add(new BorderedTextField(this).setText(stage.ready()));
                         }

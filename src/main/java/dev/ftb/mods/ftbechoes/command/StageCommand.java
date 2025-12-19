@@ -1,0 +1,70 @@
+package dev.ftb.mods.ftbechoes.command;
+
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import dev.ftb.mods.ftbechoes.FTBEchoes;
+import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+
+public class StageCommand {
+    private static final SimpleCommandExceptionType ERROR_ADD_FAILED
+            = new SimpleCommandExceptionType(Component.translatable("commands.tag.add.failed"));
+    private static final SimpleCommandExceptionType ERROR_REMOVE_FAILED
+            = new SimpleCommandExceptionType(Component.translatable("commands.tag.remove.failed"));
+
+    public static LiteralArgumentBuilder<CommandSourceStack> register() {
+        return literal("gamestage")
+                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(argument("player", EntityArgument.player())
+                        .then(literal("add")
+                                .then(argument("stage", StringArgumentType.string())
+                                        .executes(ctx -> addStage(ctx,
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                StringArgumentType.getString(ctx, "stage"),
+                                                true)
+                                        )
+                                )
+                        )
+                        .then(literal("remove")
+                                .then(argument("stage", StringArgumentType.string())
+                                        .executes(ctx -> addStage(ctx,
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                StringArgumentType.getString(ctx, "stage"),
+                                                false)
+                                        )
+                                )
+                        )
+                );
+    }
+
+    private static int addStage(CommandContext<CommandSourceStack> ctx, ServerPlayer player, String stage, boolean adding) throws CommandSyntaxException {
+        StageProvider provider = FTBEchoes.stageProvider();
+        // we expect the stage provider to handle sync'ing stage to client
+        if (adding) {
+            provider.add(player, stage);
+            if (!provider.has(player, stage)) {
+                throw ERROR_ADD_FAILED.create();
+            }
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.added_stage", stage), false);
+        } else {
+            provider.remove(player, stage);
+            if (provider.has(player, stage)) {
+                throw ERROR_REMOVE_FAILED.create();
+            }
+            ctx.getSource().sendSuccess(() -> Component.translatable("ftbechoes.commands.removed_stage", stage), false);
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+}

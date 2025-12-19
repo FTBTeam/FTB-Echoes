@@ -10,6 +10,7 @@ public class FTBEchoesCommands {
                 .then(ProgressCommand.register())
                 .then(ProgressInfoCommand.register())
                 .then(NBTEditCommand.register())
+                .then(StageCommand.register())
         );
     }
 }
