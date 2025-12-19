@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [21.1.7]
 
-### Changed
-- Now uses team stages implementation in FTB Team 2101.1.8
-  - All stages used for echo progression are now per-team, not per-player
-  - Per-player stages are migrated into team stages when the player logs in
+### Added
+- Support for team stages implementation in FTB Team 2101.1.8#
+  - Player-based stages are still checked for, but teams stage of same name is also checked if player stage not present
   - Team stages can be queried/modified with the `/ftbteams teamstage` command
 
 ### Fixed
