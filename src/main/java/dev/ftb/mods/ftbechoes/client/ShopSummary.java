@@ -6,8 +6,10 @@ import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,13 +56,12 @@ public enum ShopSummary {
     }
 
     private static int itemKey(ItemStack stack) {
-        if (stack.isDamageableItem()) {
-            // allow searching on damaged versions of shop items
-            ItemStack stack2 = stack.copy();
-            stack2.setDamageValue(0);
-            return ItemStack.hashItemAndComponents(stack2);
-        } else {
+        if (stack.getItem() == Items.POTION) {
+            // special case for potions: take component data into account
             return ItemStack.hashItemAndComponents(stack);
+        } else {
+            // other items just care about the item itself
+            return BuiltInRegistries.ITEM.getId(stack.getItem());
         }
     }
 
