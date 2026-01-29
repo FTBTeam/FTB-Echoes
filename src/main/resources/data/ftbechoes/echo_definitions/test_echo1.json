@@ -32,6 +32,17 @@
           "cost": 6
         },
         {
+          "name": "luck_1",
+          "item": {
+            "id": "minecraft:potion",
+            "count": 1,
+            "components": {
+              "minecraft:potion_contents": { "potion": "luck" }
+            }
+          },
+          "cost": 3
+        },
+        {
           "name": "Loot Crate: tbl1",
           "item": {
             "id": "ftbquests:lootcrate",

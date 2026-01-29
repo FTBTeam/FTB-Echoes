@@ -6,7 +6,6 @@ import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -45,8 +44,7 @@ public enum ShopSummary {
                     if (!data.stacks().isEmpty()) {
                         SummaryItem summary = new SummaryItem(data, echo.title(), stage.title());
                         for (ItemStack stack : data.stacks()) {
-                            int key = itemKey(stack);
-                            byItemHash.computeIfAbsent(key, k -> new ArrayList<>()).add(summary);
+                            byItemHash.computeIfAbsent(itemKey(stack), k -> new ArrayList<>()).add(summary);
                         }
                         allShopData.add(summary);
                     }
@@ -56,8 +54,14 @@ public enum ShopSummary {
     }
 
     private static int itemKey(ItemStack stack) {
-        // note: ignoring component data for the purposes of JEI
-        return BuiltInRegistries.ITEM.getId(stack.getItem());
+        if (stack.isDamageableItem()) {
+            // allow searching on damaged versions of shop items
+            ItemStack stack2 = stack.copy();
+            stack2.setDamageValue(0);
+            return ItemStack.hashItemAndComponents(stack2);
+        } else {
+            return ItemStack.hashItemAndComponents(stack);
+        }
     }
 
     public record SummaryItem(ShopData data, Component echoTitle, Component stageTitle) {
