@@ -113,19 +113,10 @@ public class StageMigration {
             "echo_wyrmwright_stage5_task2_check",
             "echo_wyrmwright_stage5_task2_completed",
             "echo_wyrmwright_unlock",
-            "events_enabled",
-            "ftb:bee_1",
-            "ftb:bee_2",
-            "ftb:bee_3",
             "home_unlocked",
-            "parkour_vault",
             "t5_zone_unlocked",
-            "tf_unlock_hydra",
             "world_engine_unlocked",
-            "creative_motor_unlock",
-            "echo1_stage1",
-            "echo1_stage2",
-            "echo1_stage3"
+            "creative_motor_unlock"
     );
 
     public static void migrateStages(ServerPlayer player, Team team) {

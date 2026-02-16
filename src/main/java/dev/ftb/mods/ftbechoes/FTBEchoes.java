@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbechoes.net.SyncProgressMessage;
 import dev.ftb.mods.ftbechoes.registry.*;
+import dev.ftb.mods.ftbechoes.util.StageMigration;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyHelper;
 import dev.ftb.mods.ftblibrary.integration.currency.CurrencyProvider;
@@ -48,7 +49,7 @@ public class FTBEchoes {
             = Lazy.of(() -> CurrencyHelper.getInstance().getProvider());
     public static final Lazy<StageProvider> STAGE_PROVIDER
             = Lazy.of(() -> StageHelper.getInstance().getProvider());
-//    private static final String STAGES_MIGRATED = "ftbechoes:stages_migrated";
+    private static final String STAGES_MIGRATED = "ftbechoes:stages_migrated";
 
     public FTBEchoes(IEventBus eventBus) {
         IEventBus forgeBus = NeoForge.EVENT_BUS;
@@ -144,11 +145,10 @@ public class FTBEchoes {
         var progress = TeamProgressManager.get(server).getProgress(event.getTeam());
         PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
 
-        // TODO not doing this yet - uncomment if/when we go for a full migration
-//        if (!player.getTags().contains(STAGES_MIGRATED)) {
-//            StageMigration.migrateStages(player, event.getTeam());
-//            player.getTags().add(STAGES_MIGRATED);
-//        }
+        if (!player.getTags().contains(STAGES_MIGRATED)) {
+            StageMigration.migrateStages(player, event.getTeam());
+            player.getTags().add(STAGES_MIGRATED);
+        }
     }
 
     private void onPlayerTeamChange(PlayerChangedTeamEvent event) {
