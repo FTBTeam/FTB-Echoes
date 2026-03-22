@@ -119,18 +119,22 @@ public class TeamProgressManager extends SavedData {
 
         if (currentStage >= 0 && currentStage < echo.stages().size()) {
             EchoStage stage = echo.stages().get(currentStage);
-            if (MiscUtil.hasStage(sp, team, stage.requiredGameStage()) && completeStage(team, echo)) {
-                notifyTeamCompletion(team, echo, currentStage);
-            }
-            stage.completionReward().ifPresent(reward -> {
-                if (reward.autoclaim()) {
-                    if (teamProgress.claimReward(echo.id(), sp, currentStage)) {
-                        PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(teamProgress, sp));
-                        PacketDistributor.sendToPlayer(sp, new ClaimRewardResponseMessage(true, Optional.ofNullable(stage.completionRewardSummary())));
-                        setDirty();
+            if (MiscUtil.hasStage(sp, team, stage.requiredGameStage())) {
+                stage.completionReward().ifPresent(reward -> {
+                    if (reward.autoclaim()) {
+                        if (teamProgress.claimReward(echo.id(), sp, currentStage)) {
+                            PacketDistributor.sendToPlayer(sp, SyncProgressMessage.forPlayer(teamProgress, sp));
+                            PacketDistributor.sendToPlayer(sp, new ClaimRewardResponseMessage(true, Optional.ofNullable(stage.completionRewardSummary())));
+                            setDirty();
+                        } else {
+                            FTBEchoes.LOGGER.error("reward claim failed for echo {}, player {}, stage {}", echo.id(), sp.getGameProfile().getName(), stage);
+                        }
                     }
+                });
+                if (completeStage(team, echo)) {
+                    notifyTeamCompletion(team, echo, currentStage);
                 }
-            });
+            }
         }
     }
 
