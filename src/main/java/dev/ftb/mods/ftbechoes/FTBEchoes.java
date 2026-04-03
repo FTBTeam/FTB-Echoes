@@ -143,10 +143,10 @@ public class FTBEchoes {
         var player = event.getPlayer();
         var server = Objects.requireNonNull(player.getServer());
         var team = event.getTeam();
-        LOGGER.info("[EchoDebug] Player {} login: team='{}' teamId={} getId={} teamType={}",
+        LOGGER.debug("Player {} login: team='{}' teamId={} getId={} teamType={}",
                 player.getGameProfile().getName(), team.getShortName(), team.getTeamId(), team.getId(), team.getClass().getSimpleName());
         var progress = TeamProgressManager.get(server).getProgress(team);
-        LOGGER.info("[EchoDebug] Progress for team {}: {} echoes tracked, stages={}",
+        LOGGER.debug("Progress for team {}: {} echoes tracked, stages={}",
                 team.getTeamId(),
                 progress.perEcho().size(),
                 progress.perEcho().entrySet().stream()

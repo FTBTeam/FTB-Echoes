@@ -191,7 +191,7 @@ public class TeamProgressManager extends SavedData {
     }
 
     private boolean applyChange(Team team, Function<TeamProgress, Boolean> task) {
-        FTBEchoes.LOGGER.debug("[EchoDebug] applyChange: team='{}' teamId={} getId={} mapSize={}",
+        FTBEchoes.LOGGER.debug("applyChange: team='{}' teamId={} getId={} mapSize={}",
                 team.getShortName(), team.getTeamId(), team.getId(), progressMap.size());
         TeamProgress teamProgress = progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
         if (task.apply(teamProgress)) {
