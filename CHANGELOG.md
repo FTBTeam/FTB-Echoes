@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [21.1.10]
+
+### Added
+- Support for echoes with no lore, only a shop
+  - Simply leave the `lore` entry in every stage empty (either all stages in an echo must have lore, or no stages must have lore)
+  - Gamestages/teamstages are not used here, instead shop items are unlocked by direct setting of progress stages for player/team
+  - Either use the `/ftbechoes progress {player|team} ...` commands, or direct Java/KubeJS access to `TeamProgressManager`
+
+## [21.1.9]
+
+### Fixed
+- Minor issue with Team Progress manager
+
 ## [21.1.8]
 
 ### Fixed
