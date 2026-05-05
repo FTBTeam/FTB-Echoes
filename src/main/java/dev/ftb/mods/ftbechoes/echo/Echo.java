@@ -46,17 +46,29 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
 
     private DataResult<Echo> validate() {
         Set<String> shopIds = new HashSet<>();
+        int loreCheck = 0;
         for (var stage : stages) {
             for (var entry : stage.shopUnlocked()) {
                 if (!shopIds.add(entry.name())) {
                     return DataResult.error(() -> String.format("duplicate shop key '%s' in echo id '%s'", entry.name(), id), this);
                 }
             }
+            if (stage.lore().isEmpty()) {
+                loreCheck++;
+            }
+        }
+        if (loreCheck != stages.size()) {
+            return DataResult.error(() -> String.format("inconsistent lore in echo id '%s' - either all or no stages may have empty lore", id), this);
         }
         return DataResult.success(this);
     }
 
     public boolean hasAnyShopItems() {
         return stages.stream().anyMatch(s -> !s.shopUnlocked().isEmpty());
+    }
+
+    public boolean hasAnyLore() {
+        // enough to check just one stage; codec validation ensures that if any stage has lore, all stages do
+        return !stages.isEmpty() && !stages.getFirst().lore().isEmpty();
     }
 }

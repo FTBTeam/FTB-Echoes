@@ -182,7 +182,7 @@ public record TeamProgress(
     boolean setStage(ResourceLocation echoId, int stageIdx) {
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
-        per.setCurrentStage(Mth.clamp(stageIdx, 0, echo.stages().size() - 1));
+        per.setCurrentStage(Mth.clamp(stageIdx, 0, echo.stages().size()));
         return true;
     }
 

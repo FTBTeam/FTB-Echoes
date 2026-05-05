@@ -206,7 +206,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         private final TextField label;
         private final Button settingsButton;
         private final Button stopAudioButton;
-        private final Lazy<Map<EchoScreen.Page, EchoScreen.PageButton>> tabButtons = Lazy.of(this::buildTabButtons);
+        private final Lazy<Map<Page, PageButton>> tabButtons = Lazy.of(this::buildTabButtons);
         private final boolean adminPlayer;
 
         public TopPanel() {
@@ -220,23 +220,28 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             stopAudioButton = new StopAudioButton();
         }
 
-        private Map<EchoScreen.Page, EchoScreen.PageButton> buildTabButtons() {
-            Map<EchoScreen.Page, EchoScreen.PageButton> res = new EnumMap<>(EchoScreen.Page.class);
+        private Map<Page, PageButton> buildTabButtons() {
+            Map<Page, PageButton> pages = new EnumMap<>(Page.class);
 
-            res.put(EchoScreen.Page.LORE, new EchoScreen.PageButton(EchoScreen.Page.LORE, this, Icons.BOOK));
-            if (echo != null && echo.hasAnyShopItems()) {
-                res.put(EchoScreen.Page.SHOP, new EchoScreen.PageButton(EchoScreen.Page.SHOP, this, Icons.MONEY_BAG));
+            if (echo != null) {
+                if (echo.hasAnyLore()) {
+                    pages.put(Page.LORE, new EchoScreen.PageButton(Page.LORE, this, Icons.BOOK));
+
+                    // only show selector drop-down after at least one stage has been completed
+                    pages.get(Page.LORE).setDropdownAction(
+                            this::showStageSelector,
+                            () -> echo != null && ClientProgress.get().isStageCompleted(echo.id(), 0)
+                    );
+                }
+                if (echo.hasAnyShopItems()) {
+                    pages.put(Page.SHOP, new EchoScreen.PageButton(Page.SHOP, this, Icons.MONEY_BAG));
+                }
             }
 
-            // only show selector drop-down after at least one stage has been completed
-            res.get(Page.LORE).setDropdownAction(
-                    this::showStageSelector,
-                    () -> echo != null && ClientProgress.get().isStageCompleted(echo.id(), 0)
-            );
-            return res;
+            return pages;
         }
 
-        private Map<EchoScreen.Page, EchoScreen.PageButton> getTabButtons() {
+        private Map<Page, PageButton> getTabButtons() {
             return tabButtons.get();
         }
 
@@ -264,8 +269,11 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
             int bw = width / (getTabButtons().size() + 1) - 4;
             int by = getTheme().getFontHeight() + 8;
-            for (EchoScreen.PageButton w : getTabButtons().values()) {
-                w.setPosAndSize(4 + w.page.ordinal() * (bw + 2), by, bw, height - by);
+            int idx = 0;
+            for (PageButton w : getTabButtons().values()) {
+                if (w != null) {
+                    w.setPosAndSize(4 + idx++ * (bw + 2), by, bw, height - by);
+                }
             }
         }
 
@@ -273,14 +281,23 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
             super.drawBackground(graphics, theme, x, y, w, h);
             int col = 0xff585d66;  // blends best with tabbed outline
-            graphics.hLine(x, x + getTabButtons().get(Page.LORE).posX - 1, y + height - 2, col);
-            if (echo != null && echo.hasAnyShopItems()) {
-                graphics.hLine(x + getTabButtons().get(Page.LORE).posX + getTabButtons().get(Page.LORE).width, x + getTabButtons().get(Page.SHOP).posX - 1, y + height - 2, col);
-                graphics.hLine(x + getTabButtons().get(Page.SHOP).posX + getTabButtons().get(Page.SHOP).width, x + width - 1, y + height - 2, col);
-            } else {
-                graphics.hLine(x + getTabButtons().get(Page.LORE).posX + getTabButtons().get(Page.LORE).width, x + width - 1, y + height - 2, col);
+            List<PageButton> list = new ArrayList<>();
+            getTabButtons().values().forEach(b -> {
+                if (b != null) {
+                    list.add(b);
+                }
+            });
+            if (!list.isEmpty()) {
+                graphics.hLine(x, x + list.getFirst().posX - 1, y + height - 2, col);
+                if (list.size() > 1) {
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        Button b1 = list.get(i), b2 = list.get(i + 1);
+                        graphics.hLine(x + b1.posX + b1.width, x + b2.posX - 1, y + height - 2, col);
+                    }
+                }
+                graphics.hLine(x + list.getLast().posX + list.getLast().width, x + width - 1, y + height - 2, col);
+                graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
             }
-            graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
         }
 
         @Override
@@ -393,9 +410,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private Map<Page, PagePanel> buildPages() {
             Map<Page,PagePanel> map = new EnumMap<>(Page.class);
-            map.put(Page.LORE, new LorePanel(this, EchoScreen.this));
-            if (echo != null && echo.hasAnyShopItems()) {
-                map.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
+            if (echo != null) {
+                if (echo.hasAnyLore()) {
+                    map.put(Page.LORE, new LorePanel(this, EchoScreen.this));
+                }
+                if (echo.hasAnyShopItems()) {
+                    map.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
+                }
             }
             return map;
         }
@@ -422,11 +443,19 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private PagePanel getCurrentPagePanel() {
             PagePanel res = getPages().get(getCurrentPage());
-            if (res == null) {
-                setCurrentPage(Page.LORE);
-                return getPages().get(Page.LORE);
+            if (res != null) {
+                return res;
             }
-            return res;
+
+            for (Page p : Page.values()) {
+                PagePanel pagePanel = getPages().get(p);
+                if (pagePanel != null) {
+                    setCurrentPage(p);
+                    return pagePanel;
+                }
+            }
+            // shouldn't ever get here!
+            throw new IllegalStateException("all panels are null!?");
         }
 
         @Override
