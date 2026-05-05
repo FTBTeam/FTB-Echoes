@@ -94,7 +94,7 @@ public class TeamProgressManager extends SavedData {
     }
 
     public TeamProgress getProgress(Team team) {
-        return get().progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
+        return progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
     }
 
     public boolean claimReward(ServerPlayer player, ResourceLocation echoId, int stageIdx) {
@@ -191,7 +191,9 @@ public class TeamProgressManager extends SavedData {
     }
 
     private boolean applyChange(Team team, Function<TeamProgress, Boolean> task) {
-        TeamProgress teamProgress = progressMap.computeIfAbsent(team.getId(), k -> newProgress());
+        FTBEchoes.LOGGER.debug("applyChange: team='{}' teamId={} getId={} mapSize={}",
+                team.getShortName(), team.getTeamId(), team.getId(), progressMap.size());
+        TeamProgress teamProgress = progressMap.computeIfAbsent(team.getTeamId(), k -> newProgress());
         if (task.apply(teamProgress)) {
             setDirty();
             team.getOnlineMembers().forEach(player ->
