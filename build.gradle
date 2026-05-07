@@ -136,7 +136,8 @@ dependencies {
 
 	// for currency testing
 	localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}")
-	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
+//	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
+	localRuntime("curse.maven:sg_economy-1446971:${sg_economy_version}")
 	localRuntime("dev.ftb.mods:ftb-xmod-compat-neoforge:${ftb_xmod_compat_version}")
 }
 

@@ -27,16 +27,3 @@ versionRange = "[${ftb_library_version},)"
 ordering = "NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
-modId = "magic_coins"
-mandatory = false
-versionRange = "[1.0.9,)"
-ordering = "NONE"
-side="BOTH"
-
-[[dependencies.${mod_id}]]
-modId = "curios"
-mandatory = false
-versionRange = "[9.4.2,)"
-ordering = "NONE"
-side="BOTH"
