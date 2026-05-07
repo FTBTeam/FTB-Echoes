@@ -27,3 +27,10 @@ versionRange = "[${ftb_library_version},)"
 ordering = "NONE"
 side="BOTH"
 
+[[dependencies.${mod_id}]]
+modId = "ftbteams"
+mandatory = true
+versionRange = "[${ftb_teams_version},)"
+ordering = "NONE"
+side="BOTH"
+
