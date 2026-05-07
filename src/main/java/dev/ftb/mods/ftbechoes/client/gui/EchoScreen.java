@@ -441,38 +441,39 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             }
         }
 
-        private PagePanel getCurrentPagePanel() {
+        private Optional<PagePanel> getCurrentPagePanel() {
             PagePanel res = getPages().get(getCurrentPage());
             if (res != null) {
-                return res;
+                return Optional.of(res);
             }
 
             for (Page p : Page.values()) {
                 PagePanel pagePanel = getPages().get(p);
                 if (pagePanel != null) {
                     setCurrentPage(p);
-                    return pagePanel;
+                    return Optional.of(pagePanel);
                 }
             }
-            // shouldn't ever get here!
-            throw new IllegalStateException("all panels are null!?");
+
+            // will get here if it's a fresh echo base with no echo set
+            return Optional.empty();
         }
 
         @Override
         public int getContentHeight() {
-            return getCurrentPagePanel().getContentHeight();
+            return getCurrentPagePanel().map(Panel::getContentHeight).orElse(0);
         }
 
         public void storeScrollPos() {
-            getCurrentPagePanel().storeScrollPos();
+            getCurrentPagePanel().ifPresent(PagePanel::storeScrollPos);
         }
 
         public double fetchScrollPos() {
-            return getCurrentPagePanel().fetchScrollPos();
+            return getCurrentPagePanel().map(PagePanel::fetchScrollPos).orElse(0.0);
         }
 
         public void onSwitchAway() {
-            getCurrentPagePanel().onSwitchAway();
+            getCurrentPagePanel().ifPresent(PagePanel::onSwitchAway);
         }
 
         @Override
