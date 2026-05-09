@@ -57,7 +57,7 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
                 loreCheck++;
             }
         }
-        if (loreCheck != stages.size()) {
+        if (loreCheck != stages.size() && loreCheck != 0) {
             return DataResult.error(() -> String.format("inconsistent lore in echo id '%s' - either all or no stages may have empty lore", id), this);
         }
         return DataResult.success(this);
