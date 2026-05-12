@@ -10,7 +10,16 @@
       "ready": "",
       "required_stage": "echo4_stage1",
       "shop_unlock": [
-        { "name": "lapis_1", "item": { "id": "minecraft:lapis_lazuli", "count": 1 }, "cost": 1 }
+        { "name": "lapis_1", "item": { "id": "minecraft:lapis_lazuli", "count": 1 }, "cost": 1 },
+        { "name": "redstone_1", "item": { "id": "minecraft:redstone", "count": 1 }, "cost": 3 },
+        { "name": "amethyst_1", "item": { "id": "minecraft:amethyst_shard", "count": 1 }, "cost": 20 },
+        { "name": "obsidian_1", "item": { "id": "minecraft:obsidian", "count": 1 }, "cost": 5 },
+        { "name": "deepslate_1", "item": { "id": "minecraft:deepslate", "count": 1 }, "cost": 1 },
+        { "name": "basalt_1", "item": { "id": "minecraft:basalt", "count": 1 }, "cost": 1 },
+        { "name": "netherrack", "item": { "id": "minecraft:netherrack", "count": 1 }, "cost": 1 },
+        { "name": "dirt", "item": { "id": "minecraft:dirt", "count": 1 }, "cost": 1 },
+        { "name": "sand", "item": { "id": "minecraft:sand", "count": 1 }, "cost": 1 },
+        { "name": "gravel", "item": { "id": "minecraft:gravel", "count": 1 } }
       ]
     },
     {
@@ -33,7 +42,7 @@
               }
             }
           ],
-          "cost": 2
+          "cost": 15
         },
         {
           "name": "stone_2",
