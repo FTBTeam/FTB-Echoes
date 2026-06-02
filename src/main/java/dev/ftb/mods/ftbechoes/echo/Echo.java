@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record Echo(ResourceLocation id, Component title, List<EchoStage> stages, Optional<Component> allComplete) {
+public record Echo(ResourceLocation id, Component title, List<EchoStage> stages, Optional<Component> allComplete, Optional<EchoModel> model) {
     private static final Codec<Echo> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ResourceLocation.CODEC.fieldOf("id").forGetter(Echo::id),
             ComponentSerialization.CODEC.fieldOf("title").forGetter(Echo::title),
             EchoStage.CODEC.listOf().fieldOf("stages").forGetter(Echo::stages),
-            ComponentSerialization.CODEC.optionalFieldOf("all_complete").forGetter(Echo::allComplete)
+            ComponentSerialization.CODEC.optionalFieldOf("all_complete").forGetter(Echo::allComplete),
+            EchoModel.CODEC.optionalFieldOf("model").forGetter(Echo::model)
     ).apply(builder, Echo::new));
 
     public static final Codec<Echo> CODEC = RAW_CODEC.validate(Echo::validate);
@@ -35,6 +36,7 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
             ComponentSerialization.STREAM_CODEC, Echo::title,
             EchoStage.STREAM_CODEC.apply(ByteBufCodecs.list()), Echo::stages,
             ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), Echo::allComplete,
+            ByteBufCodecs.optional(EchoModel.STREAM_CODEC), Echo::model,
             Echo::new
     );
 

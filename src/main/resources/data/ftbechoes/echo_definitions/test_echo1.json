@@ -1,6 +1,9 @@
 {
   "id": "ftbechoes:test_echo1",
   "title": { "text": "Test Echo 1", "color": "blue" },
+  "model": {
+    "villager_data": { "type":  "savanna", "profession": "farmer", "level": 2 }
+  },
   "stages": [
     {
       "title": { "text": "The Beginning", "color": "ftb:rainbow" },
