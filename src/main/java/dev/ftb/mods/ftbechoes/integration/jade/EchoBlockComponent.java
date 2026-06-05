@@ -16,7 +16,7 @@ public enum EchoBlockComponent implements IBlockComponentProvider {
 
     @Override
     public void appendTooltip(ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
-        if (blockAccessor.getBlockEntity() instanceof EchoProjectorBlockEntity be) {
+        if (blockAccessor.getBlockEntity() instanceof EchoProjectorBlockEntity be && be.getEchoId() != null) {
             EchoManager.getClientInstance().getEcho(be.getEchoId()).ifPresent(echo -> iTooltip.add(echo.title()));
         }
     }
