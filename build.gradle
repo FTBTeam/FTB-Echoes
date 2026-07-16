@@ -134,9 +134,12 @@ dependencies {
 	// at runtime, use the full JEI jar for NeoForge
 	runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}")
 
+	implementation("curse.maven:jade-324717:${jade_curse_id}")
+
 	// for currency testing
 	localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}")
-	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
+//	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
+	localRuntime("curse.maven:sg_economy-1446971:${sg_economy_version}")
 	localRuntime("dev.ftb.mods:ftb-xmod-compat-neoforge:${ftb_xmod_compat_version}")
 }
 
@@ -158,7 +161,8 @@ tasks.withType(ProcessResources).configureEach {
 			loader_version_range: loader_version_range,
 			// 99.9% of the time we're only going to target a very vague version of neoforge so this is fine.
 			mod_loader_range: mod_loader_range.replace("\${mc_base}", mcMinorAndPatch), // Replace the version in the mod loader range
-			ftb_library_version: ftb_library_version
+			ftb_library_version: ftb_library_version,
+			ftb_teams_version: ftb_teams_version
 	]
 
 	inputs.properties replaceProperties
@@ -210,8 +214,7 @@ publishMods {
 		minecraftVersions.add(project.minecraft_version)
 		javaVersions.add(JavaVersion.VERSION_21)
         requires("ftb-library-forge")
-        requires("magic-coins")
-        requires("curios")
+        requires("ftb-teams-forge")
 	}
 }
 

@@ -63,4 +63,17 @@ public class NBTEditCommand {
                     .orElse(0);
         }).orElse(0);
     }
+
+    public static void handleResponse(ServerPlayer serverPlayer, CompoundTag info, CompoundTag data) {
+        assert serverPlayer.getServer() != null;
+
+        FTBTeamsAPI.api().getManager().getTeamForPlayerID(info.getUUID("id")).ifPresent(team ->
+                TeamProgress.CODEC.parse(NbtOps.INSTANCE, data)
+                        .ifSuccess(progress -> {
+                            serverPlayer.displayClientMessage(Component.translatable("ftbechoes.message.progress_edited",
+                                    team.getColoredName()), false);
+                            TeamProgressManager.get(serverPlayer.getServer()).injectProgressData(team.getTeamId(), progress);
+                        })
+        );
+    }
 }

@@ -21,7 +21,7 @@ public record EchoStage(Component title, boolean showTitleInLore, List<BaseStage
     public static final Codec<EchoStage> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ComponentSerialization.CODEC.fieldOf("title").forGetter(EchoStage::title),
             Codec.BOOL.optionalFieldOf("show_title_in_lore", true).forGetter(EchoStage::showTitleInLore),
-            BaseStageEntry.CODEC.listOf(1, Integer.MAX_VALUE).fieldOf("lore").forGetter(EchoStage::lore),
+            BaseStageEntry.CODEC.listOf().fieldOf("lore").forGetter(EchoStage::lore),
             ComponentSerialization.CODEC.fieldOf("not_ready").forGetter(EchoStage::notReady),
             ComponentSerialization.CODEC.fieldOf("ready").forGetter(EchoStage::ready),
             ComponentSerialization.CODEC.optionalFieldOf("completed").forGetter(EchoStage::completed),

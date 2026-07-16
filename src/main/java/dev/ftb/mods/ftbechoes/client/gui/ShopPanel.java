@@ -7,10 +7,14 @@ import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftblibrary.ui.Panel;
 import dev.ftb.mods.ftblibrary.ui.Widget;
+import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
 
 import java.util.List;
 
 public class ShopPanel extends EchoScreen.PagePanel {
+
+    public static final int GUTTER = 5;
+
     public ShopPanel(Panel parent, EchoScreen echoScreen) {
         super(parent, echoScreen, EchoScreen.Page.SHOP);
     }
@@ -35,14 +39,23 @@ public class ShopPanel extends EchoScreen.PagePanel {
 
     @Override
     public void alignWidgets() {
-        int paddedSize = ShopItemWidget.WIDGET_SIZE + 5;
-        int perRow = (width - 5) / paddedSize;
+        if (width == 0) {
+            return;
+        }
+
+        align(WidgetLayout.NONE);
+
+        int paddedSize = ShopItemWidget.WIDGET_SIZE + GUTTER;
+        int perRow = (width - GUTTER) / paddedSize;
         int curRow = 0;
         int curCol = 0;
 
         for (Widget w : widgets) {
             if (w instanceof ShopItemWidget) {
-                w.setPosAndSize(5 + curCol * paddedSize, 5 + curRow * paddedSize, ShopItemWidget.WIDGET_SIZE, ShopItemWidget.WIDGET_SIZE);
+                w.setPosAndSize(
+                        GUTTER + curCol * paddedSize, GUTTER + curRow * paddedSize,
+                        ShopItemWidget.WIDGET_SIZE, ShopItemWidget.WIDGET_SIZE
+                );
 
                 if (++curCol >= perRow) {
                     curRow++;
@@ -51,7 +64,6 @@ public class ShopPanel extends EchoScreen.PagePanel {
             }
         }
 
-        setHeight(paddedSize * (curRow + 1));
+        setHeight(GUTTER + paddedSize * (curRow + 1));
     }
-
 }

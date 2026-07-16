@@ -28,15 +28,9 @@ ordering = "NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
-modId = "magic_coins"
+modId = "ftbteams"
 mandatory = true
-versionRange = "[1.0.9,)"
+versionRange = "[${ftb_teams_version},)"
 ordering = "NONE"
 side="BOTH"
 
-[[dependencies.${mod_id}]]
-modId = "curios"
-mandatory = true
-versionRange = "[9.4.2,)"
-ordering = "NONE"
-side="BOTH"

@@ -1,6 +1,9 @@
 {
   "id": "ftbechoes:test_echo2",
   "title": { "text": "Test Echo 2", "color": "green" },
+  "model": {
+    "villager_data": { "type":  "jungle", "profession": "cleric", "level": 5 }
+  },
   "stages": [
     {
       "title": "Stage I",

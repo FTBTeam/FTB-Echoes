@@ -4,27 +4,40 @@ Use https://github.com/FTBTeam/FTB-Mods-Issues for any mod issues
 
 ## Echo Datapack Format
 
-Each Echo is loaded a datapack json file, located in `data/<modid>/echo_definitions/<echo_id>`. E.g. the Echo `ftbechoes:test1` should be defined in `data/ftbechoes/echo_definitions/test1.json`.
+Each Echo is loaded a datapack JSON file, located in `data/<modid>/echo_definitions/<echo_id>`. E.g. the Echo `ftbechoes:test1` should be defined in `data/ftbechoes/echo_definitions/test1.json`.
 
 ### Top Level
 
-Note that whenever "a serialized component" is mentioned below, this is the raw json for a Minecraft text component, as documented [here](https://minecraft.wiki/w/Text_component_format).
+Note that whenever "a serialized component" is mentioned below, this is the raw JSON for a Minecraft text component, as documented [here](https://minecraft.wiki/w/Text_component_format).
 
 See example echo definitions [here](https://github.com/FTBTeam/FTB-Echoes/blob/main/src/main/resources/data/ftbechoes/echo_definitions/). These test definitions are loaded by the mod only when in a development environment.
 
-An Echo json has the following top-level fields, all required:
+All fields described below are required unless explicitly stated as being optional.
+
+An Echo JSON has the following top-level fields:
 
 * `id` - must be unique to the Echo; match the path & filename
-* `title` - displayed in the Echo GUI, a serialized component
-* `stages` - an ordered list of Echo stages for this echo, see below
+* `title` - displayed in the Echo GUI and Jade information; a serialized component
+* `stages` - an ordered list of Echo stages for this echo, see [Echo Stages](#echo-stages) below
 * `all_complete` - a message displayed at the end of the Echo GUI lore panel when the team has completed all stages. Optional, defaults to "All Stages Complete!"
+* `model` - optional, used to visually decorate the villager ghost-entity; if absent, just the core villager model is rendered
+
+### Model Info
+
+The `model` field of the echo has three fields:
+* `show` - optional, defaults to true; controls whether any extra layers are rendered on the entity
+* `show_hat` - optional, defaults to true; controls whether the villager's hat (if they have one) is shown
+* `villager_data` - compound field, a serialized vanilla `VillagerData` object
+  * `type` - any registered villager type, vanilla or modded, e.g. `plains`, `savanna`...
+  * `profession` - any registered villager profession, vanilla or modded, e.g. `farmer`, `cleric`...
+  * `level` - village trader level in the range 1..5 (values outside this range are accepted, but cause the level indicator not to render)
 
 ### Echo Stages
 
-Echo stages define the progression for an Echo. Fields:
+Echo `stages` are an ordered list defining the progression for an Echo. Fields:
 
 * `title` - optional, a serialized component displayed in the Lore page as the first text line of a stage if present
-* `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below
+* `lore` - a list of lore entry components, see [Lore Entry Components](#lore-entry-components) below. May be empty, but see below
 * `not_ready` - serialized component, text displayed after the lore or in the task panel if the player isn't ready to complete the stage
 * `ready` - serialized component, text displayed after the lore or in the task panel if the player _is_ ready to complete the stage
 * `completed` - serialized component, text displayed in the lore and task panels if the player has completed the stage. Optional; defaults to "Stage Completed!"
@@ -32,7 +45,11 @@ Echo stages define the progression for an Echo. Fields:
 * `shop_unlock` - optional, defaults to an empty list; a list of shop entries to unlock once the stage is completed; see [Shop Entries](#shop-entries) below
 * `completion_reward` - optional one-time reward(s) granted to players when they complete the stage; see [Completion Rewards](#completion-rewards) below 
 
-Note that if none of the stages of an echo define any shop entries via `shop_unlock`, the "Shop" tab in the GUI is simply not displayed.
+#### Notes
+
+* If _all_ echo stages have an empty `lore` list, then the "Lore" tab is not displayed (intended for shop-only echoes).
+  * It is an error to have some stages with empty lore; either _all_ stages must be empty, or _no_ stages
+* If none of the stages of an echo define any shop entries via `shop_unlock`, the "Shop" tab in the GUI is simply not displayed.
 
 ### Lore Entry Components
 
@@ -64,11 +81,11 @@ Fields:
 * `name` - a string to identify this entry, must be unique within this particular Echo
 * `item` - a serialized itemstack, or list of itemstacks, possibly including component data. If omitted, then `description` and `command` must be specified.
   * This is exclusive with the `command` field.
-* `cost` - an integer cost, must be > 0
+* `cost` - optional, defaults to 1; an integer cost, must be > 0
 * `description` - an optional serialized component or list of components
   * Extra (player-friendly) descriptive text about this shop entry can be added here
-* `icon` - the resource location for an icon image; may be omitted if `item` is specified
-* `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
+* `icon` - the resource location for an icon image; may be omitted iff `item` is specified
+* `command` - a JSON object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
   * This is exclusive with the `item` field.
 * `max_claims` - an optional integer; if present, this limits the number of times this entry can be purchased, on a per-team basis
 * `max_stage` - an optional stage number which limits the _maximum_ stage that a player can reach and still see this entry
@@ -86,7 +103,7 @@ Fields:
 * `item` - a serialized itemstack, or list of itemstacks, to give to the player
 * `experience` - an integer quantity of experience for the player
 * `currency` - an integer quantity of currency for the player
-* `command` - a json object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
+* `command` - a JSON object describing a command to run on behalf of the player; see [Command Entries](#command-entries) below
 * `description` - an optional serialized component, or list of serialized components, used for tooltip purposes on the "Claim Reward" button
   * The first line of the description, if it exists, is also shown in the toast popup when a player claims the reward
 * `autoclaim` - an optional boolean, true by default; if true, then the completion reward is claimed as soon as the player completes the stage
