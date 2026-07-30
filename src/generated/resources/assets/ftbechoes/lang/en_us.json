@@ -55,5 +55,7 @@
   "ftbechoes.tooltip.stock": "Stock",
   "ftbechoes.tooltip.too_expensive": "Too Expensive! Can't place order",
   "ftbechoes.tooltip.total_cost": "Total Cost: %s",
-  "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s"
+  "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s",
+  "config.jade.plugin_ftbechoes.entity": "FTB Echoes Entity",
+  "config.jade.plugin_ftbechoes.block": "FTB Echoes Block"
 }
