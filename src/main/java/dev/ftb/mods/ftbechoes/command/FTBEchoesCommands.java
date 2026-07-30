@@ -11,6 +11,7 @@ public class FTBEchoesCommands {
                 .then(ProgressInfoCommand.register())
                 .then(NBTEditCommand.register())
                 .then(StageCommand.register())
+                .then(OpenEchoCommand.register())
         );
     }
 }

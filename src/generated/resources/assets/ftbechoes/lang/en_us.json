@@ -13,6 +13,7 @@
   "ftbechoes.commands.shop_stock_reset": "Shop stock reset to full for echo '%s'",
   "ftbechoes.commands.shop_stock_reset.failed": "No purchases to reset for echo '%s'",
   "ftbechoes.commands.unknown_echo": "Unknown Echo id: %s",
+  "ftbechoes.commands.unknown_page": "Unknown page id: %s",
   "ftbechoes.gui.all_complete": "All Stages Complete!",
   "ftbechoes.gui.claim_reward": "Claim Reward",
   "ftbechoes.gui.collapse_all": "Collapse All",

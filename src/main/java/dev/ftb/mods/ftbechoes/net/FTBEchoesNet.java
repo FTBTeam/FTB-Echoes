@@ -22,6 +22,7 @@ public class FTBEchoesNet {
         registrar.playToClient(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handleData);
         registrar.playToClient(ReturnTeamProgressToScreenMessage.TYPE, ReturnTeamProgressToScreenMessage.STREAM_CODEC, ReturnTeamProgressToScreenMessage::handleData);
         registrar.playToClient(OpenTeamProgressInfoScreenMessage.TYPE, OpenTeamProgressInfoScreenMessage.STREAM_CODEC, OpenTeamProgressInfoScreenMessage::handleData);
+        registrar.playToClient(OpenEchoMessage.TYPE, OpenEchoMessage.STREAM_CODEC, OpenEchoMessage::handleData);
 
         // serverbound
         registrar.playToServer(RequestStageCompletionMessage.TYPE, RequestStageCompletionMessage.STREAM_CODEC, RequestStageCompletionMessage::handleData);

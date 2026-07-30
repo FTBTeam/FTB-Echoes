@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbechoes.client.gui.widget.CompleteStageButton;
 import dev.ftb.mods.ftbechoes.client.gui.widget.HorizontalLineWidget;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ImageButton;
 import dev.ftb.mods.ftbechoes.echo.Echo;
+import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
@@ -28,7 +29,7 @@ class LorePanel extends EchoScreen.PagePanel {
     private final List<Widget> jumpPointWidgets = new ArrayList<>();
 
     public LorePanel(Panel parent, EchoScreen echoScreen) {
-        super(parent, echoScreen, EchoScreen.Page.LORE);
+        super(parent, echoScreen, EchoPage.LORE);
     }
 
     @Override

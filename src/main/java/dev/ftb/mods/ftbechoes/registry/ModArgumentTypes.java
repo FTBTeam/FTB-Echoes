@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.registry;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.command.EchoArgumentType;
+import dev.ftb.mods.ftbechoes.command.PageArgumentType;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -16,4 +17,7 @@ public class ModArgumentTypes {
     public static final DeferredHolder<ArgumentTypeInfo<?, ?>, SingletonArgumentInfo<EchoArgumentType>> ECHO_ARGUMENT_TYPE
             = COMMAND_ARGUMENT_TYPES.register("echo",
             () -> ArgumentTypeInfos.registerByClass(EchoArgumentType.class, SingletonArgumentInfo.contextFree(EchoArgumentType::echo)));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, SingletonArgumentInfo<PageArgumentType>> PAGE_ARGUMENT_TYPE
+            = COMMAND_ARGUMENT_TYPES.register("page",
+            () -> ArgumentTypeInfos.registerByClass(PageArgumentType.class, SingletonArgumentInfo.contextFree(PageArgumentType::page)));
 }

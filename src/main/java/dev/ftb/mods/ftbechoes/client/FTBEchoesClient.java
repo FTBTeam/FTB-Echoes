@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbechoes.client.gui.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
 import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.net.ReturnTeamProgressToScreenMessage;
 import dev.ftb.mods.ftbechoes.registry.ModBlockEntityTypes;
@@ -32,6 +33,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -85,17 +87,27 @@ public class FTBEchoesClient {
         event.registerEntityRenderer(ModEntityTypes.ECHO.get(), EchoEntityRenderer::new);
     }
 
-    public static void openEchoScreen(EchoProjectorBlockEntity projector) {
+    public static void openEchoScreenForProjector(EchoProjectorBlockEntity projector) {
         ResourceLocation echoId = projector.getEchoId();
         BlockPos pos = projector.getBlockPos();
         if (echoId == null) {
             new EchoScreen(pos, null).openGui();
         } else {
-            EchoManager.getClientInstance().getEcho(echoId).ifPresentOrElse(
-                    echo -> new EchoScreen(pos, echo).openGui(),
-                    () -> Minecraft.getInstance().player.displayClientMessage(Component.literal("Unknown echo: " + echoId).withStyle(ChatFormatting.RED), false)
-            );
+            openEchoScreen(echoId, pos, null);
         }
+    }
+
+    public static void openEchoScreen(ResourceLocation echoId, @Nullable BlockPos pos, @Nullable EchoPage switchToPage) {
+        EchoManager.getClientInstance().getEcho(echoId).ifPresentOrElse(
+                echo -> {
+                    var screen = new EchoScreen(pos, echo);
+                    screen.openGui();
+                    if (switchToPage != null) {
+                        screen.setCurrentPage(switchToPage);
+                    }
+                },
+                () -> Minecraft.getInstance().player.displayClientMessage(Component.literal("Unknown echo: " + echoId).withStyle(ChatFormatting.RED), false)
+        );
     }
 
     public static void onProgressUpdated() {
@@ -127,7 +139,7 @@ public class FTBEchoesClient {
 
     public static void onProjectorUpdated(EchoProjectorBlockEntity projector) {
         EchoScreen screen = ClientUtils.getCurrentGuiAs(EchoScreen.class);
-        if (screen != null && screen.getProjectorPos().equals(projector.getBlockPos())) {
+        if (screen != null && screen.getProjectorPos() != null && screen.getProjectorPos().equals(projector.getBlockPos())) {
             EchoManager.getClientInstance().getEcho(projector.getEchoId()).ifPresent(screen::setEcho);
         }
     }
