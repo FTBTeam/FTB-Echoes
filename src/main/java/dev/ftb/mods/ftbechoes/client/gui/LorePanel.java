@@ -10,14 +10,22 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.TextField;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +48,7 @@ class LorePanel extends EchoScreen.PagePanel {
             int currentStage = ClientProgress.get().getCurrentStage(echo.id());
             boolean allCompleted = currentStage >= stages.size();
             int limit = Math.min(stages.size() - 1, currentStage);
-            Player player = Minecraft.getInstance().player;
+            Player player = ClientUtils.getClientPlayer();
 
             vSpace(5);
 
@@ -62,7 +70,7 @@ class LorePanel extends EchoScreen.PagePanel {
                     vSpace(5);
                 }
                 if (stageIdx == limit && stageIdx < stages.size() && !allCompleted) {
-                    if (MiscUtil.hasStage(Minecraft.getInstance().player, FTBTeamsAPI.api().getClientManager().selfTeam(), stage.requiredGameStage())) {
+                    if (MiscUtil.hasStage(player, FTBTeamsAPI.api().getClientManager().selfTeam(), stage.requiredGameStage())) {
                         if (!collapsed) {
                             add(new BorderedTextField(this).setText(stage.ready()));
                         }
@@ -166,7 +174,7 @@ class LorePanel extends EchoScreen.PagePanel {
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         }
 
         @Override
@@ -186,7 +194,7 @@ class LorePanel extends EchoScreen.PagePanel {
     }
 
     private static class BorderedTextField extends Panel {
-        private static final Icon TASKS_ICON = Icon.getIcon(Textures.TASKS);
+        private static final Icon<?> TASKS_ICON = Icon.getIcon(Textures.TASKS);
 
         private final TextField textField;
         private final int padding = 4;
@@ -214,10 +222,10 @@ class LorePanel extends EchoScreen.PagePanel {
         }
 
         @Override
-        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             GuiHelper.drawHollowRect(graphics, x, y, w, h, theme.getContentColor(WidgetType.NORMAL).withAlpha(80), false);
 
-            TASKS_ICON.draw(graphics, x + padding, y + (height - 16) / 2, 16, 16);
+            IconHelper.renderIcon(TASKS_ICON, graphics, x + padding, y + (height - 16) / 2, 16, 16);
             super.draw(graphics, theme, x, y, w, h);
         }
 

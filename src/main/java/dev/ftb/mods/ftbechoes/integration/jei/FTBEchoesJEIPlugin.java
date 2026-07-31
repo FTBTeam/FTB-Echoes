@@ -9,11 +9,13 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 @JeiPlugin
 public class FTBEchoesJEIPlugin implements IModPlugin {
-    private static final ResourceLocation ID = FTBEchoes.id("default");
+    private static final Identifier ID = FTBEchoes.id("default");
+    @Nullable
     private static IJeiHelpers jeiHelpers;
 
     @Override
@@ -25,20 +27,21 @@ public class FTBEchoesJEIPlugin implements IModPlugin {
 
     @Override
     public void registerAdvanced(IAdvancedRegistration registration) {
-        registration.addTypedRecipeManagerPlugin(RecipeTypes.SHOPPING, new ShoppingRecipeManagerPlugin());
+        registration.addSimpleRecipeManagerPlugin(RecipeTypes.SHOPPING, new ShoppingRecipeManagerPlugin());
     }
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-        registration.addRecipeCatalyst(ModBlocks.ECHO_PROJECTOR.asItem(), RecipeTypes.SHOPPING);
+        registration.addCraftingStation(RecipeTypes.SHOPPING, ModBlocks.ECHO_PROJECTOR.asItem());
     }
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return ID;
     }
 
     static IGuiHelper guiHelper() {
+        assert FTBEchoesJEIPlugin.jeiHelpers != null;
         return FTBEchoesJEIPlugin.jeiHelpers.getGuiHelper();
     }
 }

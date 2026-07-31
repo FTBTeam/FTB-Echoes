@@ -2,28 +2,22 @@ package dev.ftb.mods.ftbechoes.client;
 
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
-import dev.ftb.mods.ftbechoes.client.gui.EchoProgressInfo;
 import dev.ftb.mods.ftbechoes.client.gui.EchoScreen;
 import dev.ftb.mods.ftbechoes.client.gui.EchoSoundClipHandler;
 import dev.ftb.mods.ftbechoes.client.gui.StageEntryRenderers;
 import dev.ftb.mods.ftbechoes.client.render.EchoEntityRenderer;
-import dev.ftb.mods.ftbechoes.client.render.EchoProjectorRenderer;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.EchoPage;
-import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
-import dev.ftb.mods.ftbechoes.net.ReturnTeamProgressToScreenMessage;
-import dev.ftb.mods.ftbechoes.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbechoes.registry.ModEntityTypes;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
-import dev.ftb.mods.ftblibrary.ui.ScreenWrapper;
-import dev.ftb.mods.ftblibrary.ui.misc.SimpleToast;
-import dev.ftb.mods.ftblibrary.util.client.ClientUtils;
+import dev.ftb.mods.ftblibrary.client.gui.SimpleToast;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
@@ -33,11 +27,7 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 @Mod(value = FTBEchoes.MOD_ID, dist = Dist.CLIENT)
 public class FTBEchoesClient {
@@ -59,11 +49,11 @@ public class FTBEchoesClient {
             return;
         }
 
-        if (ScreenWrapper.hasAltDown()) {
+        if (Minecraft.getInstance().hasAltDown()) {
             altKeyTime++;
             if (altKeyTime >= 40 && EchoSoundClipHandler.INSTANCE.isPlayingSound()) {
                 EchoSoundClipHandler.INSTANCE.stopPlayingSound();
-                Minecraft.getInstance().player.playSound(SoundEvents.COMPARATOR_CLICK, 0.7f, 0.5f);
+                ClientUtils.getClientPlayer().playSound(SoundEvents.COMPARATOR_CLICK, 0.7f, 0.5f);
             }
         } else {
             altKeyTime = 0;
@@ -83,12 +73,11 @@ public class FTBEchoesClient {
     }
 
     private void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(ModBlockEntityTypes.ECHO_PROJECTOR.get(), EchoProjectorRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.ECHO.get(), EchoEntityRenderer::new);
     }
 
     public static void openEchoScreenForProjector(EchoProjectorBlockEntity projector) {
-        ResourceLocation echoId = projector.getEchoId();
+        Identifier echoId = projector.getEchoId();
         BlockPos pos = projector.getBlockPos();
         if (echoId == null) {
             new EchoScreen(pos, null).openGui();
@@ -97,7 +86,7 @@ public class FTBEchoesClient {
         }
     }
 
-    public static void openEchoScreen(ResourceLocation echoId, @Nullable BlockPos pos, @Nullable EchoPage switchToPage) {
+    public static void openEchoScreen(Identifier echoId, @Nullable BlockPos pos, @Nullable EchoPage switchToPage) {
         EchoManager.getClientInstance().getEcho(echoId).ifPresentOrElse(
                 echo -> {
                     var screen = new EchoScreen(pos, echo);
@@ -106,7 +95,7 @@ public class FTBEchoesClient {
                         screen.setCurrentPage(switchToPage);
                     }
                 },
-                () -> Minecraft.getInstance().player.displayClientMessage(Component.literal("Unknown echo: " + echoId).withStyle(ChatFormatting.RED), false)
+                () -> ClientUtils.getClientPlayer().sendSystemMessage(Component.translatable("ftbechoes.commands.unknown_echo", echoId).withStyle(ChatFormatting.RED))
         );
     }
 
@@ -114,18 +103,6 @@ public class FTBEchoesClient {
         EchoScreen screen = ClientUtils.getCurrentGuiAs(EchoScreen.class);
         if (screen != null) {
             screen.onProgressUpdated();
-        }
-    }
-
-    public static void onTeamProgressProvided(UUID teamId, TeamProgress progress, Collection<ReturnTeamProgressToScreenMessage.PlayerNameEntry> playerNameEntries) {
-        var screen = Minecraft.getInstance().screen;
-        if (screen instanceof ScreenWrapper wrapper && wrapper.getGui() instanceof EchoProgressInfo progressInfoScreen) {
-            var referencedPlayers = playerNameEntries.stream().collect(Collectors.toMap(
-                    ReturnTeamProgressToScreenMessage.PlayerNameEntry::playerId,
-                    ReturnTeamProgressToScreenMessage.PlayerNameEntry::playerName
-            ));
-
-            progressInfoScreen.setProgress(teamId, progress, referencedPlayers);
         }
     }
 

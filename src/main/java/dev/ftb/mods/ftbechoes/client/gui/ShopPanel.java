@@ -6,9 +6,9 @@ import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 
 import java.util.List;
 

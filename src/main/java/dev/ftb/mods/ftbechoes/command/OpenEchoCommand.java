@@ -11,10 +11,10 @@ import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.net.OpenEchoMessage;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +25,7 @@ import static net.minecraft.commands.Commands.literal;
 public class OpenEchoCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal("open")
-                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(argument("echo", EchoArgumentType.echo())
                         .suggests((ctx, builder) -> suggestEchoIds(builder))
                         .executes(ctx -> openEcho(ctx, EchoArgumentType.get(ctx, "echo"), null))

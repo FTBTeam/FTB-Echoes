@@ -9,18 +9,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
-public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implements CustomPacketPayload {
+public record ClaimRewardMessage(Identifier echoId, int stageIdx) implements CustomPacketPayload {
     public static final Type<ClaimRewardMessage> TYPE = new Type<>(FTBEchoes.id("claim_reward"));
 
     public static final StreamCodec<FriendlyByteBuf, ClaimRewardMessage> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, ClaimRewardMessage::echoId,
+            Identifier.STREAM_CODEC, ClaimRewardMessage::echoId,
             ByteBufCodecs.VAR_INT, ClaimRewardMessage::stageIdx,
             ClaimRewardMessage::new
     );
@@ -32,10 +32,10 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
 
     public static void handleData(ClaimRewardMessage message, IPayloadContext context) {
         boolean claimedOK = false;
-        if (context.player() instanceof ServerPlayer player && player.getServer() != null) {
+        if (context.player() instanceof ServerPlayer player) {
             Component detail = Component.literal(" ");
             if (EchoManager.getServerInstance().isKnownEcho(message.echoId)) {
-                TeamProgressManager mgr = TeamProgressManager.get(player.getServer());
+                TeamProgressManager mgr = TeamProgressManager.get(player.level().getServer());
                 var progress = mgr.getProgress(player).orElse(TeamProgress.NONE);
                 if (progress.isStageCompleted(message.echoId, message.stageIdx)) {
                     claimedOK = mgr.claimReward(player, message.echoId, message.stageIdx);
@@ -45,11 +45,11 @@ public record ClaimRewardMessage(ResourceLocation echoId, int stageIdx) implemen
                 }
                 PacketDistributor.sendToPlayer(player, SyncProgressMessage.forPlayer(progress, player));
             }
-            PacketDistributor.sendToPlayer(player, new ClaimRewardResponseMessage(claimedOK, Optional.ofNullable(detail)));
+            PacketDistributor.sendToPlayer(player, new ClaimRewardResponseMessage(claimedOK, Optional.of(detail)));
         }
     }
 
-    private static Component getRewardDetail(ResourceLocation id, int stageIdx) {
+    private static Component getRewardDetail(Identifier id, int stageIdx) {
         // at this point we know stageIdx is in valid range
         return EchoManager.getServerInstance().getEcho(id).orElseThrow()
                 .stages().get(stageIdx)

@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbechoes.integration.jade;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.block.entity.EchoProjectorBlockEntity;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -12,7 +12,7 @@ import snownee.jade.api.config.IPluginConfig;
 public enum EchoBlockComponent implements IBlockComponentProvider {
     INSTANCE;
 
-    private static final ResourceLocation ID = FTBEchoes.id("block");
+    private static final Identifier ID = FTBEchoes.id("block");
 
     @Override
     public void appendTooltip(ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
@@ -22,7 +22,7 @@ public enum EchoBlockComponent implements IBlockComponentProvider {
     }
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return ID;
     }
 }

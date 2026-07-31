@@ -14,14 +14,13 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public record StageCompletionReward(List<ItemStack> stacks, int exp, int currency, Optional<CommandInfo> command, List<Component> description, boolean autoclaim) {
+public record StageCompletionReward(List<ItemStackTemplate> stacks, int exp, int currency, Optional<CommandInfo> command, List<Component> description, boolean autoclaim) {
     public static final Codec<StageCompletionReward> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(StageCompletionReward::stacks),
             ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("experience", 0).forGetter(StageCompletionReward::exp),
@@ -32,7 +31,7 @@ public record StageCompletionReward(List<ItemStack> stacks, int exp, int currenc
     ).apply(builder, StageCompletionReward::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StageCompletionReward> STREAM_CODEC = StreamCodec.composite(
-            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), StageCompletionReward::stacks,
+            ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), StageCompletionReward::stacks,
             ByteBufCodecs.VAR_INT, StageCompletionReward::exp,
             ByteBufCodecs.VAR_INT, StageCompletionReward::currency,
             ByteBufCodecs.optional(CommandInfo.STREAM_CODEC), StageCompletionReward::command,
@@ -42,7 +41,7 @@ public record StageCompletionReward(List<ItemStack> stacks, int exp, int currenc
     );
 
     public void giveToPlayer(ServerPlayer player) {
-        stacks.forEach(stack -> ItemHandlerHelper.giveItemToPlayer(player, stack.copy()));
+        stacks.forEach(stack -> player.getInventory().placeItemBackInInventory(stack.create()));
         if (exp > 0) {
             player.giveExperiencePoints(exp);
         }
@@ -55,8 +54,8 @@ public record StageCompletionReward(List<ItemStack> stacks, int exp, int currenc
     public void addTooltip(Consumer<Component> consumer) {
         description.forEach(consumer);
 
-        for (ItemStack stack : stacks) {
-            consumer.accept(bullet().append(stack.getCount() + " x ").append(stack.getHoverName()));
+        for (ItemStackTemplate stack : stacks) {
+            consumer.accept(bullet().append(stack.count() + " x ").append(stack.create().getHoverName()));
         }
         if (exp > 0) {
             consumer.accept(bullet().append(exp + " XP"));

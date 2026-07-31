@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/slab",
   "textures": {
-    "bottom": "minecraft:block/blackstone_top",
+    "bottom": "minecraft:block/blackstone",
     "side": "minecraft:block/blackstone",
     "top": "ftbechoes:block/echo_projector_top"
   }

@@ -6,7 +6,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-@EventBusSubscriber(modid = FTBEchoes.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = FTBEchoes.MOD_ID)
 public class FTBEchoesNet {
     private static final String NETWORK_VERSION = "1.0";
 
@@ -20,8 +20,6 @@ public class FTBEchoesNet {
         registrar.playToClient(SyncProgressMessage.TYPE, SyncProgressMessage.STREAM_CODEC, SyncProgressMessage::handleData);
         registrar.playToClient(PlaceOrderResponseMessage.TYPE, PlaceOrderResponseMessage.STREAM_CODEC, PlaceOrderResponseMessage::handleData);
         registrar.playToClient(ClaimRewardResponseMessage.TYPE, ClaimRewardResponseMessage.STREAM_CODEC, ClaimRewardResponseMessage::handleData);
-        registrar.playToClient(ReturnTeamProgressToScreenMessage.TYPE, ReturnTeamProgressToScreenMessage.STREAM_CODEC, ReturnTeamProgressToScreenMessage::handleData);
-        registrar.playToClient(OpenTeamProgressInfoScreenMessage.TYPE, OpenTeamProgressInfoScreenMessage.STREAM_CODEC, OpenTeamProgressInfoScreenMessage::handleData);
         registrar.playToClient(OpenEchoMessage.TYPE, OpenEchoMessage.STREAM_CODEC, OpenEchoMessage::handleData);
 
         // serverbound
@@ -29,6 +27,5 @@ public class FTBEchoesNet {
         registrar.playToServer(PlaceOrderMessage.TYPE, PlaceOrderMessage.STREAM_CODEC, PlaceOrderMessage::handleData);
         registrar.playToServer(SelectEchoMessage.TYPE, SelectEchoMessage.STREAM_CODEC, SelectEchoMessage::handleData);
         registrar.playToServer(ClaimRewardMessage.TYPE, ClaimRewardMessage.STREAM_CODEC, ClaimRewardMessage::handleData);
-        registrar.playToServer(RequestTeamProgressMessage.TYPE, RequestTeamProgressMessage.STREAM_CODEC, RequestTeamProgressMessage::handleData);
     }
 }

@@ -4,33 +4,37 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftblibrary.FTBLibraryCommands;
 import dev.ftb.mods.ftblibrary.net.EditNBTPacket;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import dev.ftb.mods.ftbteams.api.Team;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.util.Util;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class NBTEditCommand {
-    public static final String FTBECHOES_PROGRESS = "ftbechoes:progress";
+    public static final Identifier FTBECHOES_PROGRESS = FTBEchoes.id("progress");
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal("nbtedit")
-                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(argument("player", EntityArgument.player())
                         .executes(ctx -> doEdit(ctx, EntityArgument.getPlayer(ctx, "player")))
                 );
@@ -40,14 +44,15 @@ public class NBTEditCommand {
         CommandSourceStack src = ctx.getSource();
         ServerPlayer player = src.getPlayerOrException();
         return TeamProgressManager.get(src.getServer()).getProgress(player).map(progress -> {
+            var nbtOps = ctx.getSource().registryAccess().createSerializationContext(NbtOps.INSTANCE);
             CompoundTag info = Util.make(new CompoundTag(), t -> {
                 Component teamName = FTBTeamsAPI.api().getManager().getTeamForPlayer(targetPlayer)
                         .map(Team::getColoredName)
                         .orElse(Component.literal("<unknown>"));
                 MutableComponent title = Component.literal("Echo Progress for ").append(teamName);
-                t.putString("title", Component.Serializer.toJson(title, ctx.getSource().registryAccess()));
-                t.putString("type", FTBECHOES_PROGRESS);
-                t.putUUID("id", targetPlayer.getUUID());
+                t.store("title", ComponentSerialization.CODEC, nbtOps, title);
+                t.putString("type", FTBECHOES_PROGRESS.toString());
+                t.store("id", UUIDUtil.CODEC, targetPlayer.getUUID());
                 t.put("text", FTBLibraryCommands.InfoBuilder.create(ctx)
                         .add("Team ID", teamName)
                         .build()
@@ -57,7 +62,7 @@ public class NBTEditCommand {
                     .resultOrPartial(err -> src.sendFailure(Component.literal(err).withStyle(ChatFormatting.RED)))
                     .map(tag -> {
                         // tag should always be a compound tag!
-                        NetworkHelper.sendTo(player, new EditNBTPacket(info, (CompoundTag) tag));
+                        Server2PlayNetworking.send(player, new EditNBTPacket(info, (CompoundTag) tag));
                         return Command.SINGLE_SUCCESS;
                     })
                     .orElse(0);
@@ -65,15 +70,12 @@ public class NBTEditCommand {
     }
 
     public static void handleResponse(ServerPlayer serverPlayer, CompoundTag info, CompoundTag data) {
-        assert serverPlayer.getServer() != null;
-
-        FTBTeamsAPI.api().getManager().getTeamForPlayerID(info.getUUID("id")).ifPresent(team ->
-                TeamProgress.CODEC.parse(NbtOps.INSTANCE, data)
+        info.read("id", UUIDUtil.CODEC).flatMap(id -> FTBTeamsAPI.api().getManager().getTeamForPlayerID(id))
+                .ifPresent(team -> TeamProgress.CODEC.parse(NbtOps.INSTANCE, data)
                         .ifSuccess(progress -> {
-                            serverPlayer.displayClientMessage(Component.translatable("ftbechoes.message.progress_edited",
-                                    team.getColoredName()), false);
-                            TeamProgressManager.get(serverPlayer.getServer()).injectProgressData(team.getTeamId(), progress);
-                        })
-        );
+                            serverPlayer.sendSystemMessage(Component.translatable("ftbechoes.message.progress_edited",
+                                    team.getColoredName()));
+                            TeamProgressManager.get(serverPlayer.level().getServer()).injectProgressData(team.getTeamId(), progress);
+                        }));
     }
 }

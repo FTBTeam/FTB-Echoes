@@ -12,5 +12,5 @@ public class ModBlockEntityTypes {
             = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, FTBEchoes.MOD_ID);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EchoProjectorBlockEntity>> ECHO_PROJECTOR
-            = BLOCK_ENTITY_TYPES.register("core", () -> BlockEntityType.Builder.of(EchoProjectorBlockEntity::new, ModBlocks.ECHO_PROJECTOR.get()).build(null));
+            = BLOCK_ENTITY_TYPES.register("core", () -> new BlockEntityType<>(EchoProjectorBlockEntity::new, ModBlocks.ECHO_PROJECTOR.get()));
 }

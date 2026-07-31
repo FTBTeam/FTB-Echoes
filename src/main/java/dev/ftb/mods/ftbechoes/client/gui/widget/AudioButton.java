@@ -2,39 +2,43 @@ package dev.ftb.mods.ftbechoes.client.gui.widget;
 
 import dev.ftb.mods.ftbechoes.client.gui.EchoSoundClipHandler;
 import dev.ftb.mods.ftbechoes.client.gui.Textures;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 
 public class AudioButton extends SimpleTextButton {
-    private static final Icon INACTIVE = Icon.getIcon(Textures.SPEAKER);
-    private static final Icon INACTIVE_MISSING = Icon.getIcon(Textures.SPEAKER).combineWith(Icons.CANCEL.withColor(Color4I.WHITE.withAlpha(128)));
-    private static final Icon ACTIVE =  Icon.getIcon(Textures.SPEAKER_ACTIVE);
+    private static final Icon<?> INACTIVE = Icon.getIcon(Textures.SPEAKER);
+    private static final Icon<?> INACTIVE_MISSING = Icon.getIcon(Textures.SPEAKER).combineWith(Icons.CANCEL.withColor(Color4I.WHITE.withAlpha(128)));
+    private static final Icon<?> ACTIVE =  Icon.getIcon(Textures.SPEAKER_ACTIVE);
 
     private final SoundEvent sound;
-    private final ResourceLocation location;
+    private final Identifier location;
 
-    public AudioButton(Panel panel, Component text, ResourceLocation location) {
+    public AudioButton(Panel panel, Component text, Identifier location) {
         super(panel, text, INACTIVE);
 
         this.location = location;
         this.sound = findSound(location);
     }
 
-    private SoundEvent findSound(ResourceLocation location) {
+    private SoundEvent findSound(Identifier location) {
         String locale = Minecraft.getInstance().getLanguageManager().getSelected();
-        ResourceLocation loc1 = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), locale + "/" + location.getPath());
-        ResourceLocation loc2 = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "en_us/" + location.getPath());
+        Identifier loc1 = Identifier.fromNamespaceAndPath(location.getNamespace(), locale + "/" + location.getPath());
+        Identifier loc2 = Identifier.fromNamespaceAndPath(location.getNamespace(), "en_us/" + location.getPath());
 
         return BuiltInRegistries.SOUND_EVENT.getOptional(loc1)
                 .or(() -> BuiltInRegistries.SOUND_EVENT.getOptional(loc2))
@@ -43,7 +47,7 @@ public class AudioButton extends SimpleTextButton {
     }
 
     @Override
-    public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         theme.drawPanelBackground(graphics, x + 2, y + 3, w - 4, h - 6);
         GuiHelper.drawHollowRect(graphics, x + 1, y + 2, w - 2, h - 4, theme.getContentColor(WidgetType.DISABLED), true);
     }

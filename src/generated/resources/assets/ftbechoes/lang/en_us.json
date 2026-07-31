@@ -13,7 +13,7 @@
   "ftbechoes.commands.shop_stock_reset": "Shop stock reset to full for echo '%s'",
   "ftbechoes.commands.shop_stock_reset.failed": "No purchases to reset for echo '%s'",
   "ftbechoes.commands.unknown_echo": "Unknown Echo id: %s",
-  "ftbechoes.commands.unknown_page": "Unknown page id: %s",
+  "ftbechoes.commands.unknown_page": "Unknown page: %s",
   "ftbechoes.gui.all_complete": "All Stages Complete!",
   "ftbechoes.gui.claim_reward": "Claim Reward",
   "ftbechoes.gui.collapse_all": "Collapse All",
@@ -23,6 +23,7 @@
   "ftbechoes.gui.page.shop": "Shop",
   "ftbechoes.gui.page.tasks": "Tasks",
   "ftbechoes.gui.place_order": "Place Order",
+  "ftbechoes.gui.select_echo": "Select Echo",
   "ftbechoes.gui.shopping_basket": "Shopping Basket",
   "ftbechoes.gui.stage": "Stage %s",
   "ftbechoes.gui.stage_completed": "Stage Completed!",
@@ -55,7 +56,5 @@
   "ftbechoes.tooltip.stock": "Stock",
   "ftbechoes.tooltip.too_expensive": "Too Expensive! Can't place order",
   "ftbechoes.tooltip.total_cost": "Total Cost: %s",
-  "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s",
-  "config.jade.plugin_ftbechoes.entity": "FTB Echoes Entity",
-  "config.jade.plugin_ftbechoes.block": "FTB Echoes Block"
+  "ftbechoes.tooltip.unlocked_by": "Unlocked by: %s"
 }

@@ -16,13 +16,14 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.minecraft.world.item.ItemStackTemplate;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public record ShopData(String name, List<ItemStack> stacks, int cost, List<Component> description, Optional<Icon> icon, Optional<CommandInfo> command, Optional<Integer> maxClaims, boolean perPlayerMax, int maxStage) {
+public record ShopData(String name, List<ItemStackTemplate> stacks, int cost, List<Component> description, Optional<Icon<?>> icon, Optional<CommandInfo> command, Optional<Integer> maxClaims, boolean perPlayerMax, int maxStage) {
     private static final Codec<ShopData> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("name").forGetter(ShopData::name),
             EchoCodecs.ITEM_OR_ITEMS_CODEC.optionalFieldOf("item", List.of()).forGetter(ShopData::stacks),
@@ -39,7 +40,7 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ShopData> STREAM_CODEC = NetworkHelper.composite(
             ByteBufCodecs.STRING_UTF8, ShopData::name,
-            ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
+            ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::stacks,
             ByteBufCodecs.VAR_INT, ShopData::cost,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), ShopData::description,
             ByteBufCodecs.optional(Icon.STREAM_CODEC), ShopData::icon,
@@ -60,22 +61,22 @@ public record ShopData(String name, List<ItemStack> stacks, int cost, List<Compo
     }
 
     public void giveTo(ShoppingKey key, ServerPlayer player, int nOrders) {
-        for (ItemStack stack : stacks()) {
-            int total = stack.getCount() * nOrders;
+        for (ItemStackTemplate stack : stacks()) {
+            int total = stack.count() * nOrders;
             while (total > 0) {
-                ItemStack toGive = stack.copyWithCount(Math.min(total, stack.getMaxStackSize()));
-                ItemHandlerHelper.giveItemToPlayer(player, toGive);
+                ItemStack toGive = stack.withCount(Math.min(total, stack.getMaxStackSize())).create();
+                player.getInventory().placeItemBackInInventory(toGive);
                 total -= toGive.getCount();
             }
         }
         command.ifPresent(cmdInfo -> cmdInfo.runForPlayer(player));
         if (maxClaims().isPresent()) {
-            TeamProgressManager.get().consumeLimitedShopPurchase(player, key, nOrders, this);
+            TeamProgressManager.get(player.level().getServer()).consumeLimitedShopPurchase(player, key, nOrders, this);
         }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShopData data = (ShopData) o;

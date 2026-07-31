@@ -35,9 +35,11 @@ public class ModLangProvider extends LanguageProvider {
         add("ftbechoes.gui.stock_remaining", "Stock Remaining: %s/%s");
         add("ftbechoes.gui.stock_limit.player", "Per-player limit");
         add("ftbechoes.gui.stock_limit.team", "Per-team limit");
+        add("ftbechoes.gui.select_echo", "Select Echo");
 
         add("ftbechoes.commands.invalid_echo", "Invalid Echo id: %s");
         add("ftbechoes.commands.unknown_echo", "Unknown Echo id: %s");
+        add("ftbechoes.commands.unknown_page", "Unknown page: %s");
         add("ftbechoes.commands.added_stage", "Added game stage: %s");
         add("ftbechoes.commands.removed_stage", "Removed game stage: %s");
         add("ftbechoes.commands.progress_changed", "Set progress for '%s' on echo '%s' to stage %s");

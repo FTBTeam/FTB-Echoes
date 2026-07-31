@@ -9,21 +9,21 @@ import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 
 import static dev.ftb.mods.ftbechoes.integration.jei.FTBEchoesJEIPlugin.guiHelper;
 
 public class ShoppingCategory implements IRecipeCategory<ShopSummary.SummaryItem> {
-    private static final ResourceLocation BG_TEXTURE = FTBEchoes.id("textures/gui/jei_shopping.png");
-    public static final ResourceLocation MONEY_BAG = ResourceLocation.fromNamespaceAndPath("ftblibrary", "textures/icons/money_bag.png");
+    private static final Identifier BG_TEXTURE = FTBEchoes.id("textures/gui/jei_shopping.png");
+    public static final Identifier MONEY_BAG = Identifier.fromNamespaceAndPath("ftblibrary", "textures/icons/money_bag.png");
     private static final int OUTPUT_SLOTS = 4;
 
     private final IDrawable background;
@@ -39,7 +39,7 @@ public class ShoppingCategory implements IRecipeCategory<ShopSummary.SummaryItem
     }
 
     @Override
-    public RecipeType<ShopSummary.SummaryItem> getRecipeType() {
+    public IRecipeType<ShopSummary.SummaryItem> getRecipeType() {
         return RecipeTypes.SHOPPING;
     }
 
@@ -58,13 +58,13 @@ public class ShoppingCategory implements IRecipeCategory<ShopSummary.SummaryItem
         for (int i = 0; i < OUTPUT_SLOTS; i++) {
             IRecipeSlotBuilder b = builder.addOutputSlot(42 + i * 18, 8);
             if (i < recipe.data().stacks().size()) {
-                b.addItemStack(recipe.data().stacks().get(i));
+                b.add(recipe.data().stacks().get(i));
             }
         }
     }
 
     @Override
-    public void draw(ShopSummary.SummaryItem recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+    public void draw(ShopSummary.SummaryItem recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
         background.draw(guiGraphics);
 
         moneyIcon.draw(guiGraphics, 5, 8);
@@ -72,20 +72,20 @@ public class ShoppingCategory implements IRecipeCategory<ShopSummary.SummaryItem
         String costStr = String.valueOf(recipe.data().cost());
         Font font = Minecraft.getInstance().font;
         int w = font.width(costStr);
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(4f + (18 - w) / 2f, 15f, 0);
-        guiGraphics.drawString(font, costStr, -1, 0, 0, false);
-        guiGraphics.drawString(font, costStr,  1, 0, 0, false);
-        guiGraphics.drawString(font, costStr, 0, -1, 0, false);
-        guiGraphics.drawString(font, costStr, 0,  1, 0, false);
-        guiGraphics.drawString(font, costStr, 0, 0, 0xFFE0E000, false);
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().translate(4f + (18 - w) / 2f, 15f);
+        guiGraphics.text(font, costStr, -1, 0, 0, false);
+        guiGraphics.text(font, costStr,  1, 0, 0, false);
+        guiGraphics.text(font, costStr, 0, -1, 0, false);
+        guiGraphics.text(font, costStr, 0,  1, 0, false);
+        guiGraphics.text(font, costStr, 0, 0, 0xFFE0E000, false);
+        guiGraphics.pose().popMatrix();
     }
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, ShopSummary.SummaryItem recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
         recipe.data().stacks().forEach(stack ->
-                tooltip.add(stack.getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
+                tooltip.add(stack.create().getHoverName().copy().withStyle(ChatFormatting.YELLOW, ChatFormatting.UNDERLINE))
         );
         recipe.data().description().forEach(tooltip::add);
         recipe.data().command().ifPresent(cmd -> cmd.description().forEach(tooltip::add));

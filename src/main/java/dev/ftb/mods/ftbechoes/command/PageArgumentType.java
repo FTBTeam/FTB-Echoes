@@ -42,7 +42,7 @@ public class PageArgumentType implements ArgumentType<EchoPage> {
                 Suggestions.empty();
     }
 
-    public static EchoPage getPage(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    public static EchoPage getPage(CommandContext<CommandSourceStack> context, String name) {
         return context.getArgument(name, EchoPage.class);
     }
 }

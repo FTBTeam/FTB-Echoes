@@ -8,22 +8,22 @@ import dev.ftb.mods.ftbechoes.registry.ModStageEntryTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
-public record ImageEntry(ResourceLocation location, int width, int height, Alignment alignment) implements BaseStageEntry {
+public record ImageEntry(Identifier location, int width, int height, Alignment alignment) implements BaseStageEntry {
     public static final String ID = "image";
 
     public static final MapCodec<ImageEntry> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-            ResourceLocation.CODEC.fieldOf("location").forGetter(ImageEntry::location),
+            Identifier.CODEC.fieldOf("location").forGetter(ImageEntry::location),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("width", 32).forGetter(ImageEntry::width),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("height", 32).forGetter(ImageEntry::height),
             StringRepresentable.fromEnum(Alignment::values).optionalFieldOf("align", Alignment.LEFT).forGetter(ImageEntry::alignment)
     ).apply(builder, ImageEntry::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, ImageEntry> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, ImageEntry::location,
+            Identifier.STREAM_CODEC, ImageEntry::location,
             ByteBufCodecs.VAR_INT, ImageEntry::width,
             ByteBufCodecs.VAR_INT, ImageEntry::height,
             NeoForgeStreamCodecs.enumCodec(Alignment.class), ImageEntry::alignment,

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbechoes.echo;
 
-import dev.ftb.mods.ftblibrary.config.NameMap;
+import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;

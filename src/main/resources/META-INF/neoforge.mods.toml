@@ -16,7 +16,7 @@ Lore driven progress milestones presents in a friendly and usable way with a bui
 [[dependencies.${mod_id}]]
 modId = "neoforge"
 mandatory = true
-versionRange = "${mod_loader_range}"
+versionRange = "${neoforge_version_range}"
 ordering = "NONE"
 side="BOTH"
 

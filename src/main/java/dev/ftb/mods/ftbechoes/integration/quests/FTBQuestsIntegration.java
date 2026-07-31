@@ -8,20 +8,22 @@ import dev.ftb.mods.ftbquests.quest.loot.WeightedReward;
 import dev.ftb.mods.ftbquests.quest.reward.Reward;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FTBQuestsIntegration {
+    @Nullable
     public static List<Component> getLootData(ShopData data) {
         boolean foundLootItem = false;
         List<Component> components = new ArrayList<>();
 
         var stacks = data.stacks();
         for (var stack : stacks) {
-            var item = stack.getItem();
+            var item = stack.item().value();
             if (item instanceof LootCrateItem) {
-                LootCrate crate = LootCrateItem.getCrate(stack, true);
+                LootCrate crate = LootCrateItem.getCrate(stack.create(), true);
                 if (crate == null) {
                     continue;
                 }

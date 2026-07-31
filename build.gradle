@@ -2,7 +2,7 @@ plugins {
 	id 'java-library'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '2.0.115'
+	id 'net.neoforged.moddev' version '2.0.140'
 	id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
 
@@ -10,27 +10,22 @@ tasks.named('wrapper', Wrapper).configure {
 	distributionType = Wrapper.DistributionType.BIN
 }
 
-def mcMinorAndPatch = getMinorAndPatchFromMc()
-
-version = "${mcMinorAndPatch}.${mod_version}"
-group = project.maven_group
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/maven.gradle'
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/publishing-2.gradle'
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/utils.gradle'
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/changelog.gradle'
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = archives_base_name
 }
 
-apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
-apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
+version = createModVersion(project)
+group = project.maven_group
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
-	version = "${mcMinorAndPatch}.${neo_version}"
-
-	parchment {
-		mappingsVersion = project.parchment_mappings_version
-		minecraftVersion = project.parchment_minecraft_version.replace("\${mc_version}", minecraft_version)
-	}
+	version = project.neoforge_version
 
 	runs {
 		configureEach {
@@ -57,7 +52,7 @@ neoForge {
 		}
 
 		data {
-			data()
+			clientData()
 			programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 		}
 	}
@@ -81,30 +76,12 @@ configurations {
 
 repositories {
 	mavenLocal()
-	maven {
-		url = "https://maven.ftb.dev/releases"
-		content {
-			includeGroup("dev.ftb.mods")
-		}
-	}
-	maven {
-		url = "https://maven.ftb.dev/snapshots"
-		content {
-			includeGroup("dev.ftb.mods")
-		}
-	}
+	commonMavenRepos(repositories)
 
 	maven {
 		url = "https://maven.architectury.dev"
 		content {
 			includeGroup("dev.architectury")
-		}
-	}
-
-	maven {
-		url "https://www.cursemaven.com"
-		content {
-			includeGroup "curse.maven"
 		}
 	}
 
@@ -139,7 +116,7 @@ dependencies {
 	// for currency testing
 	localRuntime("top.theillusivec4.curios:curios-neoforge:${curios_version}")
 //	localRuntime("curse.maven:magic_coins-597281:${magic_coins_version}")
-	localRuntime("curse.maven:sg_economy-1446971:${sg_economy_version}")
+	//localRuntime("curse.maven:sg_economy-1446971:${sg_economy_version}")
 	localRuntime("dev.ftb.mods:ftb-xmod-compat-neoforge:${ftb_xmod_compat_version}")
 }
 
@@ -158,11 +135,12 @@ tasks.withType(ProcessResources).configureEach {
 			mod_id: mod_id,
 			mod_name: mod_name,
 			pack_format: pack_format,
-			loader_version_range: loader_version_range,
-			// 99.9% of the time we're only going to target a very vague version of neoforge so this is fine.
-			mod_loader_range: mod_loader_range.replace("\${mc_base}", mcMinorAndPatch), // Replace the version in the mod loader range
+			neoforge_version_range: neoforge_version_range,
+			loader_version_range: neoforge_loader_version_range,
+			minecraft_version_range: minecraft_version_range,
 			ftb_library_version: ftb_library_version,
-			ftb_teams_version: ftb_teams_version
+			ftb_teams_version: ftb_teams_version,
+			jei_version: jei_version
 	]
 
 	inputs.properties replaceProperties
@@ -188,11 +166,7 @@ idea {
 	}
 }
 
-def getMinorAndPatchFromMc() {
-	String mcVersion = project.minecraft_version
-	String[] split = mcVersion.split("\\.")
-	return split[1] + "." + (split[2] ?: "0")
-}
+createMavenPublishingBlock(project)
 
 publishMods {
 	def CFToken = providers.environmentVariable("CURSEFORGE_KEY")
@@ -217,28 +191,5 @@ publishMods {
         requires("ftb-teams-forge")
 		client = true
 		server = true
-	}
-}
-
-publishing {
-	publications {
-		register('mavenJava', MavenPublication) {
-			version = ftbPublishing.mavenVersion
-			artifactId = archives_base_name
-			from components.java
-			artifact sourcesJar
-		}
-	}
-
-	repositories {
-		if (ftbPublishing.ftbToken) {
-			maven {
-				url ftbPublishing.ftbURL
-				credentials {
-					username = ftbPublishing.ftbUser
-					password = ftbPublishing.ftbToken
-				}
-			}
-		}
 	}
 }

@@ -7,16 +7,16 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Optional;
 
-public record OpenEchoMessage(ResourceLocation echoId, Optional<EchoPage> page) implements CustomPacketPayload {
+public record OpenEchoMessage(Identifier echoId, Optional<EchoPage> page) implements CustomPacketPayload {
     public static final Type<OpenEchoMessage> TYPE = new Type<>(FTBEchoes.id("open_echo"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenEchoMessage> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, OpenEchoMessage::echoId,
+            Identifier.STREAM_CODEC, OpenEchoMessage::echoId,
             ByteBufCodecs.optional(EchoPage.STREAM_CODEC), OpenEchoMessage::page,
             OpenEchoMessage::new
     );
