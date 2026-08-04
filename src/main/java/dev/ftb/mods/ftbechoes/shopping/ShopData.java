@@ -65,8 +65,9 @@ public record ShopData(String name, List<ItemStackTemplate> stacks, int cost, Li
             int total = stack.count() * nOrders;
             while (total > 0) {
                 ItemStack toGive = stack.withCount(Math.min(total, stack.getMaxStackSize())).create();
+                int count = toGive.getCount();
                 player.getInventory().placeItemBackInInventory(toGive);
-                total -= toGive.getCount();
+                total -= count;
             }
         }
         command.ifPresent(cmdInfo -> cmdInfo.runForPlayer(player));
