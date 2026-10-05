@@ -8,9 +8,9 @@ public class FTBEchoesCommands {
     public static void registerCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal(FTBEchoes.MOD_ID)
                 .then(ProgressCommand.register())
-                .then(ProgressInfoCommand.register())
                 .then(NBTEditCommand.register())
                 .then(StageCommand.register())
+                .then(OpenEchoCommand.register())
         );
     }
 }

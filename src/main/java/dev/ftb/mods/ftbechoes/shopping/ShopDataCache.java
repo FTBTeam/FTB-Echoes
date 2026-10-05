@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbechoes.shopping;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ public class ShopDataCache {
 
     @Nullable
     public ShoppingEntry find(ShoppingKey key) {
-        return map.computeIfAbsent(key, k -> echoManager.getEcho(key.echoId())
+        return map.computeIfAbsent(key, _ -> echoManager.getEcho(key.echoId())
                 .map(echo -> findEntry(echo, key.name()))
                 .orElse(null));
     }

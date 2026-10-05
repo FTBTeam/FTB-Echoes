@@ -16,9 +16,9 @@ public class ModBlocks {
                 .mapColor(MapColor.METAL)
                 .strength(3f, 10f)
                 .sound(SoundType.METAL)
-                .lightLevel(state -> 15);
+                .lightLevel(_ -> 15);
     }
 
     public static final DeferredBlock<EchoProjectorBlock> ECHO_PROJECTOR
-            = BLOCKS.register("echo_projector", () -> new EchoProjectorBlock(defaultProps()));
+            = BLOCKS.registerBlock("echo_projector", EchoProjectorBlock::new, ModBlocks::defaultProps);
 }

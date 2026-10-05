@@ -6,10 +6,10 @@ import dev.ftb.mods.ftbechoes.echo.BaseStageEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.AudioEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.ImageEntry;
 import dev.ftb.mods.ftbechoes.echo.entries.TextEntry;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.TextField;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.TextField;
-import dev.ftb.mods.ftblibrary.ui.Widget;
 import net.minecraft.network.chat.Component;
 
 import java.util.HashMap;

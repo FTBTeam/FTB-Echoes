@@ -1,7 +1,5 @@
 package dev.ftb.mods.ftbechoes.echo;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ShopSummary;
@@ -9,14 +7,16 @@ import dev.ftb.mods.ftbechoes.net.SyncEchoesMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShopDataCache;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -25,10 +25,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EchoManager {
-    private static EchoManager clientInstance;
-    private static EchoManager serverInstance;
+    @Nullable private static EchoManager clientInstance;
+    @Nullable private static EchoManager serverInstance;
 
-    private final Map<ResourceLocation, Echo> echoes = new ConcurrentHashMap<>();
+    private final Map<Identifier, Echo> echoes = new ConcurrentHashMap<>();
     private final ShopDataCache shoppingCache = new ShopDataCache(this);
 
     public static void initClient() {
@@ -64,22 +64,22 @@ public class EchoManager {
     }
 
     public static EchoManager getClientInstance() {
-        return clientInstance;
+        return Objects.requireNonNull(clientInstance);
     }
 
     public static EchoManager getServerInstance() {
-        return serverInstance;
+        return Objects.requireNonNull(serverInstance);
     }
 
     public Collection<Echo> getEchoes() {
         return echoes.values();
     }
 
-    public Optional<Echo> getEcho(ResourceLocation id) {
-        return Optional.ofNullable(echoes.get(id));
+    public Optional<Echo> getEcho(@Nullable Identifier id) {
+        return id == null ? Optional.empty() : Optional.ofNullable(echoes.get(id));
     }
 
-    public boolean isKnownEcho(ResourceLocation id) {
+    public boolean isKnownEcho(Identifier id) {
         return echoes.containsKey(id);
     }
 
@@ -110,23 +110,18 @@ public class EchoManager {
         shoppingCache.clear();
     }
 
-    public static class ReloadListener extends SimpleJsonResourceReloadListener {
-        private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-        private final RegistryAccess registryAccess;
-
-        public ReloadListener(RegistryAccess registryAccess) {
-            super(GSON, "echo_definitions");
-
-            this.registryAccess = registryAccess;
+    public static class ReloadListener extends SimpleJsonResourceReloadListener<JsonElement> {
+        public ReloadListener() {
+            super(ExtraCodecs.JSON, FileToIdConverter.json("echo_definitions"));
         }
 
         @Override
-        protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        protected void apply(Map<Identifier, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
             EchoManager.initServer();
 
             getServerInstance().clear();
 
-            map.forEach((id, json) -> Echo.fromJson(json, registryAccess).ifPresent(echo -> getServerInstance().echoes.put(id, echo)));
+            map.forEach((id, json) -> Echo.fromJson(json, getRegistryLookup()).ifPresent(echo -> getServerInstance().echoes.put(id, echo)));
 
             FTBEchoes.LOGGER.info("loaded {} echo definitions", getServerInstance().echoes.size());
 

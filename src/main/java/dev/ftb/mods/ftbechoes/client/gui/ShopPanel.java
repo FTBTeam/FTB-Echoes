@@ -2,12 +2,13 @@ package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ShopItemWidget;
+import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import dev.ftb.mods.ftblibrary.ui.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.layout.WidgetLayout;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class ShopPanel extends EchoScreen.PagePanel {
     public static final int GUTTER = 5;
 
     public ShopPanel(Panel parent, EchoScreen echoScreen) {
-        super(parent, echoScreen, EchoScreen.Page.SHOP);
+        super(parent, echoScreen, EchoPage.SHOP);
     }
 
     @Override

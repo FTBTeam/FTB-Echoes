@@ -7,22 +7,22 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public record Echo(ResourceLocation id, Component title, List<EchoStage> stages, Optional<Component> allComplete, Optional<EchoModel> model) {
+public record Echo(Identifier id, Component title, List<EchoStage> stages, Optional<Component> allComplete, Optional<EchoModel> model) {
     private static final Codec<Echo> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ResourceLocation.CODEC.fieldOf("id").forGetter(Echo::id),
+            Identifier.CODEC.fieldOf("id").forGetter(Echo::id),
             ComponentSerialization.CODEC.fieldOf("title").forGetter(Echo::title),
             EchoStage.CODEC.listOf().fieldOf("stages").forGetter(Echo::stages),
             ComponentSerialization.CODEC.optionalFieldOf("all_complete").forGetter(Echo::allComplete),
@@ -32,7 +32,7 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
     public static final Codec<Echo> CODEC = RAW_CODEC.validate(Echo::validate);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, Echo> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, Echo::id,
+            Identifier.STREAM_CODEC, Echo::id,
             ComponentSerialization.STREAM_CODEC, Echo::title,
             EchoStage.STREAM_CODEC.apply(ByteBufCodecs.list()), Echo::stages,
             ByteBufCodecs.optional(ComponentSerialization.STREAM_CODEC), Echo::allComplete,
@@ -40,7 +40,7 @@ public record Echo(ResourceLocation id, Component title, List<EchoStage> stages,
             Echo::new
     );
 
-    public static Optional<Echo> fromJson(JsonElement json, RegistryAccess registryAccess) {
+    public static Optional<Echo> fromJson(JsonElement json, HolderLookup.Provider registryAccess) {
         return CODEC.decode(registryAccess.createSerializationContext(JsonOps.INSTANCE), json)
                 .resultOrPartial(error -> FTBEchoes.LOGGER.error("JSON parse failure: {}", error))
                 .map(Pair::getFirst);

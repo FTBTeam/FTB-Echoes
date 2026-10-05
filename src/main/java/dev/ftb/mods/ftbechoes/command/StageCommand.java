@@ -9,10 +9,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftblibrary.integration.stages.StageProvider;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -25,7 +25,7 @@ public class StageCommand {
 
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal("gamestage")
-                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(argument("player", EntityArgument.player())
                         .then(literal("add")
                                 .then(argument("stage", StringArgumentType.string())

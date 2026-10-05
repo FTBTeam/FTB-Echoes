@@ -1,52 +1,60 @@
 package dev.ftb.mods.ftbechoes.client.gui;
 
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.ftb.mods.ftbechoes.FTBEchoes;
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
+import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.net.PlaceOrderMessage;
 import dev.ftb.mods.ftbechoes.net.SelectEchoMessage;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.Key;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.screens.AbstractThreePanelScreen;
+import dev.ftb.mods.ftblibrary.client.gui.theme.NordColors;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.*;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.Key;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.ui.misc.AbstractThreePanelScreen;
-import dev.ftb.mods.ftblibrary.ui.misc.NordColors;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.commands.Commands;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.common.util.Lazy;
-import net.neoforged.neoforge.network.PacketDistributor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
 public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
-    static Map<ResourceLocation,EchoScreen.Page> currentPage = new HashMap<>();
+    static Map<Identifier, EchoPage> currentPage = new HashMap<>();
 
-    private final BlockPos projectorPos;
+    @Nullable private final BlockPos projectorPos;
 
     private boolean pendingScrollToEnd;
     @Nullable private Echo echo;
 
-    public EchoScreen(BlockPos projectorPos, @Nullable Echo echo) {
+    public EchoScreen(@Nullable BlockPos projectorPos, @Nullable Echo echo) {
         super();
 
+        Preconditions.checkState(projectorPos != null || echo != null,
+                "at least one of projector pos and echo must be non-null!");
         this.projectorPos = projectorPos;
         this.echo = echo;
 
@@ -69,7 +77,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     @Override
     public void onPostInit() {
-        if (getCurrentPage() == Page.LORE) {
+        if (getCurrentPage() == EchoPage.LORE) {
             scrollBar.setValue(scrollBar.getMaxValue());
         }
     }
@@ -77,7 +85,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     @Override
     public void onClosed() {
         if (EchoSoundClipHandler.INSTANCE.isPlayingSound() && Minecraft.getInstance().screen != null && Minecraft.getInstance().player != null) {
-            Minecraft.getInstance().player.displayClientMessage(Component.translatable("ftbechoes.message.hold_alt_to_stop_sound").withStyle(ChatFormatting.AQUA), true);
+            Minecraft.getInstance().player.sendOverlayMessage(Component.translatable("ftbechoes.message.hold_alt_to_stop_sound").withStyle(ChatFormatting.AQUA));
         }
     }
 
@@ -119,11 +127,11 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
-    public Page getCurrentPage() {
-        return echo == null ? Page.LORE : currentPage.getOrDefault(echo.id(), Page.LORE);
+    public EchoPage getCurrentPage() {
+        return echo == null ? EchoPage.LORE : currentPage.getOrDefault(echo.id(), EchoPage.LORE);
     }
 
-    private void setCurrentPage(Page page) {
+    public void setCurrentPage(EchoPage page) {
         if (echo != null) {
             currentPage.put(echo.id(), page);
         }
@@ -131,11 +139,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     public void onProgressUpdated() {
         refreshWidgets();
-        if (getCurrentPage() == Page.LORE) {
+        if (getCurrentPage() == EchoPage.LORE) {
             pendingScrollToEnd = true;
         }
     }
 
+    @Nullable
     public BlockPos getProjectorPos() {
         return projectorPos;
     }
@@ -149,7 +158,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         public void onClicked(MouseButton mouseButton) {
             playClickSound();
 
-            PacketDistributor.sendToServer(new PlaceOrderMessage(ShoppingBasket.CLIENT_INSTANCE));
+            ClientPacketDistributor.sendToServer(new PlaceOrderMessage(ShoppingBasket.CLIENT_INSTANCE));
         }
 
         @Override
@@ -165,9 +174,9 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 list.add(Component.translatable("ftbechoes.gui.shopping_basket").withStyle(ChatFormatting.YELLOW));
                 ShoppingBasket.CLIENT_INSTANCE.forEach((key, count) -> EchoManager.getClientInstance().getShopData(key).ifPresent(data -> {
                     List<MutableComponent> lines = new ArrayList<>();
-                    List<ItemStack> stacks = data.stacks();
+                    List<ItemStackTemplate> stacks = data.stacks();
                     for (int i = 0; i < stacks.size(); i++) {
-                        ItemStack stack = stacks.get(i);
+                        ItemStack stack = stacks.get(i).create();
                         lines.add(Component.literal(i == 0 ? "• " : "  ").append(count * stack.getCount() + " x ").append(stack.getHoverName()));
                     }
                     data.command().ifPresent(cmd -> cmd.description().forEach(d -> lines.add(Component.literal("• ").append(d))));
@@ -192,13 +201,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         @Override
         public boolean isEnabled() {
             return ShoppingBasket.CLIENT_INSTANCE.hasContents()
-                    && getCurrentPage() == Page.SHOP
+                    && getCurrentPage() == EchoPage.SHOP
                     && ShoppingBasket.CLIENT_INSTANCE.getTotalCost() <= FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player);
         }
 
         @Override
         public boolean shouldDraw() {
-            return getCurrentPage() == Page.SHOP;
+            return getCurrentPage() == EchoPage.SHOP;
         }
     }
 
@@ -206,48 +215,48 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         private final TextField label;
         private final Button settingsButton;
         private final Button stopAudioButton;
-        private final Lazy<Map<Page, PageButton>> tabButtons = Lazy.of(this::buildTabButtons);
+        private final Lazy<Map<EchoPage, PageButton>> tabButtons = Lazy.of(this::buildTabButtons);
         private final boolean adminPlayer;
 
         public TopPanel() {
             super(EchoScreen.this);
 
             var player = Objects.requireNonNull(Minecraft.getInstance().player);
-            adminPlayer = player.hasPermissions(Commands.LEVEL_GAMEMASTERS) && player.isCreative();
+            adminPlayer = player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && player.isCreative();
 
             label = new TextField(this);
-            settingsButton = SimpleTextButton.create(this, Component.empty(), Icons.SETTINGS, this::showEchoSelector);
+            settingsButton = SimpleTextButton.create(this, Component.translatable("ftbechoes.gui.select_echo"), Icons.SETTINGS, this::showEchoSelector);
             stopAudioButton = new StopAudioButton();
         }
 
-        private Map<Page, PageButton> buildTabButtons() {
-            Map<Page, PageButton> pages = new EnumMap<>(Page.class);
+        private Map<EchoPage, PageButton> buildTabButtons() {
+            Map<EchoPage, PageButton> pages = new EnumMap<>(EchoPage.class);
 
             if (echo != null) {
                 if (echo.hasAnyLore()) {
-                    pages.put(Page.LORE, new EchoScreen.PageButton(Page.LORE, this, Icons.BOOK));
+                    pages.put(EchoPage.LORE, new EchoScreen.PageButton(EchoPage.LORE, this, Icons.BOOK));
 
                     // only show selector drop-down after at least one stage has been completed
-                    pages.get(Page.LORE).setDropdownAction(
+                    pages.get(EchoPage.LORE).setDropdownAction(
                             this::showStageSelector,
                             () -> echo != null && ClientProgress.get().isStageCompleted(echo.id(), 0)
                     );
                 }
                 if (echo.hasAnyShopItems()) {
-                    pages.put(Page.SHOP, new EchoScreen.PageButton(Page.SHOP, this, Icons.MONEY_BAG));
+                    pages.put(EchoPage.SHOP, new EchoScreen.PageButton(EchoPage.SHOP, this, Icons.MONEY_BAG));
                 }
             }
 
             return pages;
         }
 
-        private Map<Page, PageButton> getTabButtons() {
+        private Map<EchoPage, PageButton> getTabButtons() {
             return tabButtons.get();
         }
 
         @Override
         public void addWidgets() {
-            if (adminPlayer) {
+            if (adminPlayer && projectorPos != null) {
                 add(settingsButton);
             }
             add(stopAudioButton);
@@ -271,32 +280,26 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
             int by = getTheme().getFontHeight() + 8;
             int idx = 0;
             for (PageButton w : getTabButtons().values()) {
-                if (w != null) {
-                    w.setPosAndSize(4 + idx++ * (bw + 2), by, bw, height - by);
-                }
+                w.setPosAndSize(4 + idx++ * (bw + 2), by, bw, height - by);
             }
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-            super.drawBackground(graphics, theme, x, y, w, h);
+        public void drawWidget(GuiGraphicsExtractor graphics, Theme theme, Widget widget, int x, int y, int w, int h) {
+            super.drawWidget(graphics, theme, widget, x, y, w, h);
+
             int col = 0xff585d66;  // blends best with tabbed outline
-            List<PageButton> list = new ArrayList<>();
-            getTabButtons().values().forEach(b -> {
-                if (b != null) {
-                    list.add(b);
-                }
-            });
+            List<PageButton> list = new ArrayList<>(getTabButtons().values());
             if (!list.isEmpty()) {
-                graphics.hLine(x, x + list.getFirst().posX - 1, y + height - 2, col);
+                graphics.horizontalLine(x, x + list.getFirst().posX - 1, y + height - 2, col);
                 if (list.size() > 1) {
                     for (int i = 0; i < list.size() - 1; i++) {
                         Button b1 = list.get(i), b2 = list.get(i + 1);
-                        graphics.hLine(x + b1.posX + b1.width, x + b2.posX - 1, y + height - 2, col);
+                        graphics.horizontalLine(x + b1.posX + b1.width, x + b2.posX - 1, y + height - 2, col);
                     }
                 }
-                graphics.hLine(x + list.getLast().posX + list.getLast().width, x + width - 1, y + height - 2, col);
-                graphics.hLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_1.rgba());
+                graphics.horizontalLine(x + list.getLast().posX + list.getLast().width, x + width - 1, y + height - 2, col);
+                graphics.horizontalLine(x, x + width - 1, y + height - 1, NordColors.POLAR_NIGHT_0.addBrightness(-0.03f).rgba());
             }
         }
 
@@ -316,8 +319,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         private void showEchoSelector(MouseButton mb) {
             openContextMenu(Util.make(new ArrayList<>(), list ->
                     EchoManager.getClientInstance().getEchoes().forEach(echo -> {
-                        Icon icon = isCurrentEcho(echo) ? Icons.CHECK : Icon.empty();
-                        list.add(new ContextMenuItem(echo.title(), icon, btn -> selectEcho(echo)));
+                        Icon<?> icon = isCurrentEcho(echo) ? Icons.CHECK : Icon.empty();
+                        list.add(new ContextMenuItem(echo.title(), icon, _ -> selectEcho(echo)));
                     })
             ));
         }
@@ -330,28 +333,28 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                         for (int i = 0; i < echo.stages().size(); i++) {
                             final int stageIdx = i;
                             if (ClientProgress.get().isStageCompleted(echo.id(), i)) {
-                                list.add(new ContextMenuItem(echo.stages().get(stageIdx).title(), Icons.BLUE_BUTTON, btn -> scrollToStage(stageIdx)));
+                                list.add(new ContextMenuItem(echo.stages().get(stageIdx).title(), Icons.BLUE_BUTTON, _ -> scrollToStage(stageIdx)));
                             }
                         }
                         list.add(ContextMenuItem.separator());
                         list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.expand_all")
                                 .append(Component.literal(" [+]").withStyle(ChatFormatting.GRAY)),
-                                Icons.EXPAND, btn -> collapseAll(false)));
+                                Icons.EXPAND, _ -> collapseAll(false)));
                         list.add(new ContextMenuItem(Component.translatable("ftbechoes.gui.collapse_all")
                                 .append(Component.literal(" [-]").withStyle(ChatFormatting.GRAY)),
-                                Icons.COLLAPSE, btn -> collapseAll(true)));
+                                Icons.COLLAPSE, _ -> collapseAll(true)));
                     }
             ));
         }
 
         private void selectEcho(Echo echo) {
-            if (!isCurrentEcho(echo)) {
-                PacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
+            if (projectorPos != null && !isCurrentEcho(echo)) {
+                ClientPacketDistributor.sendToServer(new SelectEchoMessage(EchoScreen.this.projectorPos, echo.id()));
             }
         }
 
         private void scrollToStage(int stageIdx) {
-            if (EchoScreen.this.mainPanel.getPages().get(Page.LORE) instanceof LorePanel lorePanel) {
+            if (EchoScreen.this.mainPanel.getPages().get(EchoPage.LORE) instanceof LorePanel lorePanel) {
                 if (lorePanel.isCollapsed(stageIdx)) {
                     lorePanel.setCollapsed(stageIdx, false);
                 }
@@ -361,7 +364,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
         private void collapseAll(boolean collapse) {
             playClickSound();
-            if (EchoScreen.this.mainPanel.getPages().get(Page.LORE) instanceof LorePanel lorePanel) {
+            if (EchoScreen.this.mainPanel.getPages().get(EchoPage.LORE) instanceof LorePanel lorePanel) {
                 lorePanel.setAllCollapsed(collapse);
             }
         }
@@ -371,7 +374,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         private class StopAudioButton extends SimpleTextButton {
-            private static final Icon STOP_AUDIO_ICON = Icon.getIcon(Textures.STOP_AUDIO);
+            private static final Icon<?> STOP_AUDIO_ICON = Icon.getIcon(Textures.STOP_AUDIO);
 
             public StopAudioButton() {
                 super(TopPanel.this, Component.empty(), STOP_AUDIO_ICON);
@@ -402,26 +405,26 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
     }
 
     public class MainPanel extends Panel {
-        private final Lazy<Map<Page, PagePanel>> pages = Lazy.of(this::buildPages);
+        private final Lazy<Map<EchoPage, PagePanel>> pages = Lazy.of(this::buildPages);
 
         public MainPanel() {
             super(EchoScreen.this);
         }
 
-        private Map<Page, PagePanel> buildPages() {
-            Map<Page,PagePanel> map = new EnumMap<>(Page.class);
+        private Map<EchoPage, PagePanel> buildPages() {
+            Map<EchoPage,PagePanel> map = new EnumMap<>(EchoPage.class);
             if (echo != null) {
                 if (echo.hasAnyLore()) {
-                    map.put(Page.LORE, new LorePanel(this, EchoScreen.this));
+                    map.put(EchoPage.LORE, new LorePanel(this, EchoScreen.this));
                 }
                 if (echo.hasAnyShopItems()) {
-                    map.put(Page.SHOP, new ShopPanel(this, EchoScreen.this));
+                    map.put(EchoPage.SHOP, new ShopPanel(this, EchoScreen.this));
                 }
             }
             return map;
         }
 
-        private Map<Page,PagePanel> getPages() {
+        private Map<EchoPage,PagePanel> getPages() {
             return pages.get();
         }
 
@@ -447,7 +450,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 return Optional.of(res);
             }
 
-            for (Page p : Page.values()) {
+            for (EchoPage p : EchoPage.values()) {
                 PagePanel pagePanel = getPages().get(p);
                 if (pagePanel != null) {
                     setCurrentPage(p);
@@ -477,8 +480,8 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
-            NordColors.POLAR_NIGHT_0.draw(graphics, x, y, w, h);
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
+            IconHelper.renderIcon(NordColors.POLAR_NIGHT_0, graphics, x, y, w, h);
         }
     }
 
@@ -502,13 +505,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             theme.drawPanelBackground(graphics, x, y, w, h);
-            Color4I.GRAY.withAlpha(64).draw(graphics, x, y, w, 1);
+            IconHelper.renderIcon(Color4I.GRAY, graphics, x, y, w, 1);
         }
 
         @Override
-        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             super.draw(graphics, theme, x, y, w, h);
 
             var c = MiscUtil.formatCost(FTBEchoes.currencyProvider().getTotalCurrency(Minecraft.getInstance().player));
@@ -519,10 +522,10 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
 
     abstract static class PagePanel extends Panel {
         private final EchoScreen echoScreen;
-        private final EchoScreen.Page page;
+        private final EchoPage page;
         private double lastScrollPos = 0.0;
 
-        public PagePanel(Panel parent, EchoScreen echoScreen, EchoScreen.Page page) {
+        public PagePanel(Panel parent, EchoScreen echoScreen, EchoPage page) {
             super(parent);
 
             this.echoScreen = echoScreen;
@@ -559,27 +562,13 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
     }
 
-    public enum Page {
-        LORE("lore"),
-        SHOP("shop");
-
-        private final String name;
-
-        Page(String name) {
-            this.name = name;
-        }
-
-        public Component getLabel() {
-            return Component.translatable("ftbechoes.gui.page." + name);
-        }
-    }
-
     private class PageButton extends SimpleTextButton {
-        private final EchoScreen.Page page;
+        private final EchoPage page;
+        @Nullable
         private Runnable onDropDownClicked = null;
         private BooleanSupplier dropdownPredicate = () -> false;
 
-        public PageButton(EchoScreen.Page page, Panel panel, Icon icon) {
+        public PageButton(EchoPage page, Panel panel, Icon icon) {
             super(panel, page.getLabel(), icon);
 
             this.page = page;
@@ -591,7 +580,7 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         }
 
         @Override
-        public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             this.drawBackground(graphics, theme, x, y, w, h);
 
             var iconSize = 12;
@@ -617,20 +606,22 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
                 int x1 = x + width - 16;
                 int x2 = x + width - 6;
                 int y0 = y + height / 2;
-                graphics.hLine(x1, x2, y0 - 3, theme.getContentColor(WidgetType.NORMAL).rgba());
-                graphics.hLine(x1, x2, y0, theme.getContentColor(WidgetType.NORMAL).rgba());
-                graphics.hLine(x1, x2, y0 + 3, theme.getContentColor(WidgetType.NORMAL).rgba());
+                graphics.horizontalLine(x1, x2, y0 - 3, theme.getContentColor(WidgetType.NORMAL).rgba());
+                graphics.horizontalLine(x1, x2, y0, theme.getContentColor(WidgetType.NORMAL).rgba());
+                graphics.horizontalLine(x1, x2, y0 + 3, theme.getContentColor(WidgetType.NORMAL).rgba());
             }
         }
 
         @Override
-        public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+        public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
             theme.drawHorizontalTab(graphics, x, y, w, h, getCurrentPage() == page);
         }
 
         @Override
         public void onClicked(MouseButton mouseButton) {
-            if (dropdownPredicate.getAsBoolean() && getCurrentPage() == page && getMouseX() < getX() + width - 4 && getMouseX() > getX() + width - 18) {
+            if (onDropDownClicked != null && dropdownPredicate.getAsBoolean() && getCurrentPage() == page
+                    && getMouseX() < getX() + width - 4 && getMouseX() > getX() + width - 18)
+            {
                 onDropDownClicked.run();
                 return;
             }

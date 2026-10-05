@@ -3,14 +3,14 @@ package dev.ftb.mods.ftbechoes.client.gui.widget;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.StageCompletionReward;
 import dev.ftb.mods.ftbechoes.net.ClaimRewardMessage;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
 import dev.ftb.mods.ftblibrary.icon.Icons;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.SimpleTextButton;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class ClaimRewardButton extends SimpleTextButton {
     private final Echo echo;
@@ -26,7 +26,7 @@ public class ClaimRewardButton extends SimpleTextButton {
 
     @Override
     public void onClicked(MouseButton mouseButton) {
-        PacketDistributor.sendToServer(new ClaimRewardMessage(echo.id(), stageIdx));
+        ClientPacketDistributor.sendToServer(new ClaimRewardMessage(echo.id(), stageIdx));
     }
 
     @Override

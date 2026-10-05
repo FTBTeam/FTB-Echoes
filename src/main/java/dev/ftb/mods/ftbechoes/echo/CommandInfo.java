@@ -10,29 +10,29 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 
 import java.util.List;
 
-public record CommandInfo(String cmd, int permission, boolean silent, List<Component> description) {
+public record CommandInfo(String cmd, PermissionLevel permission, boolean silent, List<Component> description) {
     public static final Codec<CommandInfo> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.STRING.fieldOf("run").forGetter(CommandInfo::cmd),
-            ExtraCodecs.intRange(0, 4).optionalFieldOf("permission", 0).forGetter(CommandInfo::permission),
+            PermissionLevel.CODEC.optionalFieldOf("permission", PermissionLevel.ALL).forGetter(CommandInfo::permission),
             Codec.BOOL.optionalFieldOf("silent", true).forGetter(CommandInfo::silent),
             EchoCodecs.COMPONENT_OR_LIST.optionalFieldOf("description", List.of()).forGetter(CommandInfo::description)
     ).apply(builder, CommandInfo::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, CommandInfo> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, CommandInfo::cmd,
-            ByteBufCodecs.VAR_INT, CommandInfo::permission,
+            NeoForgeStreamCodecs.enumCodec(PermissionLevel.class), CommandInfo::permission,
             ByteBufCodecs.BOOL, CommandInfo::silent,
             ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list()), CommandInfo::description,
             CommandInfo::new
     );
 
     public void runForPlayer(ServerPlayer sp) {
-        if (sp.getServer() != null) {
-            CommandSourceStack stack = sp.createCommandSourceStack().withPermission(permission);
-            sp.getServer().getCommands().performPrefixedCommand(silent ? stack.withSuppressedOutput() : stack, cmd);
-        }
+            CommandSourceStack stack = sp.createCommandSourceStack().withPermission(LevelBasedPermissionSet.forLevel(permission));
+            sp.level().getServer().getCommands().performPrefixedCommand(silent ? stack.withSuppressedOutput() : stack, cmd);
     }
 }

@@ -6,7 +6,7 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Uniquely identifies one shopping entry in an Echo
@@ -14,14 +14,14 @@ import net.minecraft.resources.ResourceLocation;
  * @param echoId the echo's unique ID
  * @param name the shop data ID, which must also be unique within its Echo
  */
-public record ShoppingKey(ResourceLocation echoId, String name) {
+public record ShoppingKey(Identifier echoId, String name) {
     public static final Codec<ShoppingKey> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ResourceLocation.CODEC.fieldOf("echo_id").forGetter(ShoppingKey::echoId),
+            Identifier.CODEC.fieldOf("echo_id").forGetter(ShoppingKey::echoId),
             Codec.STRING.fieldOf("name").forGetter(ShoppingKey::name)
     ).apply(builder, ShoppingKey::new));
 
     public static final StreamCodec<FriendlyByteBuf, ShoppingKey> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, ShoppingKey::echoId,
+            Identifier.STREAM_CODEC, ShoppingKey::echoId,
             ByteBufCodecs.STRING_UTF8, ShoppingKey::name,
             ShoppingKey::new
     );

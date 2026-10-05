@@ -8,13 +8,13 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgressManager;
 import dev.ftb.mods.ftbteams.api.Team;
-import dev.ftb.mods.ftbteams.data.TeamArgument;
+import dev.ftb.mods.ftbteams.command.TeamArgument;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Set;
 import java.util.UUID;
@@ -25,7 +25,7 @@ import static net.minecraft.commands.Commands.literal;
 public class ProgressCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register() {
         return literal("progress")
-                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(literal("player")
                         .then(argument("player", EntityArgument.player())
                                 .then(argument("echo", EchoArgumentType.echo())

@@ -9,6 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.util.Lazy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,13 +25,12 @@ public class ShoppingBasket {
     );
 
     private final Object2IntMap<ShoppingKey> orders;
-    private int totalCost = 0;
+    private final Lazy<Integer> totalCost = Lazy.of(this::calcTotalCost);
 
     public static final ShoppingBasket CLIENT_INSTANCE = new ShoppingBasket(Map.of());
 
     private ShoppingBasket(Map<ShoppingKey, Integer> map) {
         orders = new Object2IntOpenHashMap<>(map);
-        recalc();
     }
 
     public void adjust(ShoppingKey key, int count, int max) {
@@ -40,7 +40,7 @@ public class ShoppingBasket {
         } else {
             orders.put(key, Math.min(max, newCount));
         }
-        recalc();
+        totalCost.invalidate();
     }
 
     public int get(ShoppingKey key) {
@@ -53,15 +53,15 @@ public class ShoppingBasket {
 
     public void clear() {
         orders.clear();
-        recalc();
+        totalCost.invalidate();
     }
 
     public void forEach(BiConsumer<ShoppingKey,Integer> consumer) {
-        orders.forEach(consumer);
+        orders.forEach(consumer::accept);
     }
 
     public int getTotalCost() {
-        return totalCost;
+        return totalCost.get();
     }
 
     public void giveTo(ServerPlayer player) {
@@ -79,29 +79,28 @@ public class ShoppingBasket {
     public ShoppingBasket validate(ServerPlayer player) {
         Map<ShoppingKey,Integer> map = new HashMap<>();
 
-        if (player.getServer() != null) {
-            TeamProgressManager.get(player.getServer()).getProgress(player).ifPresent(progress -> {
-                EchoManager mgr = EchoManager.getServerInstance();
-                orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
-                    // If the claim is limited, make sure we don't exceed the allowed number
-                    boolean stockAvailable = entry.data().maxClaims().isEmpty()
-                            || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
-                    int currentStage = progress.getCurrentStage(key.echoId());
-                    if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
-                        map.put(key, amount);
-                    }
-                }));
-            });
-        }
+        TeamProgressManager.get(player.level().getServer()).getProgress(player).ifPresent(progress -> {
+            EchoManager mgr = EchoManager.getServerInstance();
+            orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
+                // If the claim is limited, make sure we don't exceed the allowed number
+                boolean stockAvailable = entry.data().maxClaims().isEmpty()
+                        || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
+                int currentStage = progress.getCurrentStage(key.echoId());
+                if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
+                    map.put(key, amount);
+                }
+            }));
+        });
 
         return new ShoppingBasket(map);
     }
 
-    private void recalc() {
-        totalCost = 0;
+    private int calcTotalCost() {
+        int total = 0;
         EchoManager mgr = this == CLIENT_INSTANCE ? EchoManager.getClientInstance() : EchoManager.getServerInstance();
-        orders.forEach((key, nOrders) ->
-                totalCost += mgr.getShopData(key).map(data -> data.cost() * nOrders).orElse(0)
-        );
+        for (var entry : orders.object2IntEntrySet()) {
+            total += mgr.getShopData(entry.getKey()).map(data -> data.cost() * entry.getIntValue()).orElse(0);
+        }
+        return total;
     }
 }

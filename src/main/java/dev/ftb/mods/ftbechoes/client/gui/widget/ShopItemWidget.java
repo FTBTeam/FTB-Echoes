@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
@@ -9,27 +8,35 @@ import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
+import dev.ftb.mods.ftblibrary.client.gui.GuiHelper;
+import dev.ftb.mods.ftblibrary.client.gui.WidgetType;
+import dev.ftb.mods.ftblibrary.client.gui.input.MouseButton;
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Button;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleButton;
+import dev.ftb.mods.ftblibrary.client.gui.widget.SimpleTextButton;
+import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
+import dev.ftb.mods.ftblibrary.icon.AnimatedIcon;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
-import dev.ftb.mods.ftblibrary.icon.IconAnimation;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.*;
-import dev.ftb.mods.ftblibrary.ui.input.MouseButton;
-import dev.ftb.mods.ftblibrary.util.ModUtils;
 import dev.ftb.mods.ftblibrary.util.TooltipList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.neoforged.fml.ModList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ShopItemWidget extends Panel {
     public static final int WIDGET_SIZE = 64;
@@ -45,7 +52,7 @@ public class ShopItemWidget extends Panel {
     private final Component tooltip;
     private final boolean isCommand;
     private final TeamProgress teamProgress;
-    private final Map<String,List<ItemStack>> byMod;  // organising for tooltip purposes
+    private final Map<String,List<ItemStackTemplate>> byMod;  // organising for tooltip purposes
 
     @Nullable
     private List<Component> extraInfo = null;
@@ -61,8 +68,8 @@ public class ShopItemWidget extends Panel {
         costStr = MiscUtil.formatCost(data.cost());
 
         byMod = new HashMap<>();
-        for (ItemStack stack : data.stacks()) {
-            byMod.computeIfAbsent(getModForItem(stack), k -> new ArrayList<>()).add(stack);
+        for (ItemStackTemplate stack : data.stacks()) {
+            byMod.computeIfAbsent(getModForItem(stack), _ -> new ArrayList<>()).add(stack);
         }
 
         if (data.maxClaims().isPresent() && getRemainingLimit() <= 0) {
@@ -86,11 +93,10 @@ public class ShopItemWidget extends Panel {
         }
     }
 
-    private String getModForItem(ItemStack stack) {
-        if (BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals("ftbquests:lootcrate")) {
-            return "";
-        }
-        return ModUtils.getModName(stack.getItem()).orElse("");
+    private String getModForItem(ItemStackTemplate stack) {
+        return stack.item().unwrapKey().map(key ->
+                key.identifier().toString().equals("ftbquests:lootcrate") ? "" : key.identifier().getNamespace()
+        ).orElse("");
     }
 
     @Override
@@ -111,18 +117,18 @@ public class ShopItemWidget extends Panel {
         if (unlocked) {
             ShoppingBasket.CLIENT_INSTANCE.adjust(
                     key,
-                    adjustment * (ScreenWrapper.hasShiftDown() ? 10 : 1),
-                    isCommand ? 1 : data.maxClaims().map((max) -> getRemainingLimit()).orElse(Integer.MAX_VALUE));
+                    adjustment * (Minecraft.getInstance().hasShiftDown() ? 10 : 1),
+                    isCommand ? 1 : data.maxClaims().map(_ -> getRemainingLimit()).orElse(Integer.MAX_VALUE));
         }
     }
 
     @Override
-    public void drawBackground(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void drawBackground(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         GuiHelper.drawBorderedPanel(graphics, x, y, w, h, Color4I.rgb(0x1C2028), true);
     }
 
     @Override
-    public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         super.draw(graphics, theme, x, y, w, h);
 
         Component amountStr = Component.literal(String.valueOf(ShoppingBasket.CLIENT_INSTANCE.get(key)));
@@ -132,19 +138,19 @@ public class ShopItemWidget extends Panel {
 
         theme.drawString(graphics, costStr, x + width - theme.getStringWidth(costStr) - 4, y + 4, theme.getContentColor(WidgetType.NORMAL), 0);
         if (data.maxClaims().isPresent()) {
-            PoseStack pose = graphics.pose();
-            pose.pushPose();
-            pose.translate(x + 4, y + 4, 0);
-            pose.scale(0.75F, 0.75F, 1F);
+            var pose = graphics.pose();
+            pose.pushMatrix();
+            pose.translate(x + 4, y + 4);
+            pose.scale(0.75F, 0.75F);
             theme.drawString(graphics, Component.translatable("ftbechoes.tooltip.stock"), 0, 0, theme.getContentColor(WidgetType.NORMAL).withAlpha(200), 0);
-            pose.popPose();
+            pose.popMatrix();
             theme.drawString(graphics, Component.literal(String.valueOf(getRemainingLimit())), x + 4, y + 12, theme.getContentColor(WidgetType.NORMAL), 0);
         }
 
         if (!unlocked || (data.maxClaims().isPresent() && getRemainingLimit() <= 0)) {
-            graphics.pose().translate(0, 0, 300);
-            Color4I.DARK_GRAY.withAlpha(160).draw(graphics, x, y, w, h);
-            graphics.pose().translate(0, 0, -300);
+            graphics.pose().translate(0, 0);
+            IconHelper.renderIcon(Color4I.DARK_GRAY.withAlpha(160), graphics, x, y, w, h);
+            graphics.pose().translate(0, 0);
         }
     }
 
@@ -158,11 +164,11 @@ public class ShopItemWidget extends Panel {
         }
     }
 
-    private Icon getActualIcon() {
+    private Icon<?> getActualIcon() {
         if (data.stacks().size() == 1) {
-            return data.icon().orElse(ItemIcon.getItemIcon(data.stacks().getFirst()));
+            return data.icon().orElse(ItemIcon.ofTemplate(data.stacks().getFirst()));
         } else if (data.stacks().size() > 1) {
-            return data.icon().orElse(IconAnimation.fromList(data.stacks().stream().map(ItemIcon::getItemIcon).toList(), false));
+            return data.icon().orElse(AnimatedIcon.fromList(data.stacks().stream().map(ItemIcon::ofTemplate).collect(Collectors.toList()), false));
         } else {
             return data.icon().orElse(Icon.empty());
         }
@@ -170,7 +176,7 @@ public class ShopItemWidget extends Panel {
 
     int getRemainingLimit() {
         return data.maxClaims()
-                .map((max) -> teamProgress.getRemainingShopStock(Minecraft.getInstance().player, key, data))
+                .map(_ -> teamProgress.getRemainingShopStock(ClientUtils.getClientPlayer(), key, data))
                 .orElse(Integer.MAX_VALUE);
     }
 
@@ -200,7 +206,7 @@ public class ShopItemWidget extends Panel {
 
     private class IconButton extends SimpleButton {
         public IconButton(Icon icon) {
-            super(ShopItemWidget.this, Component.empty(), icon, (b, mb) -> {});
+            super(ShopItemWidget.this, Component.empty(), icon, (_, _) -> {});
         }
 
         @Override
@@ -222,7 +228,7 @@ public class ShopItemWidget extends Panel {
 
             if (extraInfo != null) {
                 list.add(Component.empty());
-                if (!ScreenWrapper.hasShiftDown()) {
+                if (!Minecraft.getInstance().hasShiftDown()) {
                     list.add(Component.translatable("ftbechoes.tooltip.hold_shift_for_more").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
                 } else {
                     extraInfo.forEach(list::add);
@@ -230,7 +236,8 @@ public class ShopItemWidget extends Panel {
             }
         }
 
-        private static Component stackDesc(ItemStack stack) {
+        private static Component stackDesc(ItemStackTemplate template) {
+            ItemStack stack = template.create();
             return stack.getCount() == 1 ?
                     stack.getHoverName() :
                     Component.literal(stack.getCount() + " x ").append(stack.getHoverName());

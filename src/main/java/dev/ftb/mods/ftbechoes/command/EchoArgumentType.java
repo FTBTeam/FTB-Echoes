@@ -9,11 +9,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.IdentifierException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -26,11 +26,11 @@ public class EchoArgumentType implements ArgumentType<Echo> {
     @Override
     public Echo parse(StringReader reader) throws CommandSyntaxException {
         final int start = reader.getCursor();
-        String s = readResourceLocation(reader);
+        String s = readIdentifier(reader);
         try {
-            return EchoManager.getInstance().getEcho(ResourceLocation.parse(s))
+            return EchoManager.getInstance().getEcho(Identifier.parse(s))
                     .orElseThrow(() -> UNKNOWN_ECHO.create(s));
-        } catch (ResourceLocationException e) {
+        } catch (IdentifierException e) {
             reader.setCursor(start);
             throw INVALID_ECHO.create(s);
         }
@@ -50,9 +50,9 @@ public class EchoArgumentType implements ArgumentType<Echo> {
         return context.getArgument(name, Echo.class);
     }
 
-    public static String readResourceLocation(StringReader reader) {
+    public static String readIdentifier(StringReader reader) {
         final int start = reader.getCursor();
-        while (reader.canRead() && ResourceLocation.isAllowedInResourceLocation(reader.peek())) {
+        while (reader.canRead() && Identifier.isAllowedInIdentifier(reader.peek())) {
             reader.skip();
         }
         return reader.getString().substring(start, reader.getCursor());

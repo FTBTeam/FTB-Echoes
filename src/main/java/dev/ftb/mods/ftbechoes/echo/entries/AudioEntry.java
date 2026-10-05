@@ -9,19 +9,19 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-public record AudioEntry(ResourceLocation location, Optional<Component> text) implements BaseStageEntry {
+public record AudioEntry(Identifier location, Optional<Component> text) implements BaseStageEntry {
     public static final String ID = "audio";
 
     public static final MapCodec<AudioEntry> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-            ResourceLocation.CODEC.fieldOf("location").forGetter(AudioEntry::location),
+            Identifier.CODEC.fieldOf("location").forGetter(AudioEntry::location),
             ComponentSerialization.CODEC.optionalFieldOf("text").forGetter(AudioEntry::text)
     ).apply(builder, AudioEntry::new));
     public static final StreamCodec<RegistryFriendlyByteBuf, AudioEntry> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, AudioEntry::location,
+            Identifier.STREAM_CODEC, AudioEntry::location,
             ComponentSerialization.OPTIONAL_STREAM_CODEC, AudioEntry::text,
             AudioEntry::new
     );

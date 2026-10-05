@@ -7,17 +7,16 @@ import dev.ftb.mods.ftbechoes.echo.Echo;
 import dev.ftb.mods.ftbechoes.echo.EchoManager;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingKey;
-import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
@@ -29,14 +28,14 @@ import java.util.function.Function;
  * @param perEcho progress on an echo, by echo ID
  */
 public record TeamProgress(
-        Map<ResourceLocation, PerEchoProgress> perEcho,
+        Map<Identifier, PerEchoProgress> perEcho,
         Map<ShoppingKey, Integer> stockLimit,
         Map<UUID,Map<ShoppingKey, Integer>> playerStockLimit
 ) {
     public static final TeamProgress NONE = new TeamProgress(Map.of(), Map.of(), Map.of());
 
-    private static final Codec<Map<ResourceLocation,PerEchoProgress>> ECHO_STAGE
-            = Codec.unboundedMap(ResourceLocation.CODEC, PerEchoProgress.CODEC).xmap(HashMap::new, Map::copyOf);
+    private static final Codec<Map<Identifier,PerEchoProgress>> ECHO_STAGE
+            = Codec.unboundedMap(Identifier.CODEC, PerEchoProgress.CODEC).xmap(HashMap::new, Map::copyOf);
     private static final Codec<Map<ShoppingKey, Integer>> LIMITED_PURCHASE_CODEC
             = Codec.list(Codec.pair(ShoppingKey.CODEC.fieldOf("key").codec(), Codec.INT.fieldOf("count").codec()))
             .xmap(TeamProgress::toMap, TeamProgress::toList);
@@ -59,7 +58,7 @@ public record TeamProgress(
     );
 
     public static final StreamCodec<FriendlyByteBuf, TeamProgress> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(HashMap::new, ResourceLocation.STREAM_CODEC, PerEchoProgress.STREAM_CODEC), TeamProgress::perEcho,
+            ByteBufCodecs.map(HashMap::new, Identifier.STREAM_CODEC, PerEchoProgress.STREAM_CODEC), TeamProgress::perEcho,
             ByteBufCodecs.map(HashMap::new, ShoppingKey.STREAM_CODEC, ByteBufCodecs.INT), p -> p.stockLimit,
             ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, LIMITED_PURCHASE_STREAM_CODEC), p -> p.playerStockLimit,
             TeamProgress::new
@@ -78,7 +77,7 @@ public record TeamProgress(
     }
 
     public TeamProgress forSyncTo(ServerPlayer player) {
-        Map<ResourceLocation, PerEchoProgress> map = Util.make(new HashMap<>(), m ->
+        Map<Identifier, PerEchoProgress> map = Util.make(new HashMap<>(), m ->
                 perEcho.forEach((id, rec) -> m.put(id, rec.forSyncToPlayer(player)))
         );
         Map<UUID,Map<ShoppingKey,Integer>> playerLimit = Util.make(new HashMap<>(), m ->
@@ -88,20 +87,20 @@ public record TeamProgress(
     }
 
     @Override
-    public Map<ResourceLocation, PerEchoProgress> perEcho() {
+    public Map<Identifier, PerEchoProgress> perEcho() {
         return Collections.unmodifiableMap(perEcho);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isRewardClaimed(ResourceLocation echoId, Player player, int stage) {
+    public boolean isRewardClaimed(Identifier echoId, Player player, int stage) {
         return getPerEchoProgress(echoId).isRewardClaimed(player, stage);
     }
 
-    public int getCurrentStage(ResourceLocation echoId) {
+    public int getCurrentStage(Identifier echoId) {
         return getPerEchoProgress(echoId).getCurrentStage();
     }
 
-    public boolean isStageCompleted(ResourceLocation id, int stageIdx) {
+    public boolean isStageCompleted(Identifier id, int stageIdx) {
         return stageIdx < getCurrentStage(id);
     }
 
@@ -114,17 +113,15 @@ public record TeamProgress(
     public List<Pair<Echo,Integer>> checkForAutoclaim(ServerPlayer sp) {
         List<Pair<Echo,Integer>> res = new ArrayList<>();
 
-        perEcho.forEach((id, per) -> {
-            EchoManager.getServerInstance().getEcho(id).ifPresent(echo -> {
-                for (int stage = 0; stage < echo.stages().size(); stage++) {
-                    if (echo.stages().get(stage).isAutoclaimReward() && isStageCompleted(echo.id(), stage)) {
-                        if (claimReward(id, sp, stage)) {
-                            res.add(Pair.of(echo, stage));
-                        }
+        perEcho.keySet().forEach(id -> EchoManager.getServerInstance().getEcho(id).ifPresent(echo -> {
+            for (int stage = 0; stage < echo.stages().size(); stage++) {
+                if (echo.stages().get(stage).isAutoclaimReward() && isStageCompleted(echo.id(), stage)) {
+                    if (claimReward(id, sp, stage)) {
+                        res.add(Pair.of(echo, stage));
                     }
                 }
-            });
-        });
+            }
+        }));
 
         return res;
     }
@@ -137,27 +134,27 @@ public record TeamProgress(
         getLimitMap(player, data).merge(key, count, Integer::sum);
     }
 
-    boolean resetShopStock(ResourceLocation echoId) {
+    boolean resetShopStock(Identifier echoId) {
         MutableBoolean removed = new MutableBoolean(stockLimit.entrySet().removeIf(e -> e.getKey().echoId().equals(echoId)));
 
-        playerStockLimit.forEach((id, map) -> {
+        playerStockLimit.values().forEach(map -> {
             if (map.entrySet().removeIf(e -> e.getKey().echoId().equals(echoId))) {
                 removed.setTrue();
             }
         });
 
-        return removed.getValue();
+        return removed.get();
     }
 
-    boolean resetAllRewards(ResourceLocation echoId, UUID playerId) {
+    boolean resetAllRewards(Identifier echoId, UUID playerId) {
         return getPerEchoProgress(echoId).clearRewards(playerId);
     }
 
-    boolean resetReward(ResourceLocation echoId, UUID playerId, int stageIdx) {
+    boolean resetReward(Identifier echoId, UUID playerId, int stageIdx) {
         return getPerEchoProgress(echoId).setRewardClaimed(playerId, stageIdx, false);
     }
 
-    boolean claimReward(ResourceLocation echoId, ServerPlayer player, int stage) {
+    boolean claimReward(Identifier echoId, ServerPlayer player, int stage) {
         if (isRewardClaimed(echoId, player, stage)) {
             return false;
         }
@@ -179,21 +176,20 @@ public record TeamProgress(
         return false;
     }
 
-    boolean setStage(ResourceLocation echoId, int stageIdx) {
+    boolean setStage(Identifier echoId, int stageIdx) {
         PerEchoProgress per = getPerEchoProgress(echoId);
         var echo = EchoManager.getServerInstance().getEcho(echoId).orElseThrow();
         per.setCurrentStage(Mth.clamp(stageIdx, 0, echo.stages().size()));
         return true;
     }
 
-    @NotNull
-    private PerEchoProgress getPerEchoProgress(ResourceLocation echoId) {
-        return perEcho.computeIfAbsent(echoId, k -> PerEchoProgress.createEmptyProgress());
+    private PerEchoProgress getPerEchoProgress(Identifier echoId) {
+        return perEcho.computeIfAbsent(echoId, _ -> PerEchoProgress.createEmptyProgress());
     }
 
     private Map<ShoppingKey, Integer> getLimitMap(Player player, ShopData data) {
         return data.perPlayerMax() ?
-                playerStockLimit.computeIfAbsent(player.getUUID(), k -> new HashMap<>()) :
+                playerStockLimit.computeIfAbsent(player.getUUID(), _ -> new HashMap<>()) :
                 stockLimit;
     }
 }

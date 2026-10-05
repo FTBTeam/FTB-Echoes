@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbechoes.client.gui.widget;
 
+import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Panel;
+import dev.ftb.mods.ftblibrary.client.gui.widget.Widget;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
-import dev.ftb.mods.ftblibrary.ui.Panel;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.Widget;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.apache.commons.lang3.Validate;
 
 public class HorizontalLineWidget extends Widget {
@@ -20,10 +20,10 @@ public class HorizontalLineWidget extends Widget {
     }
 
     @Override
-    public void draw(GuiGraphics graphics, Theme theme, int x, int y, int w, int h) {
+    public void draw(GuiGraphicsExtractor graphics, Theme theme, int x, int y, int w, int h) {
         int lw = (int) (parent.width * lineWidth);
         int xs = (parent.width - lw) / 2;
-        graphics.hLine(x + xs, x + xs + lw, y + h / 2, Color4I.WHITE.withAlpha(100).rgba());
-        graphics.hLine(x + xs, x + xs + lw, y + h / 2 + 1, Color4I.GRAY.withAlpha(60).rgba());
+        graphics.horizontalLine(x + xs, x + xs + lw, y + h / 2, Color4I.WHITE.withAlpha(100).rgba());
+        graphics.horizontalLine(x + xs, x + xs + lw, y + h / 2 + 1, Color4I.GRAY.withAlpha(60).rgba());
     }
 }

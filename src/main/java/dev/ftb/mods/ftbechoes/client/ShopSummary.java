@@ -9,11 +9,13 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Used by JEI (and potentially other recipe mods in future)
@@ -45,8 +47,8 @@ public enum ShopSummary {
                 for (ShopData data : stage.shopUnlocked()) {
                     if (!data.stacks().isEmpty()) {
                         SummaryItem summary = new SummaryItem(data, echo.title(), stage.title());
-                        for (ItemStack stack : data.stacks()) {
-                            byItemHash.computeIfAbsent(itemKey(stack), k -> new ArrayList<>()).add(summary);
+                        for (ItemStackTemplate stack : data.stacks()) {
+                            byItemHash.computeIfAbsent(itemKey(stack), _ -> new ArrayList<>()).add(summary);
                         }
                         allShopData.add(summary);
                     }
@@ -56,12 +58,16 @@ public enum ShopSummary {
     }
 
     private static int itemKey(ItemStack stack) {
-        if (stack.getItem() == Items.POTION) {
+        return itemKey(ItemStackTemplate.fromNonEmptyStack(stack));
+    }
+
+    private static int itemKey(ItemStackTemplate stack) {
+        if (stack.item() == Items.POTION) {
             // special case for potions: take component data into account
-            return ItemStack.hashItemAndComponents(stack);
+            return Objects.hash(stack.item().value(), stack.components());
         } else {
             // other items just care about the item itself
-            return BuiltInRegistries.ITEM.getId(stack.getItem());
+            return BuiltInRegistries.ITEM.getId(stack.item().value());
         }
     }
 

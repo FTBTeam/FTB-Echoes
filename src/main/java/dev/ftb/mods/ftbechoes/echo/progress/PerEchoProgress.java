@@ -9,6 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -21,7 +22,7 @@ public final class PerEchoProgress {
     private static final Codec<Map<UUID, Set<Integer>>> REWARDS_CLAIMED
             = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.INT.listOf().xmap(HashSet::new, ArrayList::new));
     private static final Codec<PerEchoProgress> RAW_CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            Codec.INT.xmap(MutableInt::new, MutableInt::getValue).fieldOf("current_stage").forGetter(p -> p.currentStage),
+            Codec.INT.xmap(MutableInt::new, m -> m.get().intValue()).fieldOf("current_stage").forGetter(p -> p.currentStage),
             REWARDS_CLAIMED.fieldOf("rewards_claimed").forGetter(p -> p.claimedRewards)
     ).apply(builder, PerEchoProgress::new));
     public static final Codec<PerEchoProgress> CODEC = RAW_CODEC.xmap(
@@ -30,7 +31,7 @@ public final class PerEchoProgress {
             Function.identity()
     );
     public static final StreamCodec<FriendlyByteBuf, PerEchoProgress> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT.map(MutableInt::new, MutableInt::getValue), p -> p.currentStage,
+            ByteBufCodecs.VAR_INT.map(MutableInt::new, m -> m.get().intValue()), p -> p.currentStage,
             ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, ByteBufCodecs.INT.apply(ByteBufCodecs.collection(HashSet::new))), p -> p.claimedRewards,
             PerEchoProgress::new
     );
@@ -64,12 +65,12 @@ public final class PerEchoProgress {
     }
 
     boolean setRewardClaimed(UUID playerId, int stage, boolean claimed) {
-        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, k -> new HashSet<>());
+        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, _ -> new HashSet<>());
         return claimed ? s.add(stage) : s.remove(stage);
     }
 
     boolean clearRewards(UUID playerId) {
-        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, k -> new HashSet<>());
+        Set<Integer> s = claimedRewards.computeIfAbsent(playerId, _ -> new HashSet<>());
         boolean hadAnyRewards = !s.isEmpty();
         s.clear();
         return hadAnyRewards;
@@ -85,12 +86,8 @@ public final class PerEchoProgress {
         return new PerEchoProgress(new MutableInt(currentStage), rewards);
     }
 
-    public Map<UUID, Set<Integer>> claimedRewards() {
-        return claimedRewards;
-    }
-
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (PerEchoProgress) obj;

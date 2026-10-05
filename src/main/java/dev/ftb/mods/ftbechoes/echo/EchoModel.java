@@ -2,12 +2,13 @@ package dev.ftb.mods.ftbechoes.echo;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.npc.VillagerData;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.npc.villager.VillagerData;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 
 public record EchoModel(boolean show, VillagerData data, boolean showHat) {
     public static final Codec<EchoModel> CODEC = RecordCodecBuilder.create(builder -> builder.group(
@@ -23,9 +24,13 @@ public record EchoModel(boolean show, VillagerData data, boolean showHat) {
             EchoModel::new
     );
 
-    public static final EchoModel NONE = new EchoModel(
+    public static final EchoModel DEFAULT = new EchoModel(
             false,
-            new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1),
+            new VillagerData(
+                    BuiltInRegistries.VILLAGER_TYPE.getOrThrow(VillagerType.PLAINS),
+                    BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE),
+                    1
+            ),
             false
     );
 }
