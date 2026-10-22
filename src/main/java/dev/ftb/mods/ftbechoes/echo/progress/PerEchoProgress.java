@@ -82,7 +82,7 @@ public final class PerEchoProgress {
 
     public PerEchoProgress forSyncToPlayer(ServerPlayer player) {
         UUID playerId = player.getUUID();
-        Map<UUID,Set<Integer>> rewards = Map.of(playerId, claimedRewards.getOrDefault(playerId, Set.of()));
+        Map<UUID,Set<Integer>> rewards = Map.of(playerId, Set.copyOf(claimedRewards.getOrDefault(playerId, Set.of())));
         return new PerEchoProgress(new MutableInt(currentStage), rewards);
     }
 
