@@ -82,9 +82,9 @@ public record TeamProgress(
                 perEcho.forEach((id, rec) -> m.put(id, rec.forSyncToPlayer(player)))
         );
         Map<UUID,Map<ShoppingKey,Integer>> playerLimit = Util.make(new HashMap<>(), m ->
-                m.put(player.getUUID(), playerStockLimit.getOrDefault(player.getUUID(), new HashMap<>()))
+                m.put(player.getUUID(), new HashMap<>(playerStockLimit.getOrDefault(player.getUUID(), new HashMap<>())))
         );
-        return new TeamProgress(map, stockLimit, playerLimit);
+        return new TeamProgress(map, new HashMap<>(stockLimit), playerLimit);
     }
 
     @Override
