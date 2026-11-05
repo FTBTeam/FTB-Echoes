@@ -93,7 +93,10 @@ repositories {
 	maven {
 		url "https://maven.blamejared.com"
 		content {
+			// TODO: FTB XMod shouldn't be declaring this as dependencies that peers require.
 			includeGroup("mezz.jei")
+			includeGroup("net.mezzdev.config")
+			includeGroup("vazkii.patchouli")
 		}
 	}
 }
