@@ -19,6 +19,7 @@ import dev.ftb.mods.ftblibrary.client.gui.theme.NordColors;
 import dev.ftb.mods.ftblibrary.client.gui.theme.Theme;
 import dev.ftb.mods.ftblibrary.client.gui.widget.*;
 import dev.ftb.mods.ftblibrary.client.icon.IconHelper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import dev.ftb.mods.ftblibrary.icon.Color4I;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.Icons;
@@ -59,6 +60,12 @@ public class EchoScreen extends AbstractThreePanelScreen<EchoScreen.MainPanel> {
         this.echo = echo;
 
         showCloseButton(false);
+    }
+
+    public static void refreshIfOpen() {
+        if (ClientUtils.getCurrentGuiAs(EchoScreen.class) instanceof EchoScreen echoScreen) {
+            echoScreen.refreshWidgets();
+        }
     }
 
     public void setEcho(Echo echo) {

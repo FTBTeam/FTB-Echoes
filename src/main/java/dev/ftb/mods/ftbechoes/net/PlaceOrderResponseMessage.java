@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbechoes.registry.ModSounds;
 import dev.ftb.mods.ftbechoes.shopping.ShoppingBasket;
 import dev.ftb.mods.ftbechoes.util.MiscUtil;
 import dev.ftb.mods.ftblibrary.client.gui.widget.ScreenWrapper;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -51,10 +52,7 @@ public record PlaceOrderResponseMessage(boolean success, Optional<Component> mes
             context.player().playSound(ModSounds.COINS.get());
 
             // Tell the shop panel to refresh so any non-dynamic data is updated (e.g. remaining claim limits)
-            Screen screen = Minecraft.getInstance().screen;
-            if (screen instanceof ScreenWrapper wrapper && wrapper.getGui() instanceof EchoScreen echoScreen) {
-                echoScreen.refreshWidgets();
-            }
+            EchoScreen.refreshIfOpen();
         } else {
             FTBEchoesClient.notifyError(Component.translatable("ftbechoes.message.purchase_failed"), message.message.orElse(Component.empty()));
         }
