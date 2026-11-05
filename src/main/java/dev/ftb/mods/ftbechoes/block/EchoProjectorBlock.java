@@ -42,7 +42,7 @@ public class EchoProjectorBlock extends Block implements EntityBlock {
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (level.isClientSide) {
             if (level.getBlockEntity(pos) instanceof EchoProjectorBlockEntity projector) {
-                FTBEchoesClient.openEchoScreen(projector);
+                FTBEchoesClient.openEchoScreenForProjector(projector);
             }
         }
         return ItemInteractionResult.sidedSuccess(level.isClientSide);

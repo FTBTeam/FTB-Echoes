@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbechoes.client.gui;
 
 import dev.ftb.mods.ftbechoes.client.ClientProgress;
 import dev.ftb.mods.ftbechoes.client.gui.widget.ShopItemWidget;
+import dev.ftb.mods.ftbechoes.echo.EchoPage;
 import dev.ftb.mods.ftbechoes.echo.EchoStage;
 import dev.ftb.mods.ftbechoes.echo.progress.TeamProgress;
 import dev.ftb.mods.ftbechoes.shopping.ShopData;
@@ -16,7 +17,7 @@ public class ShopPanel extends EchoScreen.PagePanel {
     public static final int GUTTER = 5;
 
     public ShopPanel(Panel parent, EchoScreen echoScreen) {
-        super(parent, echoScreen, EchoScreen.Page.SHOP);
+        super(parent, echoScreen, EchoPage.SHOP);
     }
 
     @Override

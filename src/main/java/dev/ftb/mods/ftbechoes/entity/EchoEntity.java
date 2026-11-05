@@ -67,7 +67,7 @@ public class EchoEntity extends Entity {
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (player.level().isClientSide && level().getBlockEntity(blockPosition()) instanceof EchoProjectorBlockEntity projector) {
-            FTBEchoesClient.openEchoScreen(projector);
+            FTBEchoesClient.openEchoScreenForProjector(projector);
         }
         return InteractionResult.sidedSuccess(player.level().isClientSide);
     }
