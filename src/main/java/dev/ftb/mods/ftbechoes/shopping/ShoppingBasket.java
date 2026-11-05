@@ -83,12 +83,14 @@ public class ShoppingBasket {
             TeamProgressManager.get(player.getServer()).getProgress(player).ifPresent(progress -> {
                 EchoManager mgr = EchoManager.getServerInstance();
                 orders.forEach((key, amount) -> mgr.getShoppingEntry(key).ifPresent(entry -> {
-                    // If the claim is limited, make sure we don't exceed the allowed number
-                    boolean stockAvailable = entry.data().maxClaims().isEmpty()
-                            || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
-                    int currentStage = progress.getCurrentStage(key.echoId());
-                    if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
-                        map.put(key, amount);
+                    if (amount > 0) {  // ignore 0 or negative amounts, probably malicious
+                        // If the claim is limited, make sure we don't exceed the allowed number
+                        boolean stockAvailable = entry.data().maxClaims().isEmpty()
+                                || progress.getRemainingShopStock(player, key, entry.data()) >= amount;
+                        int currentStage = progress.getCurrentStage(key.echoId());
+                        if (stockAvailable && currentStage >= entry.stageIdx() && currentStage <= entry.data().maxStage()) {
+                            map.put(key, amount);
+                        }
                     }
                 }));
             });
