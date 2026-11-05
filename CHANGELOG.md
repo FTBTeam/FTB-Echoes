@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [21.1.11]
 
+### Added
+* Added `/ftbechoes open ...` command to allow echo screens to be opened without block or entity
+  * Admin perms required
+
 ### Fixed
 * Ignore orders sent to server with basket amounts <= 0, client is probably misbehaving
 
