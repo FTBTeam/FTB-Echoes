@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class MiscUtil {
-    public static @NotNull Component formatCost(int cost) {
+    public static @NotNull Component formatCost(long cost) {
         return Component.empty().append(Component.literal("⬤ ").withStyle(ChatFormatting.YELLOW)).append(String.valueOf(cost)).withStyle(ChatFormatting.DARK_GREEN);
     }
 
